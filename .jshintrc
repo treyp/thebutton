@@ -2,14 +2,11 @@
     "browser": true,
     "nonstandard": true,
     "globals": {
-        "Chart": true,
-        "Timer": true,
         "d3": true,
         "moment": true,
         "_": true,
         "$": true,
-        "React": true,
-        "flairColor": true
+        "React": true
     },
     "bitwise": true,
     "camelcase": true,
