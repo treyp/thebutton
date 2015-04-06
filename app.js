@@ -1,3 +1,6 @@
+var displayQuantity = 100; // how many data points to display
+var chartEl = document.getElementById('chart');
+
 var flairColor = function (seconds) {
     if (seconds > 51) {
         return "#820080";
@@ -22,15 +25,15 @@ var Chart = (function () {
     // overriding until this can be refactored
 
     var self = {
-        margins: {top: 30, bottom: 40, left: 0, right: 30}
+        margins: {top: 0, bottom: 30, left: 0, right: 30}
     };
 
     self.height = function () {
-        return $("#chart").height() - self.margins.top - self.margins.bottom;
+        return chartEl.offsetHeight - self.margins.top - self.margins.bottom;
     };
 
     self.width = function () {
-        return $("#chart").width() - self.margins.left - self.margins.right;
+        return chartEl.offsetWidth - self.margins.left - self.margins.right;
     };
 
     var svg = d3.select("#chart")
@@ -49,6 +52,7 @@ var Chart = (function () {
     var axisScale = d3.scale.linear()
         .domain([0, 1])
         .range([8, self.width() + 4]);
+
     var yScale = d3.scale.linear()
         .domain([60, 0])
         .range([self.height(), 0]);
@@ -91,30 +95,32 @@ var Chart = (function () {
     self.xScale = xScale;
     self.yScale = yScale;
 
-    self.render = function (data) {
-        var clicks = _.filter(data, "is_click");
+    self.render = function (clicks) {
+        // grab the last {displayQuantity} clicks
+        // (with at least {displayQuantity} values)
+        if (clicks.length < displayQuantity) {
+            clicks = _.fill(Array(displayQuantity - clicks.length), 60).concat(clicks);
+        }
+        clicks = _.takeRight(clicks, displayQuantity);
 
         xScale.domain([0, clicks.length+1]);
         axisScale.domain([0, clicks.length+1]);
         svg.selectAll("g.x.axis")
             .call(xAxis);
 
-        var yPixel = _.flow(_.property("seconds_left"), yScale);
-        var flair = _.flow(_.property("seconds_left"), flairColor);
-
         var rect = svg.selectAll("rect.bar").data(clicks);
         rect.attr("class", "bar")
             .attr("x", function (d, i) {
                 return xScale(i);
             })
-            .attr("y", yPixel)
+            .attr("y", yScale)
             .attr("width", function (d, i) {
                 return xScale(i+1) - xScale(i);
             })
             .attr("height", function (d) {
-                return yScale(60) - yPixel(d);
+                return yScale(60) - yScale(d);
             })
-            .attr("fill", flair);
+            .attr("fill", flairColor);
 
         rect.enter()
             .append("rect")
@@ -123,14 +129,14 @@ var Chart = (function () {
             .attr("x", function (d, i) {
                 return xScale(i);
             })
-            .attr("y", yPixel)
+            .attr("y", yScale)
             .attr("width", function (d, i) {
                 return xScale(i+1) - xScale(i);
             })
             .attr("height", function (d) {
-                return yScale(60) - yPixel(d);
+                return yScale(60) - yScale(d);
             })
-            .attr("fill", flair);
+            .attr("fill", flairColor);
 
         rect.exit()
             .remove();
@@ -193,15 +199,14 @@ var Timer = (function () {
 
     self.sync = function (secondsLeft) {
         timerEnd = moment().add(secondsLeft * 1000);
-        var resets = currentParticipants - initialParticipants;
         timerBar
             .attr("x", function () {
-                return Chart.xScale(resets);
+                return Chart.xScale(displayQuantity);
             })
             .attr("width", function () {
                 return (
-                    Chart.xScale(resets) -
-                    Chart.xScale(resets - 1)
+                    Chart.xScale(displayQuantity) -
+                    Chart.xScale(displayQuantity - 1)
                 );
             });
 
@@ -227,8 +232,14 @@ var Timer = (function () {
     return self;
 }());
 
-
-$(function () {
-    $(window).on("resize", Chart.resize);
-    Chart.resize();
-});
+if (window.attachEvent) {
+    window.attachEvent('onresize', function () {
+        Chart.resize();
+    });
+}
+else if (window.addEventListener) {
+    window.addEventListener('resize', function () {
+        Chart.resize();
+    }, true);
+}
+Chart.resize();

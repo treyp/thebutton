@@ -3,7 +3,7 @@ html, body {
 }
 
 body {
-    font: 14px/1.14285 sans-serif;
+    font: 14px/1.2857 sans-serif;
 }
 
 .github {
@@ -35,12 +35,38 @@ body {
 
 .stats {
     min-height: 48px;
+    line-height: 18px;
 }
 
 .timer {
     float: left;
-    width: 3em;
+    width: 2.5em;
     font-size: 48px;
+    line-height: 54px;
+}
+
+.tick {
+    float: left;
+    width: 50px;
+    height: 54px;
+    line-height: 54px;
+    text-align: center;
+}
+
+.tick .tock {
+    width: 1em;
+    height: 1em;
+    border: 1px solid #000;
+    -webkit-border-radius: .5em;
+    border-radius: .5em;
+    background-color: #000;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.tick .tock.odd {
+    background-color: #fff;
+    border-color: #000;
 }
 
 .flair-no-press{

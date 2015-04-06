@@ -1,4 +1,4 @@
-var data = [];
+var clickTimes = [];
 var initialParticipants = 0;
 var currentParticipants = 0;
 var PureRenderMixin = React.addons.PureRenderMixin;
@@ -9,6 +9,18 @@ var TimerDisplay = React.createClass({
         return (
             <div className="timer">
                 {d3.format(".3n")(this.props.secondsRemaining)}
+            </div>
+        );
+    }
+});
+
+var Tick = React.createClass({
+    mixins: [PureRenderMixin],
+    render: function() {
+        var evenOrOdd = this.props.count % 2 === 0 ? 'even' : 'odd';
+        return (
+            <div className="tick">
+                <div className={'tock ' + evenOrOdd}></div>
             </div>
         );
     }
@@ -41,11 +53,15 @@ var ButtonMonitor = React.createClass({
             started: moment().format("YYYY-MM-DD HH:mm:ss"),
             lag: 0,
             participants: 0,
-            secondsRemaining: 60.0
+            secondsRemaining: 60.0,
+            ticks: 0
         };
     },
     tick: function () {
         this.setState({secondsRemaining: this.state.secondsRemaining - 0.1});
+    },
+    increaseTicks: function () {
+        this.setState({ticks: this.state.ticks + 1});
     },
     updateParticipants: function (participants) {
         this.setState({participants: participants});
@@ -58,6 +74,8 @@ var ButtonMonitor = React.createClass({
     },
     componentDidMount: function () {
         this.interval = setInterval(this.tick, 100);
+        var previousSecondsLeft;
+        var previousParticipants;
         var self = this;
         var socket = new WebSocket(
             "wss://wss.redditmedia.com/thebutton?h=" +
@@ -82,22 +100,15 @@ var ButtonMonitor = React.createClass({
             if (packet.type !== "ticking") {
                 return;
             }
+            self.increaseTicks();
+            var tick = packet.payload;
 
-            packet.payload.now = moment(
-                packet.payload.now_str + " 0000",
-                "YYYY-MM-DD-HH-mm-ss Z"
+            self.updateLag(
+                moment(tick.now_str + " 0000", "YYYY-MM-DD-HH-mm-ss Z")
             );
-            self.updateLag(packet.payload.now);
 
-            var previousTick = _.last(data);
-            if (
-                data.length > 0 &&
-                packet.payload.seconds_left >= previousTick.seconds_left
-            ) {
-                _.last(data).is_click = true;
-            }
             currentParticipants = parseInt(
-                packet.payload.participants_text.replace(/,/g, ""),
+                tick.participants_text.replace(/,/g, ""),
                 10
             );
             if (!initialParticipants) {
@@ -105,25 +116,27 @@ var ButtonMonitor = React.createClass({
             }
             self.updateParticipants(currentParticipants);
 
-            // fill in the gaps when more than one person clicks between ticks
-            var barCountOffset =
-                (currentParticipants - initialParticipants) -
-                _.filter(data, "is_click").length;
-            if (barCountOffset > 0) {
-                var clone = _.clone(previousTick);
-                clone.seconds_left = 60.0;
-                clone.is_click = true;
-                while (barCountOffset > 0) {
-                    data.push(clone);
-                    barCountOffset = barCountOffset - 1;
+            if (previousParticipants && previousParticipants < currentParticipants) {
+                // time to create new chart bars
+                clickTimes.push(previousSecondsLeft);
+                // fill in the gaps when more than one person clicks between ticks
+                var barCountOffset =
+                    (currentParticipants - initialParticipants) -
+                    clickTimes.length;
+                if (barCountOffset > 0) {
+                    while (barCountOffset > 0) {
+                        clickTimes.push(60.0);
+                        barCountOffset = barCountOffset - 1;
+                    }
                 }
+                Chart.render(clickTimes);
             }
 
-            data.push(packet.payload);
+            Timer.sync(tick.seconds_left);
+            self.syncTimer(tick.seconds_left);
 
-            Chart.render(data);
-            Timer.sync(packet.payload.seconds_left);
-            self.syncTimer(packet.payload.seconds_left);
+            previousSecondsLeft = tick.seconds_left;
+            previousParticipants = currentParticipants;
         };
     },
     componentWillUnmount: function () {
@@ -134,6 +147,7 @@ var ButtonMonitor = React.createClass({
             <div>
                 <TimerDisplay
                     secondsRemaining={this.state.secondsRemaining} />
+                <Tick count={this.state.ticks} />
                 <StatsDisplay
                     started={this.state.started}
                     lag={this.state.lag}
