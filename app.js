@@ -16,24 +16,3 @@ var flairColor = function (seconds) {
     }
     return "#e50000";
 };
-
-var init = function () {
-    var resize = function () {
-        Chart.resize();
-        Stats.resize();
-        Timer.resize();
-
-        if ($(window).width() < 900) {
-            $(".github").hide();
-        }
-        else {
-            $(".github").show();
-        }
-    };
-
-    $(window).on("resize", resize);
-
-    Stats.start = moment().format("YYYY-MM-DD HH:mm:ss");
-
-    resize();
-};

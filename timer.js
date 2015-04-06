@@ -2,8 +2,6 @@ var animating = false;
 
 var Timer = (function () {
     var self = {};
-    var fmtSeconds = d3.format(".3n");
-
     var timerEnd;
     var timerBar = Chart.svg.append("rect")
         .attr("class", "timer-bar")
@@ -15,14 +13,15 @@ var Timer = (function () {
 
     self.sync = function (secondsLeft) {
         timerEnd = moment().add(secondsLeft * 1000);
+        var resets = currentParticipants - initialParticipants;
         timerBar
             .attr("x", function () {
-                return Chart.xScale(Stats.resets);
+                return Chart.xScale(resets);
             })
             .attr("width", function () {
                 return (
-                    Chart.xScale(Stats.resets) -
-                    Chart.xScale(Stats.resets - 1)
+                    Chart.xScale(resets) -
+                    Chart.xScale(resets - 1)
                 );
             });
 
@@ -42,15 +41,7 @@ var Timer = (function () {
                 return Chart.yScale(60) - Chart.yScale(timer / 1000);
             })
             .attr("fill", flairColor(timer / 1000));
-        $("#timer").text(fmtSeconds(timer / 1000));
         requestAnimationFrame(animate);
-    };
-
-    self.resize = function () {
-        $("#timer")
-            .css("left", ($("#stats").offset().left + $("#stats").outerWidth()))
-            .css("top", Chart.margins.top)
-            .css("line-height", $("#stats").outerHeight() + "px");
     };
 
     return self;

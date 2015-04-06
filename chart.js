@@ -74,7 +74,6 @@ var Chart = (function () {
 
     self.render = function (data) {
         var clicks = _.filter(data, "is_click");
-        Stats.resets = clicks.length;
 
         xScale.domain([0, clicks.length+1]);
         axisScale.domain([0, clicks.length+1]);
