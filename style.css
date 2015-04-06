@@ -2,6 +2,20 @@ html, body {
     height: 100%;
 }
 
+body {
+    font: 14px sans-serif;
+}
+
+.github {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.github img {
+    border: 0;
+}
+
 #chart {
     height: 100%;
     padding: 0;
@@ -36,13 +50,6 @@ html, body {
     font-size: 48px;
     font-family: Consolas, monaco, monospace;
     padding: 0 16px;
-}
-
-.github {
-    position: absolute;
-    top: 0;
-    right: 0;
-    border: 0;
 }
 
 .flair-no-press{
