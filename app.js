@@ -7,40 +7,40 @@ var fmt = d3.format("0,000");
 
 
 function init() {
-	$(window).on('resize', resize);
-	Stats.start = moment().format("YYYY-MM-DD HH:mm:ss");
-	resize();
+    $(window).on('resize', resize);
+    Stats.start = moment().format("YYYY-MM-DD HH:mm:ss");
+    resize();
 }
 
 function flairColor(seconds) {
-	if (seconds > 51) {
-		return '#820080';
-	}
-	if (seconds > 41) {
-		return '#0083C7';
-	}
-	if (seconds > 31) {
-		return '#02be01';
-	}
-	if (seconds > 21) {
-		return '#E5D900';
-	}
-	if (seconds > 11) {
-		return '#e59500';
-	}
+    if (seconds > 51) {
+        return '#820080';
+    }
+    if (seconds > 41) {
+        return '#0083C7';
+    }
+    if (seconds > 31) {
+        return '#02be01';
+    }
+    if (seconds > 21) {
+        return '#E5D900';
+    }
+    if (seconds > 11) {
+        return '#e59500';
+    }
 
-	return '#e50000';
+    return '#e50000';
 }
 
 function resize() {
-	Chart.resize();
-	Stats.resize();
-	Timer.resize();
+    Chart.resize();
+    Stats.resize();
+    Timer.resize();
 
-	if ($(window).width() < 900) {
-		$('.github').hide();
-	}
-	else {
-		$('.github').show();
-	}
+    if ($(window).width() < 900) {
+        $('.github').hide();
+    }
+    else {
+        $('.github').show();
+    }
 }
