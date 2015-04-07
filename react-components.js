@@ -39,7 +39,9 @@ var StatsDisplay = React.createClass({
                 </div>
                 <div>
                     {"Lag: "}
-                    <span>{d3.format("0,000")(this.props.lag)}</span>ms
+                    {this.props.lag ?
+                        <span>{d3.format("0,000")(this.props.lag)}ms</span> :
+                        "Disconnected"}
                 </div>
                 <div>
                     {"Participants: "}
@@ -68,18 +70,18 @@ var Chart = React.createClass({
         );
         chart.attr("height", ((this.props.barHeight + 1) * data.length));
     },
-    componentWillUpdate: function (props) {
-        var data = props.times;
+    componentDidUpdate: function () {
         var chart = d3.select(React.findDOMNode(this));
-        chart.attr("width", props.width);
-        this.xScale = this.xScale.range([0, props.width]);
+        chart.attr("width", this.props.width);
+        this.xScale = this.xScale.range([0, this.props.width]);
 
         var selection = chart
-            .selectAll("g").data(data);
+            .selectAll("g").data(this.props.times);
         this.updateBarsInSelection(selection);
         this.addBarsToSelection(selection.enter());
         selection.exit().remove();
-        chart.attr("height", ((props.barHeight + 1) * selection.size()));
+        chart.attr("height",
+            ((this.props.barHeight + 1) * this.props.times.length));
     },
     addBarsToSelection: function (selection) {
         selection = selection
@@ -94,7 +96,7 @@ var Chart = React.createClass({
         selection
             .attr("transform", function (d, i) {
                 return "translate(0," +
-                    (selection.size() - i - 1) * (self.props.barHeight + 1) +
+                    (self.props.times.length - 1 - i) * (self.props.barHeight + 1) +
                     ")";
             });
         selection.select("rect")
@@ -167,6 +169,7 @@ var ButtonMonitor = React.createClass({
         this.setState({secondsRemaining: secondsRemaining});
     },
     addTime: function (seconds) {
+        // console.log('new time: ' + seconds);
         this.setState({times: this.state.times.concat(seconds)});
     },
     windowResized: function () {
