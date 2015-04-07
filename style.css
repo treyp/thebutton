@@ -16,23 +16,6 @@ body {
     border: 0;
 }
 
-#chart {
-    height: 1000px;
-    padding: 0;
-}
-
-#chart g.axis path {
-    stroke: #6ea2d5;
-    stroke-width: 1;
-    fill: none;
-}
-
-#chart line.grid {
-    stroke: #DDD;
-    stroke-width: 1;
-    fill: none;
-}
-
 .stats {
     min-height: 48px;
     line-height: 18px;
@@ -69,32 +52,57 @@ body {
     border-color: #000;
 }
 
-.flair-no-press{
-    background: #888;
-    color: #888
+.chart {
+    margin-top: 20px;
 }
 
-.flair-press-1{
-    color: #e50000;
-    background: #e50000
+.chart text {
+    font: 10px sans-serif;
+    text-anchor: end;
+    fill: #fff;
 }
 
-.flair-press-2{
-    color: #e59500;
-    background: #e59500
+.chart text.outside {
+    fill: #000;
+    text-anchor: start;
 }
 
-.flair-press-3{
-    color: #E5D900;
-    background: #E5D900
+.chart g.axis path {
+    stroke: #333;
+    stroke-width: 1;
+    fill: none;
 }
 
-.flair-press-4{
-    color: #02be01;
-    background: #02be01
+.chart line.grid {
+    stroke: #DDD;
+    stroke-width: 1;
+    fill: none;
 }
 
-.flair-press-5{
-    color: #0083C7;
-    background: #0083C7
+.flair-no-press {
+    fill: #888;
+}
+
+.flair-press-1 {
+    fill: #e50000;
+}
+
+.flair-press-2 {
+    fill: #e59500;
+}
+
+.flair-press-3 {
+    fill: #E5D900;
+}
+
+.flair-press-4 {
+    fill: #02be01;
+}
+
+.flair-press-5 {
+    fill: #0083C7;
+}
+
+.flair-press-6 {
+    fill: #820080;
 }
