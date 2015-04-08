@@ -1,5 +1,11 @@
 var LogChart = React.createClass({
     mixins: [React.addons.PureRenderMixin],
+    getInitialState: function () {
+        return {
+            lastSynced: moment().valueOf(),
+            lastTime: 60
+        };
+    },
     componentDidMount: function () {
         var chart = d3.select(React.findDOMNode(this));
 
@@ -11,9 +17,23 @@ var LogChart = React.createClass({
             chart
                 .attr("width", this.props.width)
                 .selectAll("g")
-                .data(this.props.times).enter()
+                .data(this.props.times.concat(
+                    this.props.secondsRemaining
+                )).enter()
         );
+
         chart.attr("height", this.chartHeight());
+
+        window.requestAnimationFrame(this.updateActiveBar);
+    },
+    componentWillUnmount: function () {
+        window.cancelAnimationFrame(this.updateActiveBar);
+    },
+    componentWillReceiveProps: function(props) {
+        this.setState({
+            lastSynced: moment().valueOf(),
+            lastTime: props.secondsRemaining
+        });
     },
     componentDidUpdate: function () {
         var chart = d3.select(React.findDOMNode(this));
@@ -21,15 +41,25 @@ var LogChart = React.createClass({
         this.xScale = this.xScale.range([0, this.props.width]);
 
         var selection = chart
-            .selectAll("g").data(this.props.times);
+            .selectAll("g").data(this.props.times.concat(
+                this.props.secondsRemaining
+            ));
         this.updateBarsInSelection(selection);
         this.addBarsToSelection(selection.enter());
         selection.exit().remove();
         chart.attr("height", this.chartHeight());
     },
+    updateActiveBar: function() {
+        this.updateBarsWidth(
+            d3.select(React.findDOMNode(this)).select("g:last-child").data(
+                [this.state.lastTime - ((moment() - this.state.lastSynced) / 1000)]
+            )
+        );
+        window.requestAnimationFrame(this.updateActiveBar);
+    },
     chartHeight: function () {
         return (
-            ((this.props.barHeight + 1) * this.props.times.length) +
+            ((this.props.barHeight + 1) * (this.props.times.length + 1)) +
             // add 5 pixels of padding to top in bottom when bars are short
             // so that their text labels fully show
             (this.props.barHeight < 10 ? 10 : 0));
@@ -49,12 +79,18 @@ var LogChart = React.createClass({
                 return "translate(0," +
                     (
                         (
-                            (self.props.times.length - 1 - i) *
+                            (self.props.times.length - i) *
                             (self.props.barHeight + 1)
                         ) + (self.props.barHeight < 10 ? 5 : 0)
                     ) +
                     ")";
             });
+        this.updateBarsWidth(selection);
+        return selection;
+    },
+    updateBarsWidth: function(selection) {
+        var self = this;
+
         selection.select("rect")
             .attr("width", function (d) {
                 return Math.max(1, self.xScale(60 - d));
@@ -72,8 +108,7 @@ var LogChart = React.createClass({
             })
             .attr("y", this.props.barHeight / 2)
             .attr("dy", ".35em")
-            .text(function (d) { return d; });
-        return selection;
+            .text(function (d) { return Math.round(d); });
     },
     flairClass: function (seconds) {
         if (seconds > 51) {

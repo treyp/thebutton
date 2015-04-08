@@ -150,7 +150,9 @@ var ButtonMonitor = React.createClass({
                         <LogChart
                             times={this.state.times}
                             barHeight={this.state.barHeight}
-                            width={this.state.chartWidth} />
+                            width={this.state.chartWidth}
+                            secondsRemaining={this.state.secondsRemaining}
+                            />
                         :
                         <TimeChart />
                 }
