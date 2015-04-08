@@ -12,14 +12,23 @@ var ChartSelector = React.createClass({
     render: function () {
         return (
             <div className="chart-selector">
-                <a
-                    className={this.chartOptionLinkClass("log")}
-                    onClick={this.props.updateChartSelection.bind(null, "log")}
-                >Log</a>
-                <a
-                    className={this.chartOptionLinkClass("time")}
-                    onClick={this.props.updateChartSelection.bind(null, "time")}
-                >Time</a>
+                <a className={this.chartOptionLinkClass("log")}
+                    onClick={this.props.updateChartSelection.bind(null, "log")}>
+                    <span className="tab-name">Log</span>
+                </a>
+                <a className={this.chartOptionLinkClass("time")}
+                    onClick={this.props.updateChartSelection.bind(null, "time")}>
+                    <span className="tab-name">Time</span>
+                </a>
+                <a className={this.chartOptionLinkClass("alerts")}
+                    onClick={this.props.updateChartSelection.bind(null, "alerts")}>
+                    <span className="tab-name">Alerts</span>
+                    {this.props.alertTime && this.props.alertTime !== 0 ?
+                        <span className="tab-description">
+                            at <strong>{this.props.alertTime}</strong>s
+                        </span>
+                        : ""}
+                </a>
                 {
                     (this.props.chartSelected === "log" ?
                         <form className="options">

@@ -11,7 +11,11 @@ var ButtonMonitor = React.createClass({
             ticks: 0,
             times: [], // [60,59,18,60,59,25,60,8,0,3,45,35,60,55],
             chartWidth: 0,
-            barHeight: 20
+            barHeight: 20,
+            alertTime: null,
+            deniedNotificationPermission: false,
+            notifiedForCurrentClick: false,
+            lastTimeTrackedForCurrentClick: 60
         };
     },
     tick: function () {
@@ -36,7 +40,8 @@ var ButtonMonitor = React.createClass({
         // console.log('new time: ' + seconds);
         this.setState({
             clicksTracked: this.state.times.length + 1,
-            times: this.state.times.concat(seconds)
+            times: this.state.times.concat(seconds),
+            notifiedForCurrentClick: false
         });
     },
     updateBarHeight: function (barHeight) {
@@ -44,6 +49,53 @@ var ButtonMonitor = React.createClass({
     },
     updateChartSelection: function (chart) {
         this.setState({chartSelected: chart});
+    },
+    updateAlertTime: function (time) {
+        var self = this;
+
+        if (!time && time !== 0) {
+            time = null;
+        } else {
+            time = parseInt(time, 10);
+        }
+        this.setState({alertTime: time});
+        if (!("Notification" in window)) {
+            return;
+        }
+        if (Notification.permission === "denied") {
+            self.setState({deniedNotificationPermission: true});
+        } else if (Notification.permission === "granted") {
+            self.setState({deniedNotificationPermission: false});
+        } else {
+            Notification.requestPermission(function (permission) {
+                if (permission === "denied") {
+                    self.setState({deniedNotificationPermission: true});
+                } else if (permission === "granted") {
+                    self.setState({deniedNotificationPermission: false});
+                    new Notification(
+                        "Alerts for The Button Monitor enabled!");
+                }
+            })
+        }
+    },
+    sendNecessaryNotifications: function (seconds) {
+        if (!this.state.alertTime && this.state.alertTime !== 0) {
+            return;
+        }
+        if (this.state.notifiedForCurrentClick) {
+            return;
+        }
+        if (!("Notification" in window)) {
+            return;
+        }
+        if (seconds <= this.state.alertTime) {
+            if (Notification.permission === "denied") {
+                this.setState({deniedNotificationPermission: true});
+            }
+            new Notification("/r/thebutton passed " + this.state.alertTime +
+                " seconds at " + moment().format("LTS"));
+            this.setState({notifiedForCurrentClick: true});
+        }
     },
     windowResized: function () {
         this.setState({chartWidth: React.findDOMNode(this).offsetWidth});
@@ -55,6 +107,11 @@ var ButtonMonitor = React.createClass({
         // handler call
         window.addEventListener("resize", this.windowResized);
         this.windowResized();
+
+        if (("Notification" in window) &&
+            Notification.permission === "denied") {
+            this.setState({deniedNotificationPermission: true});
+        }
 
         var initialParticipants;
         var currentParticipants;
@@ -101,6 +158,8 @@ var ButtonMonitor = React.createClass({
                 moment(tick.now_str + " 0000", "YYYY-MM-DD-HH-mm-ss Z")
             );
 
+            self.sendNecessaryNotifications(tick.seconds_left);
+
             currentParticipants = parseInt(
                 tick.participants_text.replace(/,/g, ""),
                 10
@@ -144,6 +203,11 @@ var ButtonMonitor = React.createClass({
                     <a href="//github.com/treyp/thebutton/" className="github">
                         GitHub
                     </a>
+                    <a
+                        href="//www.reddit.com/r/thebutton/"
+                        className="thebutton">
+                        /r/thebutton
+                    </a>
                     <TimerDisplay
                         secondsRemaining={this.state.secondsRemaining}
                         connected={this.state.connected} />
@@ -158,7 +222,8 @@ var ButtonMonitor = React.createClass({
                         barHeight={this.state.barHeight}
                         updateBarHeight={this.updateBarHeight}
                         updateChartSelection={this.updateChartSelection}
-                        chartSelected={this.state.chartSelected} />
+                        chartSelected={this.state.chartSelected}
+                        alertTime={this.state.alertTime} />
                 </header>
                 {
                     this.state.chartSelected === "log" ?
@@ -170,7 +235,13 @@ var ButtonMonitor = React.createClass({
                             connected={this.state.connected}
                             />
                         :
-                        <TimeChart />
+                        (this.state.chartSelected === "time" ?
+                            <TimeChart /> :
+                            <AlertSettings
+                                deniedNotificationPermission={
+                                    this.state.deniedNotificationPermission}
+                                alertTime={this.state.alertTime}
+                                updateAlertTime={this.updateAlertTime} />)
                 }
             </div>
         );

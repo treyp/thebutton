@@ -7,7 +7,7 @@ Monitor [Reddit](//www.reddit.com/)'s [/r/thebutton](//www.reddit.com/r/thebutto
 - [x] Change header stat labels to be clearer
 - [x] Port to React
 - [x] Make chart horizontal with fixed, user-selectable bar height
-- [ ] Add desktop notifications when the timer hits a user-defined number
+- [x] Add desktop notifications when the timer hits a user-defined number
 - [ ] Get WebSocket URL from Reddit directly instead of hard-coding
 - [ ] Hide when browser tab not visible (for performance reasons)
 - [ ] Better handling of connection errors/disconnects

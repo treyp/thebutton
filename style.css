@@ -23,7 +23,7 @@ a {
     overflow: hidden;
 }
 
-.github {
+.github, .thebutton {
     float: right;
     font-size: 16px;
     line-height: 18px;
@@ -82,13 +82,27 @@ a {
 .chart-selector .chart-choice {
     float: left;
     font-size: 16px;
-    line-height: 54px;
+    line-height: 1;
+    height: 54px;
     padding: 0 20px;
+    text-align: center;
+    width: 3.5em;
 }
 
 .chart-selector .chart-choice.selected {
     background-color: #e7e7e7;
     color: #000;
+}
+
+.chart-selector .chart-choice .tab-name {
+    margin-top: 20px;
+    display: block;
+}
+
+.chart-selector .chart-choice .tab-description {
+    display: block;
+    font-size: 12px;
+    color: #888;
 }
 
 .chart-selector .options {
@@ -156,4 +170,37 @@ a {
 
 .flair-press-6 {
     fill: #820080;
+}
+
+.alert-settings {
+    padding: 20px;
+    width: 20em;
+    background-color: #e7e7e7;
+    border-radius: 10px;
+    margin: 0 20px;
+}
+
+.alert-settings .row {
+    padding-bottom: 3px;
+}
+
+.alert-settings .input-row {
+    line-height: 40px;
+}
+
+.alert-settings #alert-time-input {
+    font-size: 28px;
+    line-height: 1;
+    width: 2em;
+    padding: 5px;
+    margin-right: 10px;
+}
+
+.alert-settings .detail {
+    color: #888;
+    font-size: 14px;
+}
+
+.alert-settings .error {
+    color: red;
 }
