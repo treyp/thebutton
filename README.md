@@ -9,6 +9,7 @@ Monitor [Reddit](//www.reddit.com/)'s [/r/thebutton](//www.reddit.com/r/thebutto
 - [x] Make chart horizontal with fixed, user-selectable bar height
 - [x] Add desktop notifications when the timer hits a user-defined number
 - [ ] Get WebSocket URL from Reddit directly instead of hard-coding
+- [ ] Add chart to display click numbers over time
 - [ ] Hide when browser tab not visible (for performance reasons)
 - [ ] Better handling of connection errors/disconnects
 - [ ] Make header responsive
