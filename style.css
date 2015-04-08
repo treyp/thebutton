@@ -16,11 +16,11 @@ a {
 
 #nav {
     display: block;
-    height: 54px;
     padding: 0 10px;
     margin-bottom: 20px;
     background-color: #f8f8f8;
     border-bottom: 1px solid #e7e7e7;
+    overflow: hidden;
 }
 
 .github {
@@ -32,6 +32,37 @@ a {
 
 .github img {
     border: 0;
+}
+
+.timer {
+    float: left;
+    width: 2.5em;
+    font-size: 48px;
+    line-height: 54px;
+}
+
+.tick {
+    float: left;
+    width: 50px;
+    height: 54px;
+    line-height: 54px;
+    text-align: center;
+}
+
+.tick .tock {
+    width: 1em;
+    height: 1em;
+    border: 1px solid #000;
+    -webkit-border-radius: .5em;
+    border-radius: .5em;
+    background-color: #000;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.tick .tock.odd {
+    background-color: #fff;
+    border-color: #000;
 }
 
 .stats {
@@ -71,35 +102,8 @@ a {
     margin-top: 9px;
 }
 
-.timer {
-    float: left;
-    width: 2.5em;
-    font-size: 48px;
-    line-height: 54px;
-}
-
-.tick {
-    float: left;
-    width: 50px;
-    height: 54px;
-    line-height: 54px;
-    text-align: center;
-}
-
-.tick .tock {
-    width: 1em;
-    height: 1em;
-    border: 1px solid #000;
-    -webkit-border-radius: .5em;
-    border-radius: .5em;
-    background-color: #000;
-    display: inline-block;
-    vertical-align: middle;
-}
-
-.tick .tock.odd {
-    background-color: #fff;
-    border-color: #000;
+.chart-selector .options #range {
+    width: 100px;
 }
 
 .log-chart text {

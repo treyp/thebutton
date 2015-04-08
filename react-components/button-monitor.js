@@ -129,7 +129,7 @@ var ButtonMonitor = React.createClass({
             <div>
                 <header id="nav">
                     <a href="//github.com/treyp/thebutton/" className="github">
-                        GitHub repo
+                        GitHub
                     </a>
                     <TimerDisplay
                         secondsRemaining={this.state.secondsRemaining} />
