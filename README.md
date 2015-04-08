@@ -1,7 +1,7 @@
 # The Button Monitor
 Monitor [Reddit](//www.reddit.com/)'s [/r/thebutton](//www.reddit.com/r/thebutton/). A fork of [jamesrom.github.io](//jamesrom.github.io) with new charts and notifications (coming soon). Built using [React](//facebook.github.io/react/) and [D3](//d3js.org).
 
-![Screenshot](/screenshot.jpg?raw=true)
+![Screenshot](/screenshot.png?raw=true)
 
 ## To Do List
 - [x] Change header stat labels to be clearer
