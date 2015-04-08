@@ -11,7 +11,7 @@ var StatsDisplay = React.createClass({
                     <span title={runningSince}>{runningDuration}</span>
                     {" "}<span>({
                         d3.format("0,000")(this.props.clicksTracked) +
-                        ' click' + (this.props.clicksTracked === 1 ? "" : "s")
+                        " click" + (this.props.clicksTracked === 1 ? "" : "s")
                     })</span>
                 </div>
                 <div>

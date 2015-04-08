@@ -38,6 +38,6 @@ var ChartSelector = React.createClass({
                         "")
                 }
             </div>
-        )
+        );
     }
 });
