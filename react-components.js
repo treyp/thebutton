@@ -36,6 +36,10 @@ var StatsDisplay = React.createClass({
                 <div>
                     {"Running: "}
                     <span title={runningSince}>{runningDuration}</span>
+                    {" "}<span>({
+                        d3.format("0,000")(this.props.clicksTracked) +
+                        ' click' + (this.props.clicksTracked === 1 ? "" : "s")
+                    })</span>
                 </div>
                 <div>
                     {"Lag: "}
@@ -52,7 +56,44 @@ var StatsDisplay = React.createClass({
     }
 });
 
-var Chart = React.createClass({
+var ChartSelector = React.createClass({
+    mixins: [PureRenderMixin],
+    handleSlider: function () {
+        this.props.updateBarHeight(
+            parseInt(React.findDOMNode(this.refs.slider).value, 10)
+        );
+    },
+    chartOptionLinkClass: function (choice) {
+        return "chart-choice" +
+            (this.props.chartSelected === choice ? " selected" : "");
+    },
+    render: function () {
+        return (
+            <div className="chart-selector">
+                <a
+                    className={this.chartOptionLinkClass("log")}
+                    onClick={this.props.updateChartSelection.bind(null, "log")}
+                >Log</a>
+                <a
+                    className={this.chartOptionLinkClass("time")}
+                    onClick={this.props.updateChartSelection.bind(null, "time")}
+                >Time</a>
+                <form className="options">
+                    <label htmlFor="bar-height-slider">Bar Height</label>
+                    <input type="range"
+                        min="1"
+                        max="25"
+                        value={this.props.value}
+                        id="bar-height-slider"
+                        ref="slider"
+                        onChange={this.handleSlider} />
+                </form>
+            </div>
+        )
+    }
+});
+
+var LogChart = React.createClass({
     mixins: [PureRenderMixin],
     componentDidMount: function () {
         var data = this.props.times;
@@ -111,7 +152,7 @@ var Chart = React.createClass({
                 return barWidth < 20 ? barWidth + 3 : barWidth - 3;
             })
             .classed("outside", function (d) {
-                return self.xScale(60 - d) < 20;
+                return self.props.height < 9 || self.xScale(60 - d) < 20;
             })
             .attr("y", this.props.barHeight / 2)
             .attr("dy", ".35em")
@@ -137,20 +178,29 @@ var Chart = React.createClass({
         return "flair-press-1";
     },
     render: function () {
-        return <svg className="chart"></svg>;
+        return <svg className="log-chart"></svg>;
+    }
+});
+
+var TimeChart = React.createClass({
+    render: function () {
+        return <p>Coming soon</p>;
     }
 });
 
 var ButtonMonitor = React.createClass({
     getInitialState: function () {
         return {
+            chartSelected: "log",
             started: moment(),
+            clicksTracked: 0,
             lag: 0,
             participants: 0,
             secondsRemaining: 60.0,
             ticks: 0,
             times: [], // [60,59,18,60,59,25,60,8,0,3,45,35,60,55],
-            chartWidth: 0
+            chartWidth: 0,
+            barHeight: 20
         };
     },
     tick: function () {
@@ -170,7 +220,16 @@ var ButtonMonitor = React.createClass({
     },
     addTime: function (seconds) {
         // console.log('new time: ' + seconds);
-        this.setState({times: this.state.times.concat(seconds)});
+        this.setState({
+            clicksTracked: this.state.times.length + 1,
+            times: this.state.times.concat(seconds)
+        });
+    },
+    updateBarHeight: function (barHeight) {
+        this.setState({barHeight: barHeight});
+    },
+    updateChartSelection: function (chart) {
+        this.setState({chartSelected: chart});
     },
     windowResized: function () {
         this.setState({chartWidth: React.findDOMNode(this).offsetWidth});
@@ -256,17 +315,33 @@ var ButtonMonitor = React.createClass({
     render: function () {
         return (
             <div>
-                <TimerDisplay
-                    secondsRemaining={this.state.secondsRemaining} />
-                <Tick count={this.state.ticks} />
-                <StatsDisplay
-                    started={this.state.started}
-                    lag={this.state.lag}
-                    participants={this.state.participants} />
-                <Chart
-                    times={this.state.times}
-                    barHeight={20}
-                    width={this.state.chartWidth} />
+                <header id="nav">
+                    <a href="//github.com/treyp/thebutton/" className="github">
+                        GitHub repo
+                    </a>
+                    <TimerDisplay
+                        secondsRemaining={this.state.secondsRemaining} />
+                    <Tick count={this.state.ticks} />
+                    <StatsDisplay
+                        started={this.state.started}
+                        clicksTracked={this.state.clicksTracked}
+                        lag={this.state.lag}
+                        participants={this.state.participants} />
+                    <ChartSelector
+                        barHeight={this.state.barHeight}
+                        updateBarHeight={this.updateBarHeight}
+                        updateChartSelection={this.updateChartSelection}
+                        chartSelected={this.state.chartSelected} />
+                </header>
+                {
+                    this.state.chartSelected === "log" ?
+                        <LogChart
+                            times={this.state.times}
+                            barHeight={this.state.barHeight}
+                            width={this.state.chartWidth} />
+                        :
+                        <TimeChart />
+                }
             </div>
         );
     }

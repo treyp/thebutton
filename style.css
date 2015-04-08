@@ -1,15 +1,33 @@
 html, body {
     height: 100%;
+    padding: 0;
+    margin: 0;
 }
 
 body {
     font: 14px/1.2857 sans-serif;
 }
 
+a {
+    color: #008BE0;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#nav {
+    display: block;
+    height: 54px;
+    padding: 0 10px;
+    margin-bottom: 20px;
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #e7e7e7;
+}
+
 .github {
-    position: absolute;
-    top: 0;
-    right: 0;
+    float: right;
+    font-size: 16px;
+    line-height: 18px;
+    margin: 18px 0 18px 20px;
 }
 
 .github img {
@@ -17,8 +35,40 @@ body {
 }
 
 .stats {
-    min-height: 48px;
+    float: left;
+    height: 54px;
+    width: 16em;
     line-height: 18px;
+    padding-right: 20px;
+}
+
+.chart-selector {
+    float: left;
+    height: 54px;
+}
+
+.chart-selector .chart-choice {
+    float: left;
+    font-size: 16px;
+    line-height: 54px;
+    padding: 0 20px;
+}
+
+.chart-selector .chart-choice.selected {
+    background-color: #e7e7e7;
+    color: #000;
+}
+
+.chart-selector .options {
+    float: left;
+    height: 54px;
+    margin-right: 20px;
+}
+
+.chart-selector .options label[for="bar-height-slider"] {
+    display: block;
+    text-align: center;
+    margin-top: 9px;
 }
 
 .timer {
@@ -52,28 +102,24 @@ body {
     border-color: #000;
 }
 
-.chart {
-    margin-top: 20px;
-}
-
-.chart text {
+.log-chart text {
     font: 10px sans-serif;
     text-anchor: end;
     fill: #fff;
 }
 
-.chart text.outside {
+.log-chart text.outside {
     fill: #000;
     text-anchor: start;
 }
 
-.chart g.axis path {
+.log-chart g.axis path {
     stroke: #333;
     stroke-width: 1;
     fill: none;
 }
 
-.chart line.grid {
+.log-chart line.grid {
     stroke: #DDD;
     stroke-width: 1;
     fill: none;
