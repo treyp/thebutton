@@ -100,27 +100,16 @@ var ButtonMonitor = React.createClass({
     windowResized: function () {
         this.setState({chartWidth: React.findDOMNode(this).offsetWidth});
     },
-    componentDidMount: function () {
-        this.interval = setInterval(this.tick, 100);
-
-        // thanks to React's autobinding, no need to worry about 'this' in the
-        // handler call
-        window.addEventListener("resize", this.windowResized);
-        this.windowResized();
-
-        if (("Notification" in window) &&
-            Notification.permission === "denied") {
-            this.setState({deniedNotificationPermission: true});
-        }
-
+    setupWebSocket: function () {
         var initialParticipants;
         var currentParticipants;
         var previousSecondsLeft;
         var previousParticipants;
         var self = this;
+
         var socket = new WebSocket(
             "wss://wss.redditmedia.com/thebutton?h=" +
-            "1a3bbae0dc58eeb5667e710a7eea7029d3e5f39b&e=1428553297"
+            "c5a59ef8bfb5fca5be6dfbf58f152212e745d7a1&e=1428567490"
         );
         socket.onopen = function () {
             if (!self.state.started) {
@@ -191,6 +180,21 @@ var ButtonMonitor = React.createClass({
             previousSecondsLeft = tick.seconds_left;
             previousParticipants = currentParticipants;
         };
+    },
+    componentDidMount: function () {
+        this.interval = setInterval(this.tick, 100);
+
+        // thanks to React's autobinding, no need to worry about 'this' in the
+        // handler call
+        window.addEventListener("resize", this.windowResized);
+        this.windowResized();
+
+        if (("Notification" in window) &&
+            Notification.permission === "denied") {
+            this.setState({deniedNotificationPermission: true});
+        }
+
+        this.setupWebSocket();
     },
     componentWillUnmount: function () {
         clearInterval(this.interval);
