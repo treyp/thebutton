@@ -50,6 +50,9 @@ var LogChart = React.createClass({
         chart.attr("height", this.chartHeight());
     },
     updateActiveBar: function() {
+        if (!this.props.connected) {
+            return;
+        }
         this.updateBarsWidth(
             d3.select(React.findDOMNode(this)).select("g:last-child").data(
                 [this.state.lastTime - ((moment() - this.state.lastSynced) / 1000)]

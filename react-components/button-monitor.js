@@ -2,7 +2,8 @@ var ButtonMonitor = React.createClass({
     getInitialState: function () {
         return {
             chartSelected: "log",
-            started: moment(),
+            connected: false,
+            started: null,
             clicksTracked: 0,
             lag: 0,
             participants: 0,
@@ -14,6 +15,9 @@ var ButtonMonitor = React.createClass({
         };
     },
     tick: function () {
+        if (!this.state.connected) {
+            return;
+        }
         this.setState({secondsRemaining: this.state.secondsRemaining - 0.1});
     },
     increaseTicks: function () {
@@ -59,8 +63,17 @@ var ButtonMonitor = React.createClass({
         var self = this;
         var socket = new WebSocket(
             "wss://wss.redditmedia.com/thebutton?h=" +
-            "1d15884a584a15b84dcb15561824698e9f43cf9f&e=1428466168"
+            "1a3bbae0dc58eeb5667e710a7eea7029d3e5f39b&e=1428553297"
         );
+        socket.onopen = function () {
+            if (!self.state.started) {
+                self.setState({started: moment()});
+            }
+            self.setState({connected: true});
+        };
+        socket.onclose = function () {
+            self.setState({connected: false});
+        };
         socket.onmessage = function (event) {
             /* jshint camelcase: false, maxstatements: 20 */
             // disabling camelcase since reddit uses underscore style here
@@ -132,13 +145,15 @@ var ButtonMonitor = React.createClass({
                         GitHub
                     </a>
                     <TimerDisplay
-                        secondsRemaining={this.state.secondsRemaining} />
+                        secondsRemaining={this.state.secondsRemaining}
+                        connected={this.state.connected} />
                     <Tick count={this.state.ticks} />
                     <StatsDisplay
                         started={this.state.started}
                         clicksTracked={this.state.clicksTracked}
                         lag={this.state.lag}
-                        participants={this.state.participants} />
+                        participants={this.state.participants}
+                        connected={this.state.connected} />
                     <ChartSelector
                         barHeight={this.state.barHeight}
                         updateBarHeight={this.updateBarHeight}
@@ -152,6 +167,7 @@ var ButtonMonitor = React.createClass({
                             barHeight={this.state.barHeight}
                             width={this.state.chartWidth}
                             secondsRemaining={this.state.secondsRemaining}
+                            connected={this.state.connected}
                             />
                         :
                         <TimeChart />

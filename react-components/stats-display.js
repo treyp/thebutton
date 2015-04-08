@@ -1,9 +1,13 @@
 var StatsDisplay = React.createClass({
     mixins: [React.addons.PureRenderMixin],
     render: function () {
-        var runningSince = "since " + this.props.started.format("LTS");
-        var runningDuration =
-            moment.duration(moment().diff(this.props.started)).humanize();
+        var runningSince = "Loading…"; 
+        var runningDuration = "Loading…";
+        if (this.props.connected) {
+            runningSince = "since " + this.props.started.format("LTS");
+            runningDuration =
+                moment.duration(moment().diff(this.props.started)).humanize();
+        }
         return (
             <div className="stats">
                 <div>
@@ -16,7 +20,7 @@ var StatsDisplay = React.createClass({
                 </div>
                 <div>
                     {"Lag: "}
-                    {this.props.lag ?
+                    {this.props.connected ?
                         <span>{d3.format("0,000")(this.props.lag)}ms</span> :
                         "Disconnected"}
                 </div>
