@@ -20,16 +20,23 @@ var ChartSelector = React.createClass({
                     className={this.chartOptionLinkClass("time")}
                     onClick={this.props.updateChartSelection.bind(null, "time")}
                 >Time</a>
-                <form className="options">
-                    <label htmlFor="bar-height-slider">Bar Height</label>
-                    <input type="range"
-                        min="1"
-                        max="25"
-                        value={this.props.value}
-                        id="bar-height-slider"
-                        ref="slider"
-                        onChange={this.handleSlider} />
-                </form>
+                {
+                    (this.props.chartSelected === "log" ?
+                        <form className="options">
+                            <label htmlFor="bar-height-slider">
+                                Bar Height
+                            </label>
+                            <input type="range"
+                                min="1"
+                                max="25"
+                                value={this.props.value}
+                                id="bar-height-slider"
+                                ref="slider"
+                                onChange={this.handleSlider} />
+                        </form>
+                        :
+                        "")
+                }
             </div>
         )
     }
