@@ -105,20 +105,18 @@ a {
     color: #888;
 }
 
-.chart-selector .options {
-    float: left;
-    height: 54px;
-    margin-right: 20px;
+.log-options {
+    padding: 0 10px;
+    margin: 20px 0;
+    line-height: 20px;
 }
 
-.chart-selector .options label[for="bar-height-slider"] {
-    display: block;
-    text-align: center;
-    margin-top: 9px;
+.log-options label[for="bar-height-slider"] {
+    margin-right: 1em;
 }
 
-.chart-selector .options #range {
-    width: 100px;
+.log-options #bar-height-slider {
+    width: 200px;
 }
 
 .log-chart text {

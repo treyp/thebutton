@@ -223,8 +223,6 @@ var ButtonMonitor = React.createClass({
                         participants={this.state.participants}
                         connected={this.state.connected} />
                     <ChartSelector
-                        barHeight={this.state.barHeight}
-                        updateBarHeight={this.updateBarHeight}
                         updateChartSelection={this.updateChartSelection}
                         chartSelected={this.state.chartSelected}
                         alertTime={this.state.alertTime} />
@@ -234,6 +232,7 @@ var ButtonMonitor = React.createClass({
                         <LogChart
                             times={this.state.times}
                             barHeight={this.state.barHeight}
+                            updateBarHeight={this.updateBarHeight}
                             width={this.state.chartWidth}
                             secondsRemaining={this.state.secondsRemaining}
                             connected={this.state.connected}

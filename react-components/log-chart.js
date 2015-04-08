@@ -7,7 +7,7 @@ var LogChart = React.createClass({
         };
     },
     componentDidMount: function () {
-        var chart = d3.select(React.findDOMNode(this));
+        var chart = d3.select(React.findDOMNode(this.refs.chart));
 
         this.xScale = d3.scale.linear()
             .domain([0, 60])
@@ -36,7 +36,7 @@ var LogChart = React.createClass({
         });
     },
     componentDidUpdate: function () {
-        var chart = d3.select(React.findDOMNode(this));
+        var chart = d3.select(React.findDOMNode(this.refs.chart));
         chart.attr("width", this.props.width);
         this.xScale = this.xScale.range([0, this.props.width]);
 
@@ -50,14 +50,16 @@ var LogChart = React.createClass({
         chart.attr("height", this.chartHeight());
     },
     updateActiveBar: function() {
-        if (!this.props.connected) {
-            return;
+        if (this.props.connected) {
+            this.updateBarsWidth(
+                d3.select(React.findDOMNode(this.refs.chart))
+                    .select("g:last-child")
+                    .data([
+                        this.state.lastTime -
+                        ((moment() - this.state.lastSynced) / 1000)
+                    ])
+            );
         }
-        this.updateBarsWidth(
-            d3.select(React.findDOMNode(this)).select("g:last-child").data(
-                [this.state.lastTime - ((moment() - this.state.lastSynced) / 1000)]
-            )
-        );
         window.requestAnimationFrame(this.updateActiveBar);
     },
     chartHeight: function () {
@@ -113,6 +115,11 @@ var LogChart = React.createClass({
             .attr("dy", ".35em")
             .text(function (d) { return Math.round(d); });
     },
+    handleSlider: function () {
+        this.props.updateBarHeight(
+            parseInt(React.findDOMNode(this.refs.slider).value, 10)
+        );
+    },
     flairClass: function (seconds) {
         if (seconds > 51) {
             return "flair-press-6";
@@ -132,6 +139,21 @@ var LogChart = React.createClass({
         return "flair-press-1";
     },
     render: function () {
-        return <svg className="log-chart"></svg>;
+        return (
+            <div>
+                <div className="log-options">
+                    <label htmlFor="bar-height-slider">
+                        Bar Height:
+                    </label>
+                    <input type="range"
+                        min="1"
+                        max="25"
+                        value={this.props.barHeight}
+                        id="bar-height-slider"
+                        ref="slider"
+                        onChange={this.handleSlider} />
+                </div>
+                <svg className="log-chart" ref="chart"></svg>
+            </div>);
     }
 });
