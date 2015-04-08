@@ -1,7 +1,6 @@
 var LogChart = React.createClass({
     mixins: [React.addons.PureRenderMixin],
     componentDidMount: function () {
-        var data = this.props.times;
         var chart = d3.select(React.findDOMNode(this));
 
         this.xScale = d3.scale.linear()
@@ -12,9 +11,9 @@ var LogChart = React.createClass({
             chart
                 .attr("width", this.props.width)
                 .selectAll("g")
-                .data(data).enter()
+                .data(this.props.times).enter()
         );
-        chart.attr("height", ((this.props.barHeight + 1) * data.length));
+        chart.attr("height", this.chartHeight());
     },
     componentDidUpdate: function () {
         var chart = d3.select(React.findDOMNode(this));
@@ -26,8 +25,14 @@ var LogChart = React.createClass({
         this.updateBarsInSelection(selection);
         this.addBarsToSelection(selection.enter());
         selection.exit().remove();
-        chart.attr("height",
-            ((this.props.barHeight + 1) * this.props.times.length));
+        chart.attr("height", this.chartHeight());
+    },
+    chartHeight: function () {
+        return (
+            ((this.props.barHeight + 1) * this.props.times.length) +
+            // add 5 pixels of padding to top in bottom when bars are short
+            // so that their text labels fully show
+            (this.props.barHeight < 10 ? 10 : 0));
     },
     addBarsToSelection: function (selection) {
         selection = selection
@@ -42,7 +47,12 @@ var LogChart = React.createClass({
         selection
             .attr("transform", function (d, i) {
                 return "translate(0," +
-                    (self.props.times.length - 1 - i) * (self.props.barHeight + 1) +
+                    (
+                        (
+                            (self.props.times.length - 1 - i) *
+                            (self.props.barHeight + 1)
+                        ) + (self.props.barHeight < 10 ? 5 : 0)
+                    ) +
                     ")";
             });
         selection.select("rect")
@@ -54,10 +64,11 @@ var LogChart = React.createClass({
         selection.select("text")
             .attr("x", function (d) {
                 var barWidth = Math.max(1, self.xScale(60 - d));
-                return barWidth < 20 ? barWidth + 3 : barWidth - 3;
+                return (self.props.barHeight < 9 || barWidth < 20 ?
+                    barWidth + 3 : barWidth - 3);
             })
             .classed("outside", function (d) {
-                return self.props.height < 9 || self.xScale(60 - d) < 20;
+                return self.props.barHeight < 9 || self.xScale(60 - d) < 20;
             })
             .attr("y", this.props.barHeight / 2)
             .attr("dy", ".35em")
