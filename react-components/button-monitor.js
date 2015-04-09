@@ -123,7 +123,6 @@ var ButtonMonitor = React.createClass({
         this.setState({chartWidth: React.findDOMNode(this).offsetWidth});
     },
     findWebSocket: function () {
-        console.log('hello');
         var self = this;
         var xhr = new XMLHttpRequest();
         xhr.addEventListener("readystatechange", function () {
@@ -252,13 +251,13 @@ var ButtonMonitor = React.createClass({
                     <TimerDisplay
                         secondsRemaining={this.state.secondsRemaining}
                         connected={this.state.connected} />
-                    <Tick count={this.state.ticks} />
                     <StatsDisplay
                         started={this.state.started}
                         clicksTracked={this.state.clicksTracked}
                         lag={this.state.lag}
                         participants={this.state.participants}
-                        connected={this.state.connected} />
+                        connected={this.state.connected}
+                        count={this.state.ticks} />
                     <ChartSelector
                         updateChartSelection={this.updateChartSelection}
                         chartSelected={this.state.chartSelected}

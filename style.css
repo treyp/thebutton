@@ -52,27 +52,23 @@ a {
 }
 
 .tick {
-    float: left;
-    width: 50px;
-    height: 54px;
-    line-height: 54px;
-    text-align: center;
-}
-
-.tick .tock {
-    width: 1em;
-    height: 1em;
-    border: 1px solid #000;
-    -webkit-border-radius: .5em;
-    border-radius: .5em;
-    background-color: #000;
     display: inline-block;
     vertical-align: middle;
+    width: 10px;
+    height: 10px;
+    border: 1px solid red;
+    -webkit-border-radius: 6px;
+    border-radius: 6px;
+    background-color: red;
+    margin-left: .25em;
 }
 
-.tick .tock.odd {
+.tick.odd {
     background-color: #fff;
-    border-color: #000;
+}
+
+.tick.disconnected {
+    display: none;
 }
 
 .stats {
