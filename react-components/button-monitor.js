@@ -81,7 +81,7 @@ var ButtonMonitor = React.createClass({
             time = parseInt(time, 10);
         }
         this.setState({alertTime: time});
-        if (!("Notification" in window)) {
+        if (!window.Notification) {
             return;
         }
         if (Notification.permission === "denied") {
@@ -107,7 +107,7 @@ var ButtonMonitor = React.createClass({
         if (this.state.notifiedForCurrentClick) {
             return;
         }
-        if (!("Notification" in window)) {
+        if (!window.Notification) {
             return;
         }
         if (seconds <= this.state.alertTime) {
@@ -226,8 +226,7 @@ var ButtonMonitor = React.createClass({
         window.addEventListener("resize", this.windowResized);
         this.windowResized();
 
-        if (("Notification" in window) &&
-            Notification.permission === "denied") {
+        if (window.Notification && Notification.permission === "denied") {
             this.setState({deniedNotificationPermission: true});
         }
 

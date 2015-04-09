@@ -6,7 +6,7 @@ var AlertSettings = React.createClass({
         );
     },
     render: function () {
-        if (!("Notification" in window)) {
+        if (!window.Notification) {
             return (<form className="alert-settings">
                 {"Sorry, but your browser doesn't support notifications."}
             </form>)
