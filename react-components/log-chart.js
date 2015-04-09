@@ -17,9 +17,7 @@ var LogChart = React.createClass({
             chart
                 .attr("width", this.props.width)
                 .selectAll("g")
-                .data(this.props.times.concat(
-                    this.props.secondsRemaining
-                )).enter()
+                .data(this.clicksWithActiveTime()).enter()
         );
 
         chart.attr("height", this.chartHeight());
@@ -41,30 +39,37 @@ var LogChart = React.createClass({
         this.xScale = this.xScale.range([0, this.props.width]);
 
         var selection = chart
-            .selectAll("g").data(this.props.times.concat(
-                this.props.secondsRemaining
-            ));
+            .selectAll("g").data(this.clicksWithActiveTime());
         this.updateBarsInSelection(selection);
         this.addBarsToSelection(selection.enter());
         selection.exit().remove();
         chart.attr("height", this.chartHeight());
+    },
+    clicksWithActiveTime: function () {
+        return this.props.clicks.concat({
+            seconds: this.props.secondsRemaining,
+            time: null, // we don't use this here anyway
+            color: this.props.flairClass(this.props.secondsRemaining)
+        });
     },
     updateActiveBar: function() {
         if (this.props.connected) {
             this.updateBarsWidth(
                 d3.select(React.findDOMNode(this.refs.chart))
                     .select("g:last-child")
-                    .data([
-                        this.state.lastTime -
-                        ((moment() - this.state.lastSynced) / 1000)
-                    ])
+                    .data([{
+                        seconds: this.state.lastTime -
+                            ((moment() - this.state.lastSynced) / 1000),
+                        time: null, // we don't use this here anyway
+                        color: this.props.flairClass(this.state.lastTime)
+                    }])
             );
         }
         window.requestAnimationFrame(this.updateActiveBar);
     },
     chartHeight: function () {
         return (
-            ((this.props.barHeight + 1) * (this.props.times.length + 1)) +
+            ((this.props.barHeight + 1) * (this.props.clicks.length + 1)) +
             // add 5 pixels of padding to top in bottom when bars are short
             // so that their text labels fully show
             (this.props.barHeight < 10 ? 10 : 0));
@@ -84,7 +89,7 @@ var LogChart = React.createClass({
                 return "translate(0," +
                     (
                         (
-                            (self.props.times.length - i) *
+                            (self.props.clicks.length - i) *
                             (self.props.barHeight + 1)
                         ) + (self.props.barHeight < 10 ? 5 : 0)
                     ) +
@@ -98,45 +103,28 @@ var LogChart = React.createClass({
 
         selection.select("rect")
             .attr("width", function (d) {
-                return Math.max(1, self.xScale(60 - d));
+                return Math.max(1, self.xScale(60 - d.seconds));
             })
             .attr("height", this.props.barHeight)
-            .attr("class", function (d) { return self.flairClass(d); });
+            .attr("class", function (d) { return d.color; });
         selection.select("text")
             .attr("x", function (d) {
-                var barWidth = Math.max(1, self.xScale(60 - d));
+                var barWidth = Math.max(1, self.xScale(60 - d.seconds));
                 return (self.props.barHeight < 9 || barWidth < 20 ?
                     barWidth + 3 : barWidth - 3);
             })
             .classed("outside", function (d) {
-                return self.props.barHeight < 9 || self.xScale(60 - d) < 20;
+                return self.props.barHeight < 9 ||
+                    self.xScale(60 - d.seconds) < 20;
             })
             .attr("y", this.props.barHeight / 2)
             .attr("dy", ".35em")
-            .text(function (d) { return Math.round(d); });
+            .text(function (d) { return Math.round(d.seconds); });
     },
     handleSlider: function () {
         this.props.updateBarHeight(
             parseInt(React.findDOMNode(this.refs.slider).value, 10)
         );
-    },
-    flairClass: function (seconds) {
-        if (seconds > 51) {
-            return "flair-press-6";
-        }
-        if (seconds > 41) {
-            return "flair-press-5";
-        }
-        if (seconds > 31) {
-            return "flair-press-4";
-        }
-        if (seconds > 21) {
-            return "flair-press-3";
-        }
-        if (seconds > 11) {
-            return "flair-press-2";
-        }
-        return "flair-press-1";
     },
     render: function () {
         return (

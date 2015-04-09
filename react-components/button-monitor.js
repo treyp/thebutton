@@ -9,7 +9,7 @@ var ButtonMonitor = React.createClass({
             participants: 0,
             secondsRemaining: 60.0,
             ticks: 0,
-            times: [], // [60,59,18,60,59,25,60,8,0,3,45,35,60,55],
+            clicks: [],
             chartWidth: 0,
             barHeight: 20,
             alertTime: null,
@@ -39,10 +39,32 @@ var ButtonMonitor = React.createClass({
     addTime: function (seconds) {
         // console.log('new time: ' + seconds);
         this.setState({
-            clicksTracked: this.state.times.length + 1,
-            times: this.state.times.concat(seconds),
+            clicksTracked: this.state.clicks.length + 1,
+            clicks: this.state.clicks.concat({
+                seconds: seconds,
+                time: moment(),
+                color: this.flairClass(seconds)
+            }),
             notifiedForCurrentClick: false
         });
+    },
+    flairClass: function (seconds) {
+        if (seconds > 51) {
+            return "flair-press-6";
+        }
+        if (seconds > 41) {
+            return "flair-press-5";
+        }
+        if (seconds > 31) {
+            return "flair-press-4";
+        }
+        if (seconds > 21) {
+            return "flair-press-3";
+        }
+        if (seconds > 11) {
+            return "flair-press-2";
+        }
+        return "flair-press-1";
     },
     updateBarHeight: function (barHeight) {
         this.setState({barHeight: barHeight});
@@ -109,7 +131,7 @@ var ButtonMonitor = React.createClass({
 
         var socket = new WebSocket(
             "wss://wss.redditmedia.com/thebutton?h=" +
-            "c5a59ef8bfb5fca5be6dfbf58f152212e745d7a1&e=1428567490"
+            "16dcec845cadef04b0b2b1e3080ddccc788bc872&e=1428618962"
         );
         socket.onopen = function () {
             if (!self.state.started) {
@@ -166,7 +188,7 @@ var ButtonMonitor = React.createClass({
                 // ticks
                 var barCountOffset =
                     (currentParticipants - initialParticipants) -
-                    self.state.times.length;
+                    self.state.clicks.length;
                 if (barCountOffset > 0) {
                     while (barCountOffset > 0) {
                         self.addTime(60.0);
@@ -230,7 +252,8 @@ var ButtonMonitor = React.createClass({
                 {
                     this.state.chartSelected === "log" ?
                         <LogChart
-                            times={this.state.times}
+                            clicks={this.state.clicks}
+                            flairClass={this.flairClass}
                             barHeight={this.state.barHeight}
                             updateBarHeight={this.updateBarHeight}
                             width={this.state.chartWidth}
