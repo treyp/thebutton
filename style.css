@@ -17,17 +17,26 @@ a {
 #nav {
     display: block;
     padding: 0 10px;
-    margin-bottom: 20px;
     background-color: #f8f8f8;
     border-bottom: 1px solid #e7e7e7;
     overflow: hidden;
 }
 
-.github, .thebutton {
+.right-nav {
     float: right;
     font-size: 16px;
     line-height: 18px;
-    margin: 18px 0 18px 20px;
+    margin: 18px 0 0 20px;
+    text-align: center;
+}
+
+.right-nav .author {
+    display: block;
+    font-size: 12px;
+}
+
+.right-nav .author a {
+    color: #888;
 }
 
 .github img {
@@ -105,18 +114,25 @@ a {
     color: #888;
 }
 
-.log-options {
+.options {
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #e7e7e7;
     padding: 0 10px;
-    margin: 20px 0;
+    margin-bottom: 20px;
     line-height: 20px;
 }
 
-.log-options label[for="bar-height-slider"] {
+.options label {
     margin-right: 1em;
+    font-size: 13px;
 }
 
-.log-options #bar-height-slider {
+.options #bar-height-slider {
     width: 200px;
+    height: 20px;
+    margin: 0;
+    padding: 0;
+    vertical-align: middle;
 }
 
 .log-chart text {
@@ -175,7 +191,7 @@ a {
     width: 20em;
     background-color: #e7e7e7;
     border-radius: 10px;
-    margin: 0 20px;
+    margin: 20px;
 }
 
 .alert-settings .row {

@@ -129,7 +129,7 @@ var LogChart = React.createClass({
     render: function () {
         return (
             <div>
-                <div className="log-options">
+                <div className="options">
                     <label htmlFor="bar-height-slider">
                         Bar Height:
                     </label>

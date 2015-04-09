@@ -226,14 +226,13 @@ var ButtonMonitor = React.createClass({
         return (
             <div>
                 <header id="nav">
-                    <a href="//github.com/treyp/thebutton/" className="github">
-                        GitHub
-                    </a>
-                    <a
-                        href="//www.reddit.com/r/thebutton/"
-                        className="thebutton">
-                        /r/thebutton
-                    </a>
+                    <div className="right-nav">
+                        <a href="//github.com/treyp/thebutton/">GitHub</a>
+                        <span className="author"><a href="//www.reddit.com/user/treyjp">by /u/treyjp</a></span>
+                    </div>
+                    <div className="right-nav">
+                        <a href="//www.reddit.com/r/thebutton/">/r/thebutton</a>
+                    </div>
                     <TimerDisplay
                         secondsRemaining={this.state.secondsRemaining}
                         connected={this.state.connected} />
