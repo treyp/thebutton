@@ -122,17 +122,33 @@ var ButtonMonitor = React.createClass({
     windowResized: function () {
         this.setState({chartWidth: React.findDOMNode(this).offsetWidth});
     },
-    setupWebSocket: function () {
+    findWebSocket: function () {
+        console.log('hello');
+        var self = this;
+        var xhr = new XMLHttpRequest();
+        xhr.addEventListener("readystatechange", function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    self.setupWebSocket(this.responseText.trim());
+                } else {
+                    window.setTimeout(self.findWebSocket, 5e3);
+                }
+            }
+        }, false);
+        xhr.addEventListener("error", function () {
+            window.setTimeout(self.findWebSocket, 5e3);
+        }, false);
+        xhr.open("get", "websocket-url.txt", true);
+        xhr.send();
+    },
+    setupWebSocket: function (websocketUrl) {
         var initialParticipants;
         var currentParticipants;
         var previousSecondsLeft;
         var previousParticipants;
         var self = this;
 
-        var socket = new WebSocket(
-            "wss://wss.redditmedia.com/thebutton?h=" +
-            "16dcec845cadef04b0b2b1e3080ddccc788bc872&e=1428618962"
-        );
+        var socket = new WebSocket(websocketUrl);
         socket.onopen = function () {
             if (!self.state.started) {
                 self.setState({started: moment()});
@@ -216,7 +232,7 @@ var ButtonMonitor = React.createClass({
             this.setState({deniedNotificationPermission: true});
         }
 
-        this.setupWebSocket();
+        this.findWebSocket();
     },
     componentWillUnmount: function () {
         clearInterval(this.interval);
