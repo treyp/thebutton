@@ -119,8 +119,12 @@ a {
 }
 
 .options label {
-    margin-right: 1em;
+    margin: 0 1em 0 2em;
     font-size: 13px;
+}
+
+.options label:first-child {
+    margin-left: 0;
 }
 
 .options #bar-height-slider,
@@ -129,6 +133,10 @@ a {
     height: 20px;
     margin: 0;
     padding: 0;
+    vertical-align: middle;
+}
+
+.options #labels-visible {
     vertical-align: middle;
 }
 
@@ -142,6 +150,14 @@ a {
 
 .time-chart .dot text {
     text-anchor: middle;
+}
+
+.time-chart.without-labels .dot text {
+    display: none;
+}
+
+.time-chart.without-labels .dot:hover text {
+    display: block;
 }
 
 .time-chart .dot circle {
