@@ -214,6 +214,14 @@ var ButtonMonitor = React.createClass({
             previousParticipants = currentParticipants;
         };
     },
+    promptToExit: function (event) {
+        if (this.state.clicksTracked > 10) {
+            var confirmation = "You've tracked more than ten clicks. " +
+                "Are you sure you want to leave?";
+            (event || window.event).returnValue = confirmation;
+            return confirmation;
+        }
+    },
     componentDidMount: function () {
         this.interval = setInterval(this.tick, 100);
 
@@ -221,6 +229,8 @@ var ButtonMonitor = React.createClass({
         // handler call
         window.addEventListener("resize", this.windowResized);
         this.windowResized();
+
+        window.addEventListener("beforeunload", this.promptToExit);
 
         if (window.Notification && Notification.permission === "denied") {
             this.setState({deniedNotificationPermission: true});
