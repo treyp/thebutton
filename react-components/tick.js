@@ -6,7 +6,7 @@ var Tick = React.createClass({
             evenOrOdd = "disconnected";
         }
         return (
-            <div className={"tick " + evenOrOdd}></div>
+            <div className={"ticker " + evenOrOdd}></div>
         );
     }
 });

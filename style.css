@@ -51,7 +51,7 @@ a {
     height: 54px;
 }
 
-.tick {
+.ticker {
     display: inline-block;
     vertical-align: middle;
     width: 10px;
@@ -63,7 +63,7 @@ a {
     margin-left: .25em;
 }
 
-.tick.odd {
+.ticker.odd {
     background-color: #fff;
 }
 
@@ -140,19 +140,28 @@ a {
     bottom: 20px;
 }
 
-.time-chart text {
+.time-chart .dot text {
     text-anchor: middle;
 }
 
-.time-chart circle {
+.time-chart .dot circle {
     fill-opacity: 0.5;
 }
 
 .time-chart .axis line,
 .time-chart .axis path {
-    shape-rendering: crispEdges;
-    stroke: black;
+    stroke: #000;
+    stroke-width: 1;
     fill: none;
+}
+
+.time-chart .axis text {
+    font: 10px sans-serif;
+    fill: #000;
+}
+
+.time-chart text.label {
+    font: 12px sans-serif;
 }
 
 .log-chart text {
