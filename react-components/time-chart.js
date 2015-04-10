@@ -9,6 +9,7 @@ var TimeChart = React.createClass({
             lastTime: 60,
             chartWidth: 0,
             chartHeight: 0,
+            displayLabels: true,
             startedPlusAMinute:
                 ((this.props.started || 0) + this.minimumDuration)
         };
@@ -193,6 +194,12 @@ var TimeChart = React.createClass({
                 parseInt(React.findDOMNode(this.refs.slider).value, 10)
         });
     },
+    handleLabels: function () {
+        this.setState({
+            displayLabels:
+                React.findDOMNode(this.refs.labels).checked
+        });
+    },
     render: function () {
         return (
             <div>
@@ -207,9 +214,20 @@ var TimeChart = React.createClass({
                         id="dot-size-slider"
                         ref="slider"
                         onChange={this.handleSlider} />
+                    <label htmlFor="labels-visible">
+                        Labels visible?
+                    </label>
+                    <input type="checkbox"
+                        defaultChecked={this.state.displayLabels}
+                        id="labels-visible"
+                        ref="labels"
+                        onChange={this.handleLabels} />
                 </div>
                 <div className="chart-container" ref="container">
-                    <svg className="time-chart" ref="chart"></svg>
+                    <svg className={"time-chart " +
+                        (this.state.displayLabels ?
+                            "with-labels" : "without-labels")
+                    } ref="chart"></svg>
                 </div>
             </div>);
     }
