@@ -7,12 +7,12 @@ var AlertSettings = React.createClass({
     },
     render: function () {
         if (!window.Notification) {
-            return (<form className="alert-settings">
+            return (<div className="alert-settings">
                 {"Sorry, but your browser doesn't support notifications."}
-            </form>)
+            </div>)
         } else {
             return (
-                <form className="alert-settings">
+                <div className="alert-settings">
                     <div className="row">
                         <label htmlFor="alert-time-input">
                             Notify me every time the timer passes:
@@ -33,7 +33,7 @@ var AlertSettings = React.createClass({
                             <a onClick={this.updateAlertTime}>Try again</a>
                         </div>
                         : ""}
-                </form>
+                </div>
             );
         }
     }
