@@ -123,12 +123,36 @@ a {
     font-size: 13px;
 }
 
-.options #bar-height-slider {
+.options #bar-height-slider,
+.options #dot-size-slider {
     width: 200px;
     height: 20px;
     margin: 0;
     padding: 0;
     vertical-align: middle;
+}
+
+.chart-container {
+    position: absolute;
+    top: 94px;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+}
+
+.time-chart text {
+    text-anchor: middle;
+}
+
+.time-chart circle {
+    fill-opacity: 0.5;
+}
+
+.time-chart .axis line,
+.time-chart .axis path {
+    shape-rendering: crispEdges;
+    stroke: black;
+    fill: none;
 }
 
 .log-chart text {

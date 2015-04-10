@@ -2,6 +2,7 @@ var LogChart = React.createClass({
     mixins: [React.addons.PureRenderMixin],
     getInitialState: function () {
         return {
+            barHeight: 20,
             lastSynced: moment().valueOf(),
             lastTime: 60
         };
@@ -69,16 +70,16 @@ var LogChart = React.createClass({
     },
     chartHeight: function () {
         return (
-            ((this.props.barHeight + 1) * (this.props.clicks.length + 1)) +
-            // add 5 pixels of padding to top in bottom when bars are short
+            ((this.state.barHeight + 1) * (this.props.clicks.length + 1)) +
+            // add 5 pixels of padding to top and bottom when bars are short
             // so that their text labels fully show
-            (this.props.barHeight < 10 ? 10 : 0));
+            (this.state.barHeight < 10 ? 10 : 0));
     },
     addBarsToSelection: function (selection) {
         selection = selection
             .append("g");
         selection.append("rect");
-        selection.append("text");
+        selection.append("text").attr("dy", ".35em");
         return this.updateBarsInSelection(selection);
     },
     updateBarsInSelection: function (selection) {
@@ -90,8 +91,8 @@ var LogChart = React.createClass({
                     (
                         (
                             (self.props.clicks.length - i) *
-                            (self.props.barHeight + 1)
-                        ) + (self.props.barHeight < 10 ? 5 : 0)
+                            (self.state.barHeight + 1)
+                        ) + (self.state.barHeight < 10 ? 5 : 0)
                     ) +
                     ")";
             });
@@ -105,26 +106,26 @@ var LogChart = React.createClass({
             .attr("width", function (d) {
                 return Math.max(1, self.xScale(60 - d.seconds));
             })
-            .attr("height", this.props.barHeight)
+            .attr("height", this.state.barHeight)
             .attr("class", function (d) { return d.color; });
         selection.select("text")
             .attr("x", function (d) {
                 var barWidth = Math.max(1, self.xScale(60 - d.seconds));
-                return (self.props.barHeight < 9 || barWidth < 20 ?
+                return (self.state.barHeight < 9 || barWidth < 20 ?
                     barWidth + 3 : barWidth - 3);
             })
             .classed("outside", function (d) {
-                return self.props.barHeight < 9 ||
+                return self.state.barHeight < 9 ||
                     self.xScale(60 - d.seconds) < 20;
             })
-            .attr("y", this.props.barHeight / 2)
-            .attr("dy", ".35em")
+            .attr("y", this.state.barHeight / 2)
             .text(function (d) { return Math.round(d.seconds); });
     },
     handleSlider: function () {
-        this.props.updateBarHeight(
-            parseInt(React.findDOMNode(this.refs.slider).value, 10)
-        );
+        this.setState({
+            barHeight:
+                parseInt(React.findDOMNode(this.refs.slider).value, 10)
+        });
     },
     render: function () {
         return (
@@ -136,7 +137,7 @@ var LogChart = React.createClass({
                     <input type="range"
                         min="1"
                         max="25"
-                        value={this.props.barHeight}
+                        value={this.state.barHeight}
                         id="bar-height-slider"
                         ref="slider"
                         onChange={this.handleSlider} />

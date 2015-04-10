@@ -7,13 +7,13 @@ var ChartSelector = React.createClass({
     render: function () {
         return (
             <div className="chart-selector">
-                <a className={this.chartOptionLinkClass("log")}
-                    onClick={this.props.updateChartSelection.bind(null, "log")}>
-                    <span className="tab-name">Log</span>
-                </a>
                 <a className={this.chartOptionLinkClass("time")}
                     onClick={this.props.updateChartSelection.bind(null, "time")}>
                     <span className="tab-name">Time</span>
+                </a>
+                <a className={this.chartOptionLinkClass("log")}
+                    onClick={this.props.updateChartSelection.bind(null, "log")}>
+                    <span className="tab-name">Log</span>
                 </a>
                 <a className={this.chartOptionLinkClass("alerts")}
                     onClick={this.props.updateChartSelection.bind(null, "alerts")}>

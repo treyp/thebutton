@@ -1,7 +1,7 @@
 var ButtonMonitor = React.createClass({
     getInitialState: function () {
         return {
-            chartSelected: "log",
+            chartSelected: "time",
             connected: false,
             started: null,
             clicksTracked: 0,
@@ -10,8 +10,7 @@ var ButtonMonitor = React.createClass({
             secondsRemaining: 60.0,
             ticks: 0,
             clicks: [],
-            chartWidth: 0,
-            barHeight: 20,
+            windowWidth: 0,
             alertTime: null,
             deniedNotificationPermission: false,
             notifiedForCurrentClick: false,
@@ -42,7 +41,7 @@ var ButtonMonitor = React.createClass({
             clicksTracked: this.state.clicks.length + 1,
             clicks: this.state.clicks.concat({
                 seconds: seconds,
-                time: moment(),
+                time: moment().valueOf(),
                 color: this.flairClass(seconds)
             }),
             notifiedForCurrentClick: false
@@ -65,9 +64,6 @@ var ButtonMonitor = React.createClass({
             return "flair-press-2";
         }
         return "flair-press-1";
-    },
-    updateBarHeight: function (barHeight) {
-        this.setState({barHeight: barHeight});
     },
     updateChartSelection: function (chart) {
         this.setState({chartSelected: chart});
@@ -120,7 +116,7 @@ var ButtonMonitor = React.createClass({
         }
     },
     windowResized: function () {
-        this.setState({chartWidth: React.findDOMNode(this).offsetWidth});
+        this.setState({windowWidth: React.findDOMNode(this).offsetWidth});
     },
     findWebSocket: function () {
         var self = this;
@@ -267,15 +263,19 @@ var ButtonMonitor = React.createClass({
                         <LogChart
                             clicks={this.state.clicks}
                             flairClass={this.flairClass}
-                            barHeight={this.state.barHeight}
-                            updateBarHeight={this.updateBarHeight}
-                            width={this.state.chartWidth}
+                            width={this.state.windowWidth}
                             secondsRemaining={this.state.secondsRemaining}
                             connected={this.state.connected}
                             />
                         :
                         (this.state.chartSelected === "time" ?
-                            <TimeChart /> :
+                            <TimeChart
+                                started={this.state.started}
+                                clicks={this.state.clicks}
+                                flairClass={this.flairClass}
+                                secondsRemaining={this.state.secondsRemaining}
+                                connected={this.state.connected}
+                                /> :
                             <AlertSettings
                                 deniedNotificationPermission={
                                     this.state.deniedNotificationPermission}
