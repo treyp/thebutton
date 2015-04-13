@@ -10,7 +10,10 @@ Monitor [Reddit](//www.reddit.com/)'s [/r/thebutton](//www.reddit.com/r/thebutto
 - [x] Add desktop notifications when the timer hits a user-defined number
 - [x] ~~Get WebSocket URL from Reddit directly instead of hard-coding~~
 - [x] Add chart to display click numbers over time
-- [ ] Make text labels optional
+- [x] Make text labels optional
+- [ ] Consider adding AM/PM to time labels on X axis
+- [ ] Change counting of simultaenous clicks so all clickers get the proper flair (instead of 60s for the "missed" presses)
+- [ ] Export graph to an image
 - [ ] Make header responsive
 - [ ] Replace pulse dot with a clearer "live" text that fades out after 1 second (with a 1 second fade)
 - [ ] Auto dot size and bar height option: starts large, shrinks down based on window size, minimum of 1
