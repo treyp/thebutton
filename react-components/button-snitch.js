@@ -1,4 +1,4 @@
-var ButtonMonitor = React.createClass({
+var ButtonSnitch = React.createClass({
     getInitialState: function () {
         return {
             chartSelected: "time",
@@ -91,7 +91,7 @@ var ButtonMonitor = React.createClass({
                 } else if (permission === "granted") {
                     self.setState({deniedNotificationPermission: false});
                     new Notification(
-                        "Alerts for The Button Monitor enabled!");
+                        "Alerts for The Button Snitch enabled!");
                 }
             })
         }
@@ -297,4 +297,4 @@ var ButtonMonitor = React.createClass({
     }
 });
 
-React.render(<ButtonMonitor />, document.getElementById("button-monitor"));
+React.render(<ButtonSnitch />, document.getElementById("button-snitch"));

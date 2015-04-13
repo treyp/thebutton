@@ -1,4 +1,4 @@
-# The Button Monitor
+# The Button Snitch
 Monitor [Reddit](//www.reddit.com/)'s [/r/thebutton](//www.reddit.com/r/thebutton/). A fork of [jamesrom.github.io](//jamesrom.github.io) with different visualizations and notifications. Built using [React](//facebook.github.io/react/) and [D3](//d3js.org).
 
 ![Screenshot](/screenshot.png?raw=true)
