@@ -152,6 +152,15 @@ a {
     text-anchor: middle;
 }
 
+.time-chart.with-labels .dot text {
+    font-size: 10px;
+    text-shadow: 0 0 1px #fff;
+}
+
+.time-chart.with-labels .dot:hover text {
+    font-size: 14px;
+}
+
 .time-chart.without-labels .dot text {
     display: none;
 }
@@ -162,6 +171,44 @@ a {
 
 .time-chart .dot circle {
     fill-opacity: 0.5;
+}
+
+/* opacity is 1-(.5^n), where n = number of overlapping dots */
+
+.time-chart .dot circle.times-2 {
+    fill-opacity: 0.75;
+}
+
+.time-chart .dot circle.times-3 {
+    fill-opacity: 0.875;
+}
+
+.time-chart .dot circle.times-4 {
+    fill-opacity: 0.9375;
+}
+
+.time-chart .dot circle.times-5 {
+    fill-opacity: 0.96875;
+}
+
+.time-chart .dot circle.times-6 {
+    fill-opacity: 0.984375;
+}
+
+.time-chart .dot circle.times-7 {
+    fill-opacity: 0.9921875;
+}
+
+.time-chart .dot circle.times-8 {
+    fill-opacity: 0.99609375;
+}
+
+.time-chart .dot circle.times-9 {
+    fill-opacity: 0.998046875;
+}
+
+.time-chart .dot circle.times-10-or-more {
+    fill-opacity: 0.999;
 }
 
 .time-chart .axis line,
