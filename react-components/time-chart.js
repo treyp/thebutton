@@ -1,7 +1,7 @@
 var TimeChart = React.createClass({
     mixins: [React.addons.PureRenderMixin],
     minimumDuration: 180e3,
-    margins: {top: 10, left: 45, right: 10, bottom: 25},
+    margins: {top: 10, left: 45, right: 10, bottom: 30},
     getInitialState: function () {
         return {
             dotSize: 5,
@@ -23,7 +23,6 @@ var TimeChart = React.createClass({
                 this.props.connected ? this.props.started.valueOf() : 0,
                 this.props.connected ? this.state.startedPlusAMinute : 0
             ]));
-
         this.yScale = this.calculateYRange(d3.scale.linear()
             .domain([0, 60]));
 
@@ -39,14 +38,13 @@ var TimeChart = React.createClass({
             .attr("class", "label x-label")
             .attr("text-anchor", "center")
             .attr("x", container.offsetWidth / 2)
-            .attr("y", container.offsetHeight)
-            .text("Time");
-
+            .attr("y", container.offsetHeight - 5)
+            .text("Time (× clicks)");
         this.yAxis = d3.svg.axis()
             .scale(this.yScale)
             .orient('left');
         this.yAxisEl = chart.append('g')
-            .attr('transform', 'translate(' +  this.margins.left + ',' + 0 + ')')
+            .attr('transform', 'translate(' +  this.margins.left + ',0)')
             .attr('class', 'axis y-axis')
             .call(this.yAxis);
         this.yAxisLabel = chart.append("text")
@@ -111,8 +109,7 @@ var TimeChart = React.createClass({
             .call(this.xAxis);
         this.xAxisLabel
             .attr("x", this.state.chartWidth / 2)
-            .attr("y", this.state.chartHeight);
-
+            .attr("y", this.state.chartHeight - 5);
         this.yAxisEl
             .call(this.yAxis);
         this.yAxisLabel
@@ -177,7 +174,10 @@ var TimeChart = React.createClass({
             .attr("cy", function (d) {
                 return self.yScale(d.seconds);
             })
-            .attr("class", function (d) { return d.color; });
+            .attr("class", function (d) {
+                return d.color + " times-" + d.clicks +
+                    (d.clicks >= 10 ? '-or-more' : '');
+            });
         selection.select("text")
             .attr("x", function (d) {
                 return self.xScale(d.time);
@@ -186,7 +186,10 @@ var TimeChart = React.createClass({
                 return self.yScale(d.seconds);
             })
             .attr("dy", "-" + (self.state.dotSize + 5) + "px")
-            .text(function (d) { return Math.round(d.seconds); });
+            .text(function (d) {
+                return Math.round(d.seconds) +
+                    (d.clicks > 1 ? (" × " + d.clicks) : "");
+            });
     },
     handleSlider: function () {
         this.setState({

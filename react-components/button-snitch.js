@@ -1,4 +1,4 @@
-var ButtonMonitor = React.createClass({
+var ButtonSnitch = React.createClass({
     getInitialState: function () {
         return {
             chartSelected: "time",
@@ -35,14 +35,15 @@ var ButtonMonitor = React.createClass({
     syncTimer: function (secondsRemaining) {
         this.setState({secondsRemaining: secondsRemaining});
     },
-    addTime: function (seconds) {
+    addTime: function (seconds, clicks) {
         // console.log('new time: ' + seconds);
         this.setState({
             clicksTracked: this.state.clicks.length + 1,
             clicks: this.state.clicks.concat({
                 seconds: seconds,
                 time: moment().valueOf(),
-                color: this.flairClass(seconds)
+                color: this.flairClass(seconds),
+                clicks: clicks
             }),
             notifiedForCurrentClick: false
         });
@@ -91,7 +92,7 @@ var ButtonMonitor = React.createClass({
                 } else if (permission === "granted") {
                     self.setState({deniedNotificationPermission: false});
                     new Notification(
-                        "Alerts for The Button Monitor enabled!");
+                        "Alerts for The Button Snitch enabled!");
                 }
             })
         }
@@ -137,7 +138,6 @@ var ButtonMonitor = React.createClass({
         xhr.send();
     },
     setupWebSocket: function (websocketUrl) {
-        var initialParticipants;
         var currentParticipants;
         var previousSecondsLeft;
         var previousParticipants;
@@ -186,26 +186,17 @@ var ButtonMonitor = React.createClass({
                 tick.participants_text.replace(/,/g, ""),
                 10
             );
-            if (!initialParticipants) {
-                initialParticipants = currentParticipants;
-            }
             self.updateParticipants(currentParticipants);
 
             if (previousParticipants &&
                 previousParticipants < currentParticipants) {
-                // time to create new chart bars
-                self.addTime(previousSecondsLeft);
-                // fill in the gaps when more than one person clicks between
-                // ticks
-                var barCountOffset =
-                    (currentParticipants - initialParticipants) -
-                    self.state.clicks.length;
-                if (barCountOffset > 0) {
-                    while (barCountOffset > 0) {
-                        self.addTime(60.0);
-                        barCountOffset = barCountOffset - 1;
-                    }
-                }
+                // the second argument calculates how many people
+                // clicked this time. multiple clicks apparently all count for
+                // the same number.
+                self.addTime(
+                    previousSecondsLeft,
+                    (currentParticipants - previousParticipants)
+                );
             }
 
             self.syncTimer(tick.seconds_left);
@@ -297,4 +288,4 @@ var ButtonMonitor = React.createClass({
     }
 });
 
-React.render(<ButtonMonitor />, document.getElementById("button-monitor"));
+React.render(<ButtonSnitch />, document.getElementById("button-snitch"));

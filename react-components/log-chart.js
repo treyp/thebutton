@@ -50,7 +50,8 @@ var LogChart = React.createClass({
         return this.props.clicks.concat({
             seconds: this.props.secondsRemaining,
             time: null, // we don't use this here anyway
-            color: this.props.flairClass(this.props.secondsRemaining)
+            color: this.props.flairClass(this.props.secondsRemaining),
+            clicks: 0
         });
     },
     updateActiveBar: function() {
@@ -62,7 +63,8 @@ var LogChart = React.createClass({
                         seconds: this.state.lastTime -
                             ((moment() - this.state.lastSynced) / 1000),
                         time: null, // we don't use this here anyway
-                        color: this.props.flairClass(this.state.lastTime)
+                        color: this.props.flairClass(this.state.lastTime),
+                        clicks: 0
                     }])
             );
         }
@@ -111,15 +113,18 @@ var LogChart = React.createClass({
         selection.select("text")
             .attr("x", function (d) {
                 var barWidth = Math.max(1, self.xScale(60 - d.seconds));
-                return (self.state.barHeight < 9 || barWidth < 20 ?
+                return (self.state.barHeight < 9 || barWidth < 35 ?
                     barWidth + 3 : barWidth - 3);
             })
             .classed("outside", function (d) {
                 return self.state.barHeight < 9 ||
-                    self.xScale(60 - d.seconds) < 20;
+                    self.xScale(60 - d.seconds) < 35;
             })
             .attr("y", this.state.barHeight / 2)
-            .text(function (d) { return Math.round(d.seconds); });
+            .text(function (d) {
+                return Math.round(d.seconds) +
+                    (d.clicks > 1 ? (" × " + d.clicks) : "");
+            });
     },
     handleSlider: function () {
         this.setState({
