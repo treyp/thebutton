@@ -288,4 +288,4 @@ var ButtonSnitch = React.createClass({
     }
 });
 
-React.render(<ButtonSnitch />, document.getElementById("button-snitch"));
+window.reactRoot = React.render(<ButtonSnitch />, document.getElementById("button-snitch"));
