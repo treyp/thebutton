@@ -1,5 +1,43 @@
 var ButtonSnitch = React.createClass({
-    getInitialState: function () {
+    generateFakeClicks: function (quantity) {
+        var clicks = [];
+        var remaining = quantity;
+        var lastClickTime = moment().valueOf();
+        var duration;
+        while (remaining > 0) {
+            duration = 60 -
+                (Math.round(Math.pow(Math.random(), 10) * 60e3) / 1000);
+            lastClickTime = lastClickTime - (duration * 1000);
+            clicks.unshift({
+                seconds: Math.round(duration),
+                time: lastClickTime,
+                color: this.flairClass(Math.round(duration)),
+                clicks: Math.round(Math.pow(Math.random(), 10) * 10),
+            });
+            remaining = remaining - 1;
+        }
+        return clicks;
+    },
+    getInitialStateFake: function () {
+        var clicks = this.generateFakeClicks(10e3);
+        return {
+            chartSelected: "time",
+            connected: true,
+            started: moment(clicks[0].time),
+            clicksTracked: clicks.length,
+            lag: Math.round(Math.random() * 2000),
+            participants: 0,
+            secondsRemaining: 60.0,
+            ticks: clicks.length * 5,
+            clicks: clicks,
+            windowWidth: 0,
+            alertTime: null,
+            deniedNotificationPermission: false,
+            notifiedForCurrentClick: false,
+            lastTimeTrackedForCurrentClick: 60
+        };
+    },
+    getInitialStateReal: function () {
         return {
             chartSelected: "time",
             connected: false,
@@ -17,23 +55,14 @@ var ButtonSnitch = React.createClass({
             lastTimeTrackedForCurrentClick: 60
         };
     },
+    getInitialState: function () {
+        return this.getInitialStateReal();
+    },
     tick: function () {
         if (!this.state.connected) {
             return;
         }
         this.setState({secondsRemaining: this.state.secondsRemaining - 0.1});
-    },
-    increaseTicks: function () {
-        this.setState({ticks: this.state.ticks + 1});
-    },
-    updateParticipants: function (participants) {
-        this.setState({participants: participants});
-    },
-    updateLag: function (serverTime) {
-        this.setState({lag: Math.abs(serverTime - moment())});
-    },
-    syncTimer: function (secondsRemaining) {
-        this.setState({secondsRemaining: secondsRemaining});
     },
     addTime: function (seconds, clicks) {
         // console.log('new time: ' + seconds);
@@ -173,12 +202,7 @@ var ButtonSnitch = React.createClass({
             if (packet.type !== "ticking") {
                 return;
             }
-            self.increaseTicks();
             var tick = packet.payload;
-
-            self.updateLag(
-                moment(tick.now_str + " 0000", "YYYY-MM-DD-HH-mm-ss Z")
-            );
 
             self.sendNecessaryNotifications(tick.seconds_left);
 
@@ -186,7 +210,6 @@ var ButtonSnitch = React.createClass({
                 tick.participants_text.replace(/,/g, ""),
                 10
             );
-            self.updateParticipants(currentParticipants);
 
             if (previousParticipants &&
                 previousParticipants < currentParticipants) {
@@ -199,7 +222,14 @@ var ButtonSnitch = React.createClass({
                 );
             }
 
-            self.syncTimer(tick.seconds_left);
+            self.setState({
+                ticks: self.state.ticks + 1,
+                lag: Math.abs(
+                    moment(tick.now_str + " 0000", "YYYY-MM-DD-HH-mm-ss Z") -
+                    moment()),
+                participants: currentParticipants,
+                secondsRemaining: tick.seconds_left
+            });
 
             previousSecondsLeft = tick.seconds_left;
             previousParticipants = currentParticipants;

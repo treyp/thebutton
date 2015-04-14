@@ -1,7 +1,7 @@
 var TimeChart = React.createClass({
     mixins: [React.addons.PureRenderMixin],
     minimumDuration: 180e3,
-    margins: {top: 10, left: 45, right: 10, bottom: 30},
+    margins: {top: 20, left: 45, right: 10, bottom: 30},
     getInitialState: function () {
         return {
             dotSize: 5,
