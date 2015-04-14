@@ -29,7 +29,7 @@ var TimeChart = React.createClass({
         this.xAxis = d3.svg.axis()
             .scale(this.xScale)
             .orient('bottom')
-            .tickFormat(function (d) { return moment(d).format('h:mm:ss'); });
+            .tickFormat(function (d) { return moment(d).format('h:mm:ss A'); });
         this.xAxisEl = chart.append('g')
             .attr('transform', 'translate(0,' + (container.offsetHeight - this.margins.top - this.margins.bottom) + ')')
             .attr('class', 'axis x-axis')

@@ -11,7 +11,7 @@ Monitor [Reddit](//www.reddit.com/)'s [/r/thebutton](//www.reddit.com/r/thebutto
 - [x] ~~Get WebSocket URL from Reddit directly instead of hard-coding~~
 - [x] Add chart to display click numbers over time
 - [x] Make text labels optional
-- [ ] Consider adding AM/PM to time labels on X axis
+- [x] Consider adding AM/PM to time labels on X axis
 - [ ] Change counting of simultaenous clicks so all clickers get the proper flair (instead of 60s for the "missed" presses)
 - [ ] Export graph to an image
 - [ ] Make header responsive
