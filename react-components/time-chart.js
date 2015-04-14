@@ -10,21 +10,24 @@ var TimeChart = React.createClass({
             chartWidth: 0,
             chartHeight: 0,
             displayLabels: true,
-            startedPlusAMinute:
-                ((this.props.started || 0) + this.minimumDuration)
+            startingXMax: (moment().valueOf() + this.minimumDuration)
         };
     },
     componentDidMount: function () {
         var chart = d3.select(React.findDOMNode(this.refs.chart));
         var container = React.findDOMNode(this.refs.container);
 
-        this.xScale = this.calculateXRange(d3.scale.linear()
-            .domain([
-                this.props.connected ? this.props.started.valueOf() : 0,
-                this.props.connected ? this.state.startedPlusAMinute : 0
-            ]));
-        this.yScale = this.calculateYRange(d3.scale.linear()
-            .domain([0, 60]));
+        this.xScale = this.calculateXRange(
+            d3.scale.linear()
+                .domain([
+                    this.props.connected ? this.props.started.valueOf() : this.state.lastSynced,
+                    this.state.startingXMax
+                ]),
+            container.offsetWidth);
+        this.yScale = this.calculateYRange(
+            d3.scale.linear()
+                .domain([0, 60]),
+            container.offsetHeight);
 
         this.xAxis = d3.svg.axis()
             .scale(this.xScale)
@@ -59,14 +62,18 @@ var TimeChart = React.createClass({
             chart
                 .attr("width", container.offsetWidth)
                 .attr("height", container.offsetHeight)
-                .selectAll("g")
+                .selectAll("g.dot")
                 .data(this.clicksWithActiveTime()).enter()
         );
 
         window.addEventListener("resize", this.windowResized);
-        this.windowResized();
 
         window.requestAnimationFrame(this.updateActiveDot);
+
+        this.setState({
+            chartWidth: container.offsetWidth,
+            chartHeight: container.offsetHeight
+        });
     },
     componentWillUnmount: function () {
         window.cancelAnimationFrame(this.updateActiveDot);
@@ -78,24 +85,20 @@ var TimeChart = React.createClass({
         this.setState({
             lastSynced: moment().valueOf(),
             lastTime: props.secondsRemaining,
-            startedPlusAMinute: props.started ?
+            startingXMax: props.started ?
                 props.started + this.minimumDuration : 0
         });
     },
     componentDidUpdate: function () {
         var chart = d3.select(React.findDOMNode(this.refs.chart));
         var clicksWithActiveTime = this.clicksWithActiveTime();
-        chart
-            .attr("width", this.state.chartWidth)
-            .attr("height", this.state.chartHeight);
         if (this.props.connected) {
             this.xScale = this.calculateXRange(this.xScale.domain([
                     this.props.started.valueOf(),
                     Math.max(
-                        this.state.startedPlusAMinute,
+                        this.state.startingXMax,
                         clicksWithActiveTime.slice(-1)[0].time)
-                ]));
-            this.yScale = this.calculateYRange(this.yScale);
+                ]), this.state.chartWidth);
         }
 
         var selection = chart
@@ -104,35 +107,42 @@ var TimeChart = React.createClass({
         this.addDotsToSelection(selection.enter());
         selection.exit().remove();
 
-        this.xAxisEl
-            .attr('transform', 'translate(0,' + (this.state.chartHeight - this.margins.top - this.margins.bottom) + ')')
-            .call(this.xAxis);
-        this.xAxisLabel
-            .attr("x", this.state.chartWidth / 2)
-            .attr("y", this.state.chartHeight - 5);
-        this.yAxisEl
-            .call(this.yAxis);
-        this.yAxisLabel
-            .attr("x", -1 * this.state.chartHeight / 2);
+        this.xAxisEl.call(this.xAxis);
     },
-    calculateYRange: function (scale) {
+    calculateYRange: function (scale, height) {
         return scale.range([this.margins.top, Math.max(
                 this.margins.top,
-                this.state.chartHeight - this.margins.top - this.margins.bottom
+                height - this.margins.top - this.margins.bottom
             )]);
     },
-    calculateXRange: function (scale) {
+    calculateXRange: function (scale, width) {
         return scale.range([this.margins.left, Math.max(
                 this.margins.left,
-                this.state.chartWidth - this.margins.left - this.margins.right
+                width - this.margins.left - this.margins.right
             )]);
     },
     windowResized: function () {
+        var chart = d3.select(React.findDOMNode(this.refs.chart));
         var container = React.findDOMNode(this.refs.container);
+
         this.setState({
             chartWidth: container.offsetWidth,
             chartHeight: container.offsetHeight
         });
+
+        chart
+            .attr("width", this.state.chartWidth)
+            .attr("height", this.state.chartHeight);
+        this.xAxisLabel
+            .attr("x", this.state.chartWidth / 2)
+            .attr("y", this.state.chartHeight - 5);
+        this.xAxisEl
+            .attr('transform', 'translate(0,' + (this.state.chartHeight - this.margins.top - this.margins.bottom) + ')');
+        this.yScale = this.calculateYRange(this.yScale, this.state.chartHeight);
+        this.yAxisEl
+            .call(this.yAxis);
+        this.yAxisLabel
+            .attr("x", -1 * this.state.chartHeight / 2);
     },
     clicksWithActiveTime: function () {
         return this.props.clicks.concat({
