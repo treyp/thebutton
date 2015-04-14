@@ -1,35 +1,49 @@
 var ButtonSnitch = React.createClass({
     generateFakeClicks: function (quantity) {
         var clicks = [];
+        var colorCounts = {
+            "flair-press-1": 0,
+            "flair-press-2": 0,
+            "flair-press-3": 0,
+            "flair-press-4": 0,
+            "flair-press-5": 0,
+            "flair-press-6": 0
+        };
         var remaining = quantity;
         var lastClickTime = moment().valueOf();
         var duration;
+        var clickCount;
+        var flairClass;
         while (remaining > 0) {
             duration = 60 -
                 (Math.round(Math.pow(Math.random(), 10) * 60e3) / 1000);
             lastClickTime = lastClickTime - (duration * 1000);
+            clickCount = Math.round(Math.pow(Math.random(), 10) * 10);
+            flairClass = this.flairClass(Math.round(duration));
             clicks.unshift({
                 seconds: Math.round(duration),
                 time: lastClickTime,
-                color: this.flairClass(Math.round(duration)),
-                clicks: Math.round(Math.pow(Math.random(), 10) * 10),
+                color: flairClass,
+                clicks: clickCount,
             });
+            colorCounts[flairClass] = colorCounts[flairClass] + clickCount;
             remaining = remaining - 1;
         }
-        return clicks;
+        return {clicks: clicks, colorCounts: colorCounts};
     },
     getInitialStateFake: function () {
-        var clicks = this.generateFakeClicks(10e3);
+        var clickData = this.generateFakeClicks(10e3);
         return {
             chartSelected: "time",
             connected: true,
-            started: moment(clicks[0].time),
-            clicksTracked: clicks.length,
+            started: moment(clickData.clicks[0].time),
+            clicksTracked: clickData.clicks.length,
             lag: Math.round(Math.random() * 2000),
             participants: 0,
             secondsRemaining: 60.0,
-            ticks: clicks.length * 5,
-            clicks: clicks,
+            ticks: clickData.clicks.length * 5,
+            clicks: clickData.clicks,
+            colorCounts: clickData.colorCounts,
             windowWidth: 0,
             alertTime: null,
             deniedNotificationPermission: false,
@@ -48,6 +62,14 @@ var ButtonSnitch = React.createClass({
             secondsRemaining: 60.0,
             ticks: 0,
             clicks: [],
+            colorCounts: {
+                "flair-press-1": 0,
+                "flair-press-2": 0,
+                "flair-press-3": 0,
+                "flair-press-4": 0,
+                "flair-press-5": 0,
+                "flair-press-6": 0
+            },
             windowWidth: 0,
             alertTime: null,
             deniedNotificationPermission: false,
@@ -65,15 +87,18 @@ var ButtonSnitch = React.createClass({
         this.setState({secondsRemaining: this.state.secondsRemaining - 0.1});
     },
     addTime: function (seconds, clicks) {
-        // console.log('new time: ' + seconds);
+        var colorCounts = this.state.colorCounts;
+        colorCounts[this.flairClass(seconds)] =
+            colorCounts[this.flairClass(seconds)] + clicks;
         this.setState({
-            clicksTracked: this.state.clicks.length + 1,
+            clicksTracked: this.state.clicksTracked + clicks,
             clicks: this.state.clicks.concat({
                 seconds: seconds,
                 time: moment().valueOf(),
                 color: this.flairClass(seconds),
                 clicks: clicks
             }),
+            colorCounts: colorCounts,
             notifiedForCurrentClick: false
         });
     },
@@ -269,7 +294,11 @@ var ButtonSnitch = React.createClass({
                 <header id="nav">
                     <div className="right-nav">
                         <a href="//github.com/treyp/thebutton/">GitHub</a>
-                        <span className="author"><a href="//www.reddit.com/user/treyjp">by /u/treyjp</a></span>
+                        <span className="author">
+                            <a href="//www.reddit.com/user/treyjp">
+                                by /u/treyjp
+                            </a>
+                        </span>
                     </div>
                     <div className="right-nav">
                         <a href="//www.reddit.com/r/thebutton/">/r/thebutton</a>
@@ -289,6 +318,10 @@ var ButtonSnitch = React.createClass({
                         chartSelected={this.state.chartSelected}
                         alertTime={this.state.alertTime} />
                 </header>
+                <RainbowDistribution
+                    connected={this.state.connected}
+                    clicksTracked={this.state.clicksTracked}
+                    colorCounts={this.state.colorCounts} />
                 {
                     this.state.chartSelected === "log" ?
                         <LogChart
@@ -318,4 +351,5 @@ var ButtonSnitch = React.createClass({
     }
 });
 
-window.reactRoot = React.render(<ButtonSnitch />, document.getElementById("button-snitch"));
+window.reactRoot =
+    React.render(<ButtonSnitch />, document.getElementById("button-snitch"));

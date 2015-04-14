@@ -20,7 +20,8 @@ var TimeChart = React.createClass({
         this.xScale = this.calculateXRange(
             d3.scale.linear()
                 .domain([
-                    this.props.connected ? this.props.started.valueOf() : this.state.lastSynced,
+                    this.props.connected ?
+                        this.props.started.valueOf() : this.state.lastSynced,
                     this.state.startingXMax
                 ]),
             container.offsetWidth);
@@ -34,7 +35,10 @@ var TimeChart = React.createClass({
             .orient('bottom')
             .tickFormat(function (d) { return moment(d).format('h:mm:ss A'); });
         this.xAxisEl = chart.append('g')
-            .attr('transform', 'translate(0,' + (container.offsetHeight - this.margins.top - this.margins.bottom) + ')')
+            .attr('transform', 'translate(0,' +
+                (container.offsetHeight - this.margins.top -
+                    this.margins.bottom) +
+                ')')
             .attr('class', 'axis x-axis')
             .call(this.xAxis);
         this.xAxisLabel = chart.append("text")
@@ -137,7 +141,10 @@ var TimeChart = React.createClass({
             .attr("x", this.state.chartWidth / 2)
             .attr("y", this.state.chartHeight - 5);
         this.xAxisEl
-            .attr('transform', 'translate(0,' + (this.state.chartHeight - this.margins.top - this.margins.bottom) + ')');
+            .attr('transform', 'translate(0,' +
+                (this.state.chartHeight - this.margins.top -
+                    this.margins.bottom) +
+                ')');
         this.yScale = this.calculateYRange(this.yScale, this.state.chartHeight);
         this.yAxisEl
             .call(this.yAxis);

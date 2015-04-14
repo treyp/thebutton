@@ -110,6 +110,91 @@ a {
     color: #888;
 }
 
+.rainbow-distribution {
+    text-align: center;
+    color: #fff;
+    font-size: 12px;
+    line-height: 20px;
+    height: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    border-bottom: 1px solid #e7e7e7;
+}
+
+.rainbow-distribution.text {
+    color: #000;
+}
+
+.rainbow-distribution.disconnected {
+    background-color: #e7e7e7;
+    color: #333;
+    cursor: default;
+}
+
+.rainbow-distribution > div {
+    float: left;
+}
+
+.rainbow-distribution.text > div {
+    width: 16.6666% !important;
+}
+
+.rainbow-distribution .label {
+    font-weight: bold;
+}
+
+.rainbow-distribution.rainbow .label {
+    display: none;
+}
+
+.rainbow-distribution.rainbow .flair-press-1 {
+    background-color: #e50000;
+}
+
+.rainbow-distribution.rainbow .flair-press-2 {
+    background-color: #e59500;
+}
+
+.rainbow-distribution.rainbow .flair-press-3 {
+    background-color: #E5D900;
+}
+
+.rainbow-distribution.rainbow .flair-press-4 {
+    background-color: #02be01;
+}
+
+.rainbow-distribution.rainbow .flair-press-5 {
+    background-color: #0083C7;
+}
+
+.rainbow-distribution.rainbow .flair-press-6 {
+    background-color: #820080;
+}
+
+.rainbow-distribution.text .flair-press-1 .label {
+    color: #e50000;
+}
+
+.rainbow-distribution.text .flair-press-2 .label {
+    color: #e59500;
+}
+
+.rainbow-distribution.text .flair-press-3 .label {
+    color: #E5D900;
+}
+
+.rainbow-distribution.text .flair-press-4 .label {
+    color: #02be01;
+}
+
+.rainbow-distribution.text .flair-press-5 .label {
+    color: #0083C7;
+}
+
+.rainbow-distribution.text .flair-press-6 .label {
+    color: #820080;
+}
+
 .options {
     background-color: #f8f8f8;
     border-bottom: 1px solid #e7e7e7;
