@@ -173,7 +173,34 @@ var ButtonSnitch = React.createClass({
     windowResized: function () {
         this.setState({windowWidth: React.findDOMNode(this).offsetWidth});
     },
-    findWebSocket: function () {
+    findWebSocketFromReddit: function () {
+        var self = this;
+        var xhr = new XMLHttpRequest();
+        xhr.addEventListener("readystatechange", function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    var regex = /"(wss:\/\/[^"]+)/g;
+                    var matches = regex.exec(this.responseText);
+                    if (matches && matches[1]) {
+                        self.setupWebSocket(matches[1]);
+                    } else {
+                        self.findWebSocketLocally();
+                    }
+                } else {
+                    self.findWebSocketLocally();
+                }
+            }
+        }, false);
+        xhr.addEventListener("error", function () {
+            self.findWebSocketLocally();
+        }, false);
+        // use a proxy to get /r/thebutton because CORS would
+        // block us otherwise
+        xhr.open("get", "//cors-unblocker.herokuapp.com/get?url=" +
+            "https%3A%2F%2Fwww.reddit.com%2Fr%2Fthebutton", true);
+        xhr.send();
+    },
+    findWebSocketLocally: function () {
         var self = this;
         var xhr = new XMLHttpRequest();
         xhr.addEventListener("readystatechange", function () {
@@ -181,12 +208,12 @@ var ButtonSnitch = React.createClass({
                 if (xhr.status === 200) {
                     self.setupWebSocket(this.responseText.trim());
                 } else {
-                    window.setTimeout(self.findWebSocket, 5e3);
+                    window.setTimeout(self.findWebSocketFromReddit, 5e3);
                 }
             }
         }, false);
         xhr.addEventListener("error", function () {
-            window.setTimeout(self.findWebSocket, 5e3);
+            window.setTimeout(self.findWebSocketFromReddit, 5e3);
         }, false);
         xhr.open("get", "websocket-url.txt", true);
         xhr.send();
@@ -206,6 +233,7 @@ var ButtonSnitch = React.createClass({
         };
         socket.onclose = function () {
             self.setState({connected: false});
+            window.setTimeout(self.findWebSocketFromReddit, 5e3);
         };
         socket.onmessage = function (event) {
             /* jshint camelcase: false, maxstatements: 20 */
@@ -282,7 +310,7 @@ var ButtonSnitch = React.createClass({
             this.setState({deniedNotificationPermission: true});
         }
 
-        this.findWebSocket();
+        this.findWebSocketFromReddit();
     },
     componentWillUnmount: function () {
         clearInterval(this.interval);
