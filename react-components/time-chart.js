@@ -67,7 +67,7 @@ var TimeChart = React.createClass({
                 .attr("width", container.offsetWidth)
                 .attr("height", container.offsetHeight)
                 .selectAll("g.dot")
-                .data(this.clicksWithActiveTime()).enter()
+                .data(this).enter()
         );
 
         window.addEventListener("resize", this.windowResized);
@@ -93,24 +93,42 @@ var TimeChart = React.createClass({
                 props.started + this.minimumDuration : 0
         });
     },
-    componentDidUpdate: function () {
+    componentDidUpdate: function (prevProps, prevState) {
         var chart = d3.select(React.findDOMNode(this.refs.chart));
-        var clicksWithActiveTime = this.clicksWithActiveTime();
-        if (this.props.connected) {
-            this.xScale = this.calculateXRange(this.xScale.domain([
-                    this.props.started.valueOf(),
-                    Math.max(
-                        this.state.startingXMax,
-                        clicksWithActiveTime.slice(-1)[0].time)
-                ]), this.state.chartWidth);
+
+        if (!this.props.connected) {
+            // remove the active dot
+            chart.selectAll("g.dot").data(this.props.clicks).exit().remove();
+            return;
         }
 
-        var selection = chart
-            .selectAll("g.dot").data(clicksWithActiveTime);
-        this.updateDots(selection);
-        this.addDotsToSelection(selection.enter());
-        selection.exit().remove();
+        var clicksWithActiveTime = this.clicksWithActiveTime();
 
+        // performance optimization: if we have a lot of elements on the page,
+        // only update the old dots (which probably don't need to move) when
+        // a new dot shows up
+        if (this.props.clicks.length > 300 &&
+            this.props.clicks.length === prevProps.clicks.length &&
+            this.state.chartWidth === prevState.chartWidth &&
+            this.state.chartHeight === prevState.chartHeight) {
+            // update active dot
+            this.updateDots(chart
+                .select("g.dot:last-child")
+                .data(clicksWithActiveTime.slice(-1)[0]));
+        } else {
+            var selection = chart
+                .selectAll("g.dot").data(clicksWithActiveTime);
+            this.updateDots(selection);
+            this.addDotsToSelection(selection.enter());
+            selection.exit().remove();
+        }
+
+        this.xScale = this.calculateXRange(this.xScale.domain([
+                this.props.started.valueOf(),
+                Math.max(
+                    this.state.startingXMax,
+                    clicksWithActiveTime.slice(-1)[0].time)
+            ]), this.state.chartWidth);
         this.xAxisEl.call(this.xAxis);
     },
     calculateYRange: function (scale, height) {
@@ -128,34 +146,34 @@ var TimeChart = React.createClass({
     windowResized: function () {
         var chart = d3.select(React.findDOMNode(this.refs.chart));
         var container = React.findDOMNode(this.refs.container);
-
-        this.setState({
-            chartWidth: container.offsetWidth,
-            chartHeight: container.offsetHeight
-        });
+        var height = container.offsetHeight;
+        var width = container.offsetWidth;
 
         chart
-            .attr("width", this.state.chartWidth)
-            .attr("height", this.state.chartHeight);
+            .attr("width", width)
+            .attr("height", height);
         this.xAxisLabel
-            .attr("x", this.state.chartWidth / 2)
-            .attr("y", this.state.chartHeight - 5);
+            .attr("x", width / 2)
+            .attr("y", height - 5);
         this.xAxisEl
             .attr('transform', 'translate(0,' +
-                (this.state.chartHeight - this.margins.top -
+                (height - this.margins.top -
                     this.margins.bottom) +
                 ')');
-        this.yScale = this.calculateYRange(this.yScale, this.state.chartHeight);
+        this.yScale = this.calculateYRange(this.yScale, height);
         this.yAxisEl
             .call(this.yAxis);
         this.yAxisLabel
-            .attr("x", -1 * this.state.chartHeight / 2);
+            .attr("x", -1 * height / 2);
+
+        this.setState({chartWidth: width, chartHeight: height});
     },
     clicksWithActiveTime: function () {
         return this.props.clicks.concat({
             seconds: this.props.secondsRemaining,
             time: moment().valueOf(),
-            color: this.props.flairClass(this.props.secondsRemaining)
+            color: this.props.flairClass(this.props.secondsRemaining),
+            clicks: 0
         });
     },
     updateActiveDot: function() {
@@ -167,7 +185,8 @@ var TimeChart = React.createClass({
                         seconds: this.state.lastTime -
                             ((moment() - this.state.lastSynced) / 1000),
                         time: moment(),
-                        color: this.props.flairClass(this.state.lastTime)
+                        color: this.props.flairClass(this.state.lastTime),
+                        clicks: 0
                     }])
             );
         }

@@ -1,4 +1,8 @@
 var ButtonSnitch = React.createClass({
+    getInitialState: function () {
+        return this.getInitialStateReal();
+        // return this.getInitialStateFake(5e3);
+    },
     generateFakeClicks: function (quantity) {
         var clicks = [];
         var colorCounts = {
@@ -14,11 +18,12 @@ var ButtonSnitch = React.createClass({
         var duration;
         var clickCount;
         var flairClass;
+        var totalClicks = 0;
         while (remaining > 0) {
             duration = 60 -
                 (Math.round(Math.pow(Math.random(), 10) * 60e3) / 1000);
             lastClickTime = lastClickTime - (duration * 1000);
-            clickCount = Math.round(Math.pow(Math.random(), 10) * 10);
+            clickCount = Math.ceil(Math.pow(Math.random(), 10) * 10);
             flairClass = this.flairClass(Math.round(duration));
             clicks.unshift({
                 seconds: Math.round(duration),
@@ -27,17 +32,22 @@ var ButtonSnitch = React.createClass({
                 clicks: clickCount,
             });
             colorCounts[flairClass] = colorCounts[flairClass] + clickCount;
-            remaining = remaining - 1;
+            totalClicks = totalClicks + clickCount;
+            remaining = remaining - clickCount;
         }
-        return {clicks: clicks, colorCounts: colorCounts};
+        return {
+            clicks: clicks,
+            colorCounts: colorCounts,
+            clicksTracked: totalClicks
+        };
     },
-    getInitialStateFake: function () {
-        var clickData = this.generateFakeClicks(10e3);
+    getInitialStateFake: function (quantity) {
+        var clickData = this.generateFakeClicks(quantity);
         return {
             chartSelected: "time",
             connected: true,
             started: moment(clickData.clicks[0].time),
-            clicksTracked: clickData.clicks.length,
+            clicksTracked: clickData.clicksTracked,
             lag: Math.round(Math.random() * 2000),
             participants: 0,
             secondsRemaining: 60.0,
@@ -76,9 +86,6 @@ var ButtonSnitch = React.createClass({
             notifiedForCurrentClick: false,
             lastTimeTrackedForCurrentClick: 60
         };
-    },
-    getInitialState: function () {
-        return this.getInitialStateReal();
     },
     tick: function () {
         if (!this.state.connected) {
