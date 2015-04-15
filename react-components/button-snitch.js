@@ -168,7 +168,7 @@ var ButtonSnitch = React.createClass({
                     new Notification(
                         "Alerts for The Button Snitch enabled!");
                 }
-            })
+            });
         }
     },
     updateBeep: function (beep) {
@@ -257,11 +257,11 @@ var ButtonSnitch = React.createClass({
         socket.onclose = function () {
             self.setState({connected: false});
             document.title = "The Button Snitch";
-            document.getElementById('favicon').href = "favicon/favicon.ico";
+            document.getElementById("favicon").href = "favicon/favicon.ico";
             window.setTimeout(self.findWebSocketFromReddit, 5e3);
         };
         socket.onmessage = function (event) {
-            /* jshint camelcase: false, maxstatements: 20 */
+            /* jshint camelcase: false */
             // disabling camelcase since reddit uses underscore style here
             // also bumping maxstatements until i have a chance to refactor
             /*
@@ -310,7 +310,7 @@ var ButtonSnitch = React.createClass({
             });
 
             document.title = tick.seconds_left + " | The Button Snitch";
-            document.getElementById('favicon').href = "favicon/" +
+            document.getElementById("favicon").href = "favicon/" +
                 self.colorName[self.flairClass(tick.seconds_left)]
                 .toLowerCase() + ".ico";
 

@@ -32,14 +32,14 @@ var TimeChart = React.createClass({
 
         this.xAxis = d3.svg.axis()
             .scale(this.xScale)
-            .orient('bottom')
-            .tickFormat(function (d) { return moment(d).format('h:mm:ss A'); });
-        this.xAxisEl = chart.append('g')
-            .attr('transform', 'translate(0,' +
+            .orient("bottom")
+            .tickFormat(function (d) { return moment(d).format("h:mm:ss A"); });
+        this.xAxisEl = chart.append("g")
+            .attr("transform", "translate(0," +
                 (container.offsetHeight - this.margins.top -
                     this.margins.bottom) +
-                ')')
-            .attr('class', 'axis x-axis')
+                ")")
+            .attr("class", "axis x-axis")
             .call(this.xAxis);
         this.xAxisLabel = chart.append("text")
             .attr("class", "label x-label")
@@ -49,10 +49,10 @@ var TimeChart = React.createClass({
             .text("Time");
         this.yAxis = d3.svg.axis()
             .scale(this.yScale)
-            .orient('left');
-        this.yAxisEl = chart.append('g')
-            .attr('transform', 'translate(' +  this.margins.left + ',0)')
-            .attr('class', 'axis y-axis')
+            .orient("left");
+        this.yAxisEl = chart.append("g")
+            .attr("transform", "translate(" +  this.margins.left + ",0)")
+            .attr("class", "axis y-axis")
             .call(this.yAxis);
         this.yAxisLabel = chart.append("text")
             .attr("class", "label y-label")
@@ -156,10 +156,10 @@ var TimeChart = React.createClass({
             .attr("x", width / 2)
             .attr("y", height - 5);
         this.xAxisEl
-            .attr('transform', 'translate(0,' +
+            .attr("transform", "translate(0," +
                 (height - this.margins.top -
                     this.margins.bottom) +
-                ')');
+                ")");
         this.yScale = this.calculateYRange(this.yScale, height);
         this.yAxisEl
             .call(this.yAxis);
@@ -212,7 +212,7 @@ var TimeChart = React.createClass({
             })
             .attr("class", function (d) {
                 return d.color + " times-" + d.clicks +
-                    (d.clicks >= 10 ? '-or-more' : '');
+                    (d.clicks >= 10 ? "-or-more" : "");
             });
         selection.select("text")
             .attr("x", function (d) {

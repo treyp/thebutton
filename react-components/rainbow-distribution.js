@@ -17,8 +17,8 @@ var RainbowDistribution = React.createClass({
         }
         return (
             <div
-                className={'rainbow-distribution ' +
-                    (this.state.rainbow ? 'rainbow' : 'text')}
+                className={"rainbow-distribution " +
+                    (this.state.rainbow ? "rainbow" : "text")}
                 onClick={this.toggleDisplay}>
                 {[6, 5, 4, 3, 2, 1].map(function (flairClass) {
                     flairClass = "flair-press-" + flairClass;
