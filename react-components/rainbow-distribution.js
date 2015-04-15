@@ -24,11 +24,10 @@ var RainbowDistribution = React.createClass({
             </div>);
         }
         return (
-            <div className={React.addons.classSet({
-                'rainbow-distribution': true,
-                'rainbow': this.state.rainbow,
-                'text': !this.state.rainbow
-            })} onClick={this.toggleDisplay}>
+            <div
+                className={'rainbow-distribution ' +
+                    (this.state.rainbow ? 'rainbow' : 'text')}
+                onClick={this.toggleDisplay}>
                 {[6, 5, 4, 3, 2, 1].map(function (flairClass) {
                     flairClass = "flair-press-" + flairClass;
                     var percentage = 100 * this.props.colorCounts[flairClass] /
