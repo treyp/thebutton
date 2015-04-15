@@ -132,6 +132,14 @@ var ButtonSnitch = React.createClass({
         }
         return "flair-press-1";
     },
+    colorName: {
+        "flair-press-6": "Purple",
+        "flair-press-5": "Blue",
+        "flair-press-4": "Green",
+        "flair-press-3": "Yellow",
+        "flair-press-2": "Orange",
+        "flair-press-1": "Red"
+    },
     updateChartSelection: function (chart) {
         this.setState({chartSelected: chart});
     },
@@ -248,6 +256,8 @@ var ButtonSnitch = React.createClass({
         };
         socket.onclose = function () {
             self.setState({connected: false});
+            document.title = "The Button Snitch";
+            document.getElementById('favicon').href = "favicon/favicon.ico";
             window.setTimeout(self.findWebSocketFromReddit, 5e3);
         };
         socket.onmessage = function (event) {
@@ -298,6 +308,11 @@ var ButtonSnitch = React.createClass({
                 participants: currentParticipants,
                 secondsRemaining: tick.seconds_left
             });
+
+            document.title = tick.seconds_left + " | The Button Snitch";
+            document.getElementById('favicon').href = "favicon/" +
+                self.colorName[self.flairClass(tick.seconds_left)]
+                .toLowerCase() + ".ico";
 
             previousSecondsLeft = tick.seconds_left;
             previousParticipants = currentParticipants;
@@ -364,7 +379,8 @@ var ButtonSnitch = React.createClass({
                 <RainbowDistribution
                     connected={this.state.connected}
                     clicksTracked={this.state.clicksTracked}
-                    colorCounts={this.state.colorCounts} />
+                    colorCounts={this.state.colorCounts}
+                    colorName={this.colorName} />
                 {
                     this.state.chartSelected === "log" ?
                         <LogChart

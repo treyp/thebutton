@@ -5,14 +5,6 @@ var RainbowDistribution = React.createClass({
             rainbow: true
         };
     },
-    colorName: {
-        "flair-press-6": "Purple",
-        "flair-press-5": "Blue",
-        "flair-press-4": "Green",
-        "flair-press-3": "Yellow",
-        "flair-press-2": "Orange",
-        "flair-press-1": "Red"
-    },
     toggleDisplay: function (e) {
         e.preventDefault();
         this.setState({rainbow: !this.state.rainbow});
@@ -38,7 +30,7 @@ var RainbowDistribution = React.createClass({
                         key={flairClass}
                         style={{width: percentage + "%"}}>
                             <span className="label">
-                                {this.colorName[flairClass]}:
+                                {this.props.colorName[flairClass]}:
                             </span>
                             {" " + d3.format(".3n")(percentage)}% ({
                                 d3.format("0,000")(

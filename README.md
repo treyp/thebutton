@@ -16,6 +16,7 @@ Monitor [Reddit](//www.reddit.com/)'s [/r/thebutton](//www.reddit.com/r/thebutto
 - [x] Show distribution of flair colors in tracked clicks
 - [x] Better handling of connection errors/disconnects
 - [x] Support beep noise for new clicks
+- [x] Update favicon and window title to reflect color and time remaining
 - [ ] Export graph to an image
 - [ ] Make header responsive
 - [ ] Replace pulse dot with a clearer "live" text that fades out after 1 second (with a 1 second fade)
