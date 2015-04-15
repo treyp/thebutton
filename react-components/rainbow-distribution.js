@@ -18,7 +18,7 @@ var RainbowDistribution = React.createClass({
         this.setState({rainbow: !this.state.rainbow});
     },
     render: function () {
-        if (!this.props.connected || !this.props.clicksTracked) {
+        if (!this.props.clicksTracked) {
             return (<div className="rainbow-distribution disconnected">
                 Waiting for the first click…
             </div>);
