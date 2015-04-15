@@ -9,14 +9,13 @@ var AlertSettings = React.createClass({
         this.props.updateBeep(React.findDOMNode(this.refs.beep).checked);
     },
     render: function () {
-        if (!window.Notification) {
-            return (<div className="alert-settings">
-                {"Sorry, but your browser doesn't support notifications."}
-            </div>)
-        } else {
-            return (
-                <div>
-                    <div className="alert-settings">
+        return (
+            <div>
+                {!window.Notification ?
+                    <div className="alert-settings">{
+                        "Sorry, but your browser doesn't support notifications."
+                    }</div> :
+                    (<div className="alert-settings">
                         <div className="row">
                             <label htmlFor="alert-time-input">
                                 Notify me every time the timer passes:
@@ -39,22 +38,22 @@ var AlertSettings = React.createClass({
                                 <a onClick={this.updateAlertTime}>Try again</a>
                             </div>
                             : ""}
-                    </div>
-                    <div className="alert-settings">
-                        <div className="row">
-                            <input
-                                type="checkbox"
-                                defaultChecked={this.props.beep}
-                                id="alert-beep"
-                                ref="beep"
-                                onChange={this.updateBeep} />
-                            <label htmlFor="alert-beep">
-                                Play a beep for new clicks?
-                            </label>
-                        </div>
+                    </div>)
+                }
+                <div className="alert-settings">
+                    <div className="row">
+                        <input
+                            type="checkbox"
+                            defaultChecked={this.props.beep}
+                            id="alert-beep"
+                            ref="beep"
+                            onChange={this.updateBeep} />
+                        <label htmlFor="alert-beep">
+                            Play a beep for new clicks?
+                        </label>
                     </div>
                 </div>
-            );
-        }
+            </div>
+        );
     }
 });
