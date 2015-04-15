@@ -46,7 +46,7 @@ var TimeChart = React.createClass({
             .attr("text-anchor", "center")
             .attr("x", container.offsetWidth / 2)
             .attr("y", container.offsetHeight - 5)
-            .text("Time (× clicks)");
+            .text("Time");
         this.yAxis = d3.svg.axis()
             .scale(this.yScale)
             .orient('left');
