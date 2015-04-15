@@ -58,7 +58,8 @@ var ButtonSnitch = React.createClass({
             alertTime: null,
             deniedNotificationPermission: false,
             notifiedForCurrentClick: false,
-            lastTimeTrackedForCurrentClick: 60
+            lastTimeTrackedForCurrentClick: 60,
+            beep: false
         };
     },
     getInitialStateReal: function () {
@@ -84,7 +85,8 @@ var ButtonSnitch = React.createClass({
             alertTime: null,
             deniedNotificationPermission: false,
             notifiedForCurrentClick: false,
-            lastTimeTrackedForCurrentClick: 60
+            lastTimeTrackedForCurrentClick: 60,
+            beep: false
         };
     },
     tick: function () {
@@ -108,6 +110,9 @@ var ButtonSnitch = React.createClass({
             colorCounts: colorCounts,
             notifiedForCurrentClick: false
         });
+        if (this.state.beep) {
+            React.findDOMNode(this.refs.audio).play();
+        }
     },
     flairClass: function (seconds) {
         if (seconds > 51) {
@@ -157,6 +162,9 @@ var ButtonSnitch = React.createClass({
                 }
             })
         }
+    },
+    updateBeep: function (beep) {
+        this.setState({beep: beep});
     },
     sendNecessaryNotifications: function (seconds) {
         if (!this.state.alertTime && this.state.alertTime !== 0) {
@@ -379,8 +387,15 @@ var ButtonSnitch = React.createClass({
                                 deniedNotificationPermission={
                                     this.state.deniedNotificationPermission}
                                 alertTime={this.state.alertTime}
-                                updateAlertTime={this.updateAlertTime} />)
+                                updateAlertTime={this.updateAlertTime}
+                                beep={this.state.beep}
+                                updateBeep={this.updateBeep} />)
                 }
+                <audio
+                    src="beep.mp3"
+                    preload="auto"
+                    className="audio"
+                    ref="audio"></audio>
             </div>
         );
     }

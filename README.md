@@ -15,6 +15,7 @@ Monitor [Reddit](//www.reddit.com/)'s [/r/thebutton](//www.reddit.com/r/thebutto
 - [x] Change counting of simultaenous clicks so all clickers get the proper flair (instead of 60s for the "missed" presses)
 - [x] Show distribution of flair colors in tracked clicks
 - [x] Better handling of connection errors/disconnects
+- [x] Support beep noise for new clicks
 - [ ] Export graph to an image
 - [ ] Make header responsive
 - [ ] Replace pulse dot with a clearer "live" text that fades out after 1 second (with a 1 second fade)

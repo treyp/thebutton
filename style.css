@@ -396,3 +396,7 @@ a {
 .alert-settings .error {
     color: red;
 }
+
+.audio {
+    display: none;
+}
