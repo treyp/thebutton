@@ -218,7 +218,7 @@ a {
     fill: none;
 }
 
-.time-chart .axis text {
+.time-chart .axis text, .histogram-chart .axis text {
     font: 10px sans-serif;
     fill: #000;
 }
@@ -247,6 +247,12 @@ a {
 .log-chart line.grid {
     stroke: #DDD;
     stroke-width: 1;
+    fill: none;
+}
+
+.histogram-chart .axis path,.histogram-chart .axis line {
+    stroke: #000;
+    stroke-width: 2;
     fill: none;
 }
 
@@ -309,4 +315,19 @@ a {
 
 .alert-settings .error {
     color: red;
+}
+
+.histogram-seconds {
+    font-size: 10px;
+    fill: white;
+}
+
+.histogram-clicks {
+    font-size: 10px;
+    fill: #777;
+}
+
+.histogram-average {
+    font-size: 12px;
+    fill: #777;
 }

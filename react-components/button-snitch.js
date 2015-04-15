@@ -66,6 +66,7 @@ var ButtonSnitch = React.createClass({
         }
         return "flair-press-1";
     },
+
     updateChartSelection: function (chart) {
         this.setState({chartSelected: chart});
     },
@@ -234,13 +235,45 @@ var ButtonSnitch = React.createClass({
         window.removeEventListener("resize", this.windowResized);
     },
     render: function () {
+        var selectedChart;
+        switch (this.state.chartSelected) {
+            case "log":
+               selectedChart = <LogChart
+                   clicks={this.state.clicks}
+                   flairClass={this.flairClass}
+                   width={this.state.windowWidth}
+                   secondsRemaining={this.state.secondsRemaining}
+                   connected={this.state.connected}
+                   />;
+                break;
+            case "time":
+                selectedChart = <TimeChart
+                    started={this.state.started}
+                    clicks={this.state.clicks}
+                    flairClass={this.flairClass}
+                    secondsRemaining={this.state.secondsRemaining}
+                    connected={this.state.connected}
+                    />;
+                break;
+            case "histogram":
+                selectedChart = <HistogramChart
+                    clicks={this.state.clicks}
+                    flairClass={this.flairClass}
+                    width={this.state.windowWidth}
+                    secondsRemaining={this.state.secondsRemaining}
+                    connected={this.state.connected}
+                    />
+                break;
+            default:
+                selectedChart = <AlertSettings
+                    deniedNotificationPermission={
+                                    this.state.deniedNotificationPermission}
+                    alertTime={this.state.alertTime}
+                    updateAlertTime={this.updateAlertTime} />;
+        }
         return (
             <div>
                 <header id="nav">
-                    <div className="right-nav">
-                        <a href="//github.com/treyp/thebutton/">GitHub</a>
-                        <span className="author"><a href="//www.reddit.com/user/treyjp">by /u/treyjp</a></span>
-                    </div>
                     <div className="right-nav">
                         <a href="//www.reddit.com/r/thebutton/">/r/thebutton</a>
                     </div>
@@ -259,30 +292,7 @@ var ButtonSnitch = React.createClass({
                         chartSelected={this.state.chartSelected}
                         alertTime={this.state.alertTime} />
                 </header>
-                {
-                    this.state.chartSelected === "log" ?
-                        <LogChart
-                            clicks={this.state.clicks}
-                            flairClass={this.flairClass}
-                            width={this.state.windowWidth}
-                            secondsRemaining={this.state.secondsRemaining}
-                            connected={this.state.connected}
-                            />
-                        :
-                        (this.state.chartSelected === "time" ?
-                            <TimeChart
-                                started={this.state.started}
-                                clicks={this.state.clicks}
-                                flairClass={this.flairClass}
-                                secondsRemaining={this.state.secondsRemaining}
-                                connected={this.state.connected}
-                                /> :
-                            <AlertSettings
-                                deniedNotificationPermission={
-                                    this.state.deniedNotificationPermission}
-                                alertTime={this.state.alertTime}
-                                updateAlertTime={this.updateAlertTime} />)
-                }
+                {selectedChart}
             </div>
         );
     }
