@@ -347,6 +347,42 @@ var ButtonSnitch = React.createClass({
         window.removeEventListener("resize", this.windowResized);
     },
     render: function () {
+        var selectedChart;
+        switch (this.state.chartSelected) {
+            case "log":
+               selectedChart = <LogChart
+                   clicks={this.state.clicks}
+                   flairClass={this.flairClass}
+                   width={this.state.windowWidth}
+                   secondsRemaining={this.state.secondsRemaining}
+                   connected={this.state.connected}
+                   />;
+                break;
+            case "time":
+                selectedChart = <TimeChart
+                    started={this.state.started}
+                    clicks={this.state.clicks}
+                    flairClass={this.flairClass}
+                    secondsRemaining={this.state.secondsRemaining}
+                    connected={this.state.connected}
+                    />;
+                break;
+            case "histogram":
+                selectedChart = <HistogramChart
+                    clicks={this.state.clicks}
+                    clicksTracked={this.state.clicksTracked}
+                    flairClass={this.flairClass}
+                    />
+                break;
+            default:
+                selectedChart = <AlertSettings
+                    deniedNotificationPermission={
+                        this.state.deniedNotificationPermission}
+                    alertTime={this.state.alertTime}
+                    updateAlertTime={this.updateAlertTime}
+                    beep={this.state.beep}
+                    updateBeep={this.updateBeep} />;
+        }
         return (
             <div>
                 <header id="nav">
@@ -381,32 +417,7 @@ var ButtonSnitch = React.createClass({
                     clicksTracked={this.state.clicksTracked}
                     colorCounts={this.state.colorCounts}
                     colorName={this.colorName} />
-                {
-                    this.state.chartSelected === "log" ?
-                        <LogChart
-                            clicks={this.state.clicks}
-                            flairClass={this.flairClass}
-                            width={this.state.windowWidth}
-                            secondsRemaining={this.state.secondsRemaining}
-                            connected={this.state.connected}
-                            />
-                        :
-                        (this.state.chartSelected === "time" ?
-                            <TimeChart
-                                started={this.state.started}
-                                clicks={this.state.clicks}
-                                flairClass={this.flairClass}
-                                secondsRemaining={this.state.secondsRemaining}
-                                connected={this.state.connected}
-                                /> :
-                            <AlertSettings
-                                deniedNotificationPermission={
-                                    this.state.deniedNotificationPermission}
-                                alertTime={this.state.alertTime}
-                                updateAlertTime={this.updateAlertTime}
-                                beep={this.state.beep}
-                                updateBeep={this.updateBeep} />)
-                }
+                {selectedChart}
                 <audio
                     src="beep.mp3"
                     preload="auto"

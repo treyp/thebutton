@@ -89,9 +89,8 @@ a {
     font-size: 16px;
     line-height: 1;
     height: 54px;
-    padding: 0 20px;
+    padding: 0 15px;
     text-align: center;
-    width: 3.5em;
 }
 
 .chart-selector .chart-choice.selected {
@@ -205,7 +204,8 @@ a {
 }
 
 .options label {
-    margin: 0 1em 0 2em;
+    margin-left: 2em;
+    padding-right: 1em;
     font-size: 13px;
 }
 
@@ -304,7 +304,7 @@ a {
     fill: none;
 }
 
-.time-chart .axis text {
+.time-chart .axis text, .histogram-chart .axis text {
     font: 10px sans-serif;
     fill: #000;
 }
@@ -336,32 +336,111 @@ a {
     fill: none;
 }
 
-.flair-no-press {
+.histogram-chart .axis path,.histogram-chart .axis line {
+    stroke: #000;
+    stroke-width: 2;
+    fill: none;
+}
+
+circle.flair-no-press,
+rect.flair-no-press {
     fill: #888;
 }
 
-.flair-press-1 {
+circle.flair-press-1,
+rect.flair-press-1 {
     fill: #e50000;
 }
 
-.flair-press-2 {
+circle.flair-press-2,
+rect.flair-press-2 {
     fill: #e59500;
 }
 
-.flair-press-3 {
+circle.flair-press-3,
+rect.flair-press-3 {
     fill: #E5D900;
 }
 
-.flair-press-4 {
+circle.flair-press-4,
+rect.flair-press-4 {
     fill: #02be01;
 }
 
-.flair-press-5 {
+circle.flair-press-5,
+rect.flair-press-5 {
     fill: #0083C7;
 }
 
-.flair-press-6 {
+circle.flair-press-6,
+rect.flair-press-6 {
     fill: #820080;
+}
+
+line.flair-no-press {
+    stroke: #888;
+}
+
+line.flair-press-1 {
+    stroke: #e50000;
+}
+
+line.flair-press-2 {
+    stroke: #e59500;
+}
+
+line.flair-press-3 {
+    stroke: #E5D900;
+}
+
+line.flair-press-4 {
+    stroke: #02be01;
+}
+
+line.flair-press-5 {
+    stroke: #0083C7;
+}
+
+line.flair-press-6 {
+    stroke: #820080;
+}
+
+.histogram-chart .hidden {
+    display: none;
+}
+
+.histogram-chart .seconds {
+    text-anchor: middle;
+    font-size: 10px;
+    fill: #fff;
+}
+
+.histogram-chart .clicks {
+    text-anchor: middle;
+    font-size: 10px;
+    fill: #777;
+}
+
+.histogram-chart line.average {
+    stroke: #888;
+}
+
+.histogram-chart text.average {
+    text-anchor: end;
+    font-size: 12px;
+    fill: #777;
+    text-shadow: 0 0 1px #fff;
+}
+
+.histogram-chart line.average.loading,
+.histogram-chart text.average.loading {
+    display: none;
+}
+
+.histogram-chart .last rect {
+    fill: none;
+    stroke: #000;
+    stroke-width: 5;
 }
 
 .alert-settings {
