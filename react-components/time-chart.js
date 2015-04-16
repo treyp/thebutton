@@ -11,7 +11,7 @@ var TimeChart = React.createClass({
             chartHeight: 0,
             displayLabels: true,
             displayGrid: true,
-            displayMean: true,
+            displayMean: false,
             startingXMax: (moment().valueOf() + this.minimumDuration)
         };
     },
