@@ -24,31 +24,31 @@ a {
 
 .right-nav {
     float: right;
-    font-size: 16px;
-    line-height: 1;
-    margin: 18px 0 0 20px;
-    text-align: center;
-}
-
-.right-nav .author {
-    display: block;
     font-size: 12px;
+    line-height: 21px;
+    margin: 3px 10px;
+    text-align: right;
 }
 
-.right-nav .author a {
-    color: #888;
+.right-nav .row {
+    display: block;
 }
 
-.github img {
-    border: 0;
+.right-nav .title {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.right-nav .row a.github {
+    margin-left: 2em;
 }
 
 .timer {
     float: left;
     width: 2.5em;
     font-size: 48px;
-    line-height: 54px;
-    height: 54px;
+    line-height: 63px;
+    margin: 3px 0;
 }
 
 .ticker {
@@ -73,34 +73,28 @@ a {
 
 .stats {
     float: left;
-    height: 54px;
     width: 16em;
-    line-height: 18px;
+    line-height: 21px;
     padding-right: 20px;
+    margin: 3px 0;
 }
 
 .chart-selector {
     float: left;
-    height: 54px;
 }
 
 .chart-selector .chart-choice {
     float: left;
     font-size: 16px;
     line-height: 1;
-    height: 54px;
-    padding: 0 15px;
+    line-height: 63px;
+    padding: 3px 15px;
     text-align: center;
 }
 
 .chart-selector .chart-choice.selected {
     background-color: #e7e7e7;
     color: #000;
-}
-
-.chart-selector .chart-choice .tab-name {
-    margin-top: 20px;
-    display: block;
 }
 
 .chart-selector .chart-choice .tab-description {
@@ -228,7 +222,7 @@ a {
 
 .chart-container {
     position: absolute;
-    top: 118px;
+    top: 133px;
     left: 20px;
     right: 20px;
     bottom: 20px;

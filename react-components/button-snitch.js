@@ -387,15 +387,23 @@ var ButtonSnitch = React.createClass({
             <div>
                 <header id="nav">
                     <div className="right-nav">
-                        <a href="//github.com/treyp/thebutton/">GitHub</a>
-                        <span className="author">
-                            <a href="//www.reddit.com/user/treyjp">
-                                by /u/treyjp
+                        <span className="row links">
+                            <a href="//www.reddit.com/r/thebutton/">
+                                /r/thebutton
                             </a>
+                            <a
+                                className="github"
+                                href="//github.com/treyp/thebutton/">GitHub</a>
                         </span>
-                    </div>
-                    <div className="right-nav">
-                        <a href="//www.reddit.com/r/thebutton/">/r/thebutton</a>
+                        <span className="row title">The Button Snitch</span>
+                        <span className="row authors">
+                            {"by "}
+                            <a href="//www.reddit.com/user/treyjp">
+                                /u/treyjp
+                            </a>
+                            {" and "}
+                            <a href="//github.com/treyp/thebutton/graphs/contributors">contributors</a>
+                        </span>
                     </div>
                     <TimerDisplay
                         secondsRemaining={this.state.secondsRemaining}
