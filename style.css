@@ -85,9 +85,7 @@ a {
 
 .chart-selector .chart-choice {
     float: left;
-    font-size: 16px;
-    line-height: 1;
-    line-height: 63px;
+    height: 63px;
     padding: 3px 15px;
     text-align: center;
 }
@@ -95,6 +93,13 @@ a {
 .chart-selector .chart-choice.selected {
     background-color: #e7e7e7;
     color: #000;
+}
+
+.chart-selector .chart-choice .tab-name {
+    display: inline-block;
+    font-size: 16px;
+    margin-top: 21px;
+    line-height: 21px;
 }
 
 .chart-selector .chart-choice .tab-description {
