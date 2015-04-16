@@ -204,7 +204,8 @@ a {
 }
 
 .options label {
-    margin: 0 1em 0 2em;
+    margin-left: 2em;
+    padding-right: 1em;
     font-size: 13px;
 }
 

@@ -1,6 +1,6 @@
 var HistogramChart = React.createClass({
     mixins: [React.addons.PureRenderMixin],
-    margins: {top: 15, left: 45, right: 5, bottom: 30},
+    margins: {top: 15, left: 45, right: 5, bottom: 40},
     getInitialState: function () {
         var histogram = new Array(60);
         for (var i = 0; i < 60; i++) {
@@ -10,7 +10,8 @@ var HistogramChart = React.createClass({
             histogram: histogram,
             mean: 60,
             height: 0,
-            width: 0
+            width: 0,
+            displayHighlight: true
         };
     },
     componentDidMount: function () {
@@ -100,7 +101,10 @@ var HistogramChart = React.createClass({
             .attr("height",
                 function (d) { return self.yScale(0) - self.yScale(d); });
         group.append("text")
-            .attr("class", "seconds")
+            .attr("class", function (d) {
+                return ("seconds" +
+                    (self.yScale(0) - self.yScale(d) > 15 ? "" : " hidden"));
+            })
             .attr("x", function (d, i) {
                 return self.xScale(i + 0.5) + (barWidth / 2);
             })
@@ -114,7 +118,7 @@ var HistogramChart = React.createClass({
             })
             .attr("y", function (d) { return self.yScale(d); })
             .attr("dy", "-.35em")
-            .text(function (d) { return d; });
+            .text(function (d) { return d3.format("0,000")(d); });
 
         // draw the average
         var mean = this.mean(histogram, this.props.clicksTracked);
@@ -141,8 +145,9 @@ var HistogramChart = React.createClass({
         var lastClicks = (this.props.clicks.length ?
             this.props.clicks.slice(-1)[0].clicks : 1);
         chart.append("g")
-                .attr("class",
-                    "last" + (this.props.clicks.length ? "" : " hidden"))
+                .attr("class", "last" +
+                    (this.props.clicks.length && this.state.displayHighlight ?
+                        "" : " hidden"))
             .append("rect")
                 .attr("x", this.xScale(lastValue - 0.5))
                 .attr("width", barWidth)
@@ -152,7 +157,8 @@ var HistogramChart = React.createClass({
         this.setState({
             histogram: histogram,
             height: height,
-            width: width
+            width: width,
+            mean: mean
         });
 
         window.addEventListener("resize", this.windowResized);
@@ -191,6 +197,10 @@ var HistogramChart = React.createClass({
             .attr("height",
                 function (d) { return self.yScale(0) - self.yScale(d); });
         group.select("text.seconds")
+            .attr("class", function (d) {
+                return ("seconds" +
+                    (self.yScale(0) - self.yScale(d) > 15 ? "" : " hidden"));
+            })
             .attr("x", function (d, i) {
                 return self.xScale(i + 0.5) + (barWidth / 2);
             })
@@ -200,7 +210,7 @@ var HistogramChart = React.createClass({
                 return self.xScale(i + 0.5) + (barWidth / 2);
             })
             .attr("y", function (d) { return self.yScale(d); })
-            .text(function (d) { return d; });
+            .text(function (d) { return d3.format("0,000")(d); });
 
         // update the mean
         var meanX = this.xScale(this.state.mean);
@@ -221,8 +231,9 @@ var HistogramChart = React.createClass({
         var lastClicks = (this.props.clicks.length ?
             this.props.clicks.slice(-1)[0].clicks : 1);
         chart.select("g.last")
-                .attr("class",
-                    "last" + (this.props.clicks.length ? "" : " hidden"))
+                .attr("class", "last" +
+                    (this.props.clicks.length && this.state.displayHighlight ?
+                        "" : " hidden"))
             .select("rect")
                 .attr("x", this.xScale(lastValue - 0.5))
                 .attr("width",
@@ -280,6 +291,10 @@ var HistogramChart = React.createClass({
             .attr("height",
                 function (d) { return self.yScale(0) - self.yScale(d); });
         group.select("text.seconds")
+            .attr("class", function (d) {
+                return ("seconds" +
+                    (self.yScale(0) - self.yScale(d) > 15 ? "" : " hidden"));
+            })
             .attr("x", function (d, i) {
                 return self.xScale(i + 0.5) + (barWidth / 2);
             })
@@ -291,8 +306,7 @@ var HistogramChart = React.createClass({
             .attr("y", function (d) { return self.yScale(d); });
 
         // move the average
-        var mean = this.mean(this.state.histogram, this.props.clicksTracked);
-        var meanX = this.xScale(mean);
+        var meanX = this.xScale(this.state.mean);
         chart.select("line.average")
             .attr("x1", meanX)
             .attr("y1", this.margins.top)
@@ -333,14 +347,31 @@ var HistogramChart = React.createClass({
         }
     },
     componentDidUpdate: function (prevProps) {
-        if (this.props.clicks.length > prevProps.clicks.length) {
-            this.updateChart();
-        }
+        this.updateChart();
+    },
+    handleHighlight: function () {
+        this.setState({
+            displayHighlight:
+                React.findDOMNode(this.refs.highlight).checked
+        });
     },
     render: function () {
-        return (<div className="chart-container" ref="container">
-            <svg className="histogram-chart" ref="chart"></svg>
-        </div>);
+        return (
+            <div>
+                <div className="options">
+                    <label htmlFor="display-highlight">
+                        Outline last click?
+                    </label>
+                    <input type="checkbox"
+                        defaultChecked={this.state.displayHighlight}
+                        id="display-highlight"
+                        ref="highlight"
+                        onChange={this.handleHighlight} />
+                </div>
+                <div className="chart-container" ref="container">
+                    <svg className="histogram-chart" ref="chart"></svg>
+                </div>
+            </div>);
     }
 });
 
