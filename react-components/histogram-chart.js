@@ -1,225 +1,255 @@
 var HistogramChart = React.createClass({
-    lastUpdate: 0,
-    histogram: [],
-    lastClick: {},
     mixins: [React.addons.PureRenderMixin],
     getInitialState: function () {
+        var histogram = new Array(60);
+        for (var i = 0; i < 60; i++) {
+            histogram[i] = 0;
+        }
         return {
-            barHeight: 20,
-            lastSynced: moment().valueOf(),
-            lastTime: 60
+            histogram: histogram,
+            mean: 60,
+            height: 0,
+            width: 0
         };
     },
     componentDidMount: function () {
-        this.buildChart();
-
-        //window.requestAnimationFrame(this.updateActiveBar);
-    },
-    buildChart: function() {
-        var data = this.histogram;
-
-        var flairColor = function (seconds) {
-            if (seconds > 51) {
-                return "#820080";
-            }
-            if (seconds > 41) {
-                return "#0083C7";
-            }
-            if (seconds > 31) {
-                return "#02be01";
-            }
-            if (seconds > 21) {
-                return "#E5D900";
-            }
-            if (seconds > 11) {
-                return "#e59500";
-            }
-            return "#e50000";
-        };
-
-        var height = 500;
-        var width = 1000;
-
+        var self = this;
         var svg = d3.select(React.findDOMNode(this.refs.chart));
+        var container = React.findDOMNode(this.refs.container);
+        var histogram = this.state.histogram.slice();
+        var width = container.offsetWidth;
+        var height = container.offsetHeight;
+        this.x = d3.scale.linear().domain([1, 61]).range([0, width]);
+        this.y = d3.scale.linear().range([0, height]);
+        var barWidth = this.x(60) - this.x(59);
 
-        var x = d3.scale.ordinal().rangeRoundBands([0, width], 0, 0);
+        this.props.clicks.forEach(function (click) {
+            histogram[click.seconds - 1] = histogram[click.seconds - 1] + click.clicks;
+        });
 
-        var y = d3.scale.linear().range([0, height]);
+        svg.attr("width", width).attr("height", height);
+        this.y = this.y.domain([0,
+            Math.max(d3.max(histogram, function (d) { return d; }), 8)
+        ]);
 
-        var xAxis = d3.svg.axis()
-            .scale(x)
-            .orient("bottom");
-
-        var yAxis = d3.svg.axis()
-            .scale(y)
-            .orient("left")
-            .ticks(10);
-
-        svg.attr("width", width).attr("height",height);
-
-        x.domain(data.map(function(d) { return d.seconds; }));
-        y.domain([0, Math.max(d3.max(data, function(d) { return d.clicks; }), 8)]);
-
-        svg.text("");
-
-        var mean = 0;
-
-        if (this.props.clicks.length > 0) {
-            mean = (d3.mean(data, function(d) { return d.seconds * d.clicks; }) / this.props.clicks.length) * 60;
-        }
-
-        var group = svg.selectAll("bar")
-            .data(data)
-            .enter()
-            .append("g")
-            .filter(function(d) {return d.clicks > 0;});
-
-        group.append("rect")
-            .style("fill", function(d) {return flairColor(d.seconds);})
-            .attr("x", function(d) { return x(d.seconds); })
-            .attr("width", x.rangeBand())
-            .attr("y", function(d) { return height - y(d.clicks); })
-            .attr("height", function(d) { return y(d.clicks); });
-
-        svg.selectAll("bar")
-            .data([this.lastClick])
-            .enter().append("rect")
-            .style("fill", "black").style("opacity", "0.5")
-            .attr("x", function(d) { return x(d.seconds); })
-            .attr("width", x.rangeBand())
-            .attr("y", function(d) { return height - y(d.clicks); })
-            .attr("height", function(d) { return y(1); })
-
-        group.append("text")
-            .attr("class", "histogram-seconds")
-            .attr("x", function(d) { return x(d.seconds); })
-            .attr("y", function(d) { return height - y(d.clicks) + 10 ; })
-            .text(function(d) {return d.seconds;});
-
-        group.append("text")
-            .attr("class", "histogram-clicks")
-            .attr("x", function(d) { return x(d.seconds); })
-            .attr("y", function(d) { return height - y(d.clicks) - 5 ; })
-            .text(function(d) {return d.clicks;});
-
-        svg.append("line")
-            .attr("stroke", "#777777")
-            .attr("x1", 1000 - ((mean - 1) * 1000 / 60))
-            .attr("y1", 0)
-            .attr("x2", 1000 - ((mean - 1) * 1000 / 60))
-            .attr("y2", height);
-
-        svg.append("text")
-            .attr("class", "histogram-average")
-            .attr("x", function(d) { return 1000 - ((mean - 1.5) * 1000 / 60); })
-            .attr("y", function(d) { return 10; })
-            .text("Ø " + Math.round(mean * 1000) / 1000);
-
-        svg.append("line")
-            .attr("stroke", "#333")
-            .attr("x1", width)
-            .attr("y1", height)
-            .attr("x2", 0)
-            .attr("y2", height);
-
-        svg.append("line")
-            .attr("stroke", "#333")
-            .attr("x1", width)
-            .attr("y1", 0)
-            .attr("x2", width)
-            .attr("y2", height);
-
-        var borders = [60,51,41,31,21,11];
-
-        svg.selectAll("line")
-            .data(borders)
+        // draw the axes and lines
+        svg.selectAll("line.grid")
+            .data([60,51,41,31,21,11])
             .enter()
             .append("line")
-            .attr("stroke", function(d) {return flairColor(d); })
-            .attr("x1", function(d) {return x(d);})
+            .attr("class", function(d) {
+                return "grid " + self.props.flairClass(d);
+            })
+            .attr("x1", function (d) { return self.x(d + 1); })
             .attr("y1", 0)
-            .attr("x2", function(d) {return x(d);})
-            .attr("y2", height);
+            .attr("x2", function (d) { return self.x(d + 1); })
+            .attr("y1", height);
 
-        svg.append("line")
-            .attr("stroke", flairColor(60))
-            .attr("x1", x(60))
-            .attr("y1", 0)
-            .attr("x2", x(60))
-            .attr("y2", height);
+        // draw the bars
+        var group = svg.selectAll("g.bar")
+            .data(histogram)
+            .enter()
+            .append("g")
+            .attr("class", function (d) {
+                return "bar" + (d === 0 ? " hidden" : "");
+            });
+        group.append("rect")
+            .attr("class", function (d, i) {
+                return self.props.flairClass(i + 1);
+            })
+            .attr("x", function (d, i) { return self.x(i + 1); })
+            .attr("y", function (d) { return height - self.y(d); })
+            .attr("width", barWidth)
+            .attr("height", function (d) { return self.y(d); });
+        group.append("text")
+            .attr("class", "seconds")
+            .attr("x", function (d, i) { return self.x(i + 1) + (barWidth / 2); })
+            .attr("y", function (d) { return height - self.y(d); })
+            .attr("dy", "1.35em")
+            .text(function (d, i) { return i + 1; });
+        group.append("text")
+            .attr("class", "clicks")
+            .attr("x", function (d, i) { return self.x(i + 1) + (barWidth / 2); })
+            .attr("y", function (d) { return height - self.y(d); })
+            .attr("dy", "-.35em")
+            .text(function (d) { return d; });
 
+        // draw the average
+        var mean = this.mean(histogram, this.props.clicksTracked);
+        var meanX = this.x(mean + .5);
         svg.append("line")
-            .attr("stroke", flairColor(51))
-            .attr("x1", x(51))
+            .attr("class", "average" +
+                (this.props.clicks.length ? "" : " loading"))
+            .attr("x1", meanX)
             .attr("y1", 0)
-            .attr("x2", x(51))
+            .attr("x2", meanX)
             .attr("y2", height);
+        svg.append("text")
+            .attr("class", "average" +
+                (this.props.clicks.length ? "" : " loading"))
+            .attr("x", meanX)
+            .attr("dx", "-.35em")
+            .attr("dy", 10)
+            .text("Ø " + Math.round(mean * 1000) / 1000);
 
-        svg.append("line")
-            .attr("stroke", flairColor(41))
-            .attr("x1", x(41))
-            .attr("y1", 0)
-            .attr("x2", x(41))
-            .attr("y2", height);
+        // draw the active number
+        var lastValue = (this.props.clicks.length ?
+            this.props.clicks.slice(-1)[0].seconds : 60);
+        var lastClicks = (this.props.clicks.length ?
+            this.props.clicks.slice(-1)[0].clicks : 1);
+        svg.append("g")
+                .attr("class",
+                    "last" + (this.props.clicks.length ? "" : " hidden"))
+            .append("rect")
+                .attr("x", this.x(lastValue))
+                .attr("width", barWidth)
+                .attr("y", height - this.y(histogram[lastValue - 1]))
+                .attr("height", this.y(lastClicks))
+
+        this.setState({
+            histogram: histogram,
+            height: height,
+            width: width
+        });
+
+        window.addEventListener("resize", this.windowResized);
     },
     componentWillUnmount: function () {
-        window.cancelAnimationFrame(this.updateActiveBar);
+        window.removeEventListener("resize", this.windowResized);
     },
-    componentWillReceiveProps: function(props) {
+    mean: function (histogram, clicksTracked) {
+        if (!clicksTracked) {
+            return 60;
+        }
+        return (d3.sum(histogram.map(function (clicks, seconds) {
+            return (seconds + 1) * clicks;
+        })) / clicksTracked);
+    },
+    updateChart: function () {
+        var svg = d3.select(React.findDOMNode(this.refs.chart));
+        var barWidth = this.x(60) - this.x(59);
+        var self = this;
+
+        // update the bars
+        var group = svg.selectAll("g.bar")
+            .data(this.state.histogram)
+            .attr("class", function (d) {
+                return "bar" + (d === 0 ? " hidden" : "");
+            });
+        group.select("rect")
+            .attr("x", function (d, i) { return self.x(i + 1); })
+            .attr("y", function (d) { return self.state.height - self.y(d); })
+            .attr("height", function (d) { return self.y(d); });
+        group.select("text.seconds")
+            .attr("x", function (d, i) { return self.x(i + 1) + (barWidth / 2); })
+            .attr("y", function (d) { return self.state.height - self.y(d); })
+        group.select("text.clicks")
+            .attr("x", function (d, i) { return self.x(i + 1) + (barWidth / 2); })
+            .attr("y", function (d) { return self.state.height - self.y(d); })
+            .text(function (d) { return d; });
+
+        // update the mean
+        var meanX = this.x(this.state.mean + .5);
+        svg.select("line.average")
+            .attr("x1", meanX)
+            .attr("x2", meanX)
+            .attr("class", "average" +
+                (this.props.clicks.length ? "" : " loading"));
+        svg.select("text.average")
+            .attr("x", meanX)
+            .text("Ø " + Math.round(this.state.mean * 1000) / 1000)
+            .attr("class", "average" +
+                (this.props.clicks.length ? "" : " loading"));
+
+        // update the active number
+        var lastValue = (this.props.clicks.length ?
+            this.props.clicks.slice(-1)[0].seconds : 60);
+        var lastClicks = (this.props.clicks.length ?
+            this.props.clicks.slice(-1)[0].clicks : 1);
+        svg.select("g.last")
+                .attr("class",
+                    "last" + (this.props.clicks.length ? "" : " hidden"))
+            .select("rect")
+                .attr("x", this.x(lastValue))
+                .attr("width", this.x(lastValue + 1) - this.x(lastValue))
+                .attr("y", this.state.height - this.y(this.state.histogram[lastValue - 1]))
+                .attr("height", this.y(lastClicks));
+    },
+    windowResized: function () {
+        var self = this;
+        var svg = d3.select(React.findDOMNode(this.refs.chart));
+        var container = React.findDOMNode(this.refs.container);
+        var width = container.offsetWidth;
+        var height = container.offsetHeight;
+        this.x = this.x.range([0, width]);
+        this.y = this.y.range([0, height]);
+        var barWidth = this.x(60) - this.x(59);
+
+        svg.attr("width", width).attr("height", height);
+
+        // move the axes and lines
+        svg.selectAll("line.grid")
+            .attr("x1", function (d) { return self.x(d + 1); })
+            .attr("x2", function (d) { return self.x(d + 1); })
+            .attr("y1", height);
+
+        // move the bars
+        var group = svg.selectAll("g.bar");
+        group.select("rect")
+            .attr("x", function (d, i) { return self.x(i + 1); })
+            .attr("y", function (d) { return height - self.y(d); })
+            .attr("width", barWidth)
+            .attr("height", function (d) { return self.y(d); });
+        group.select("text.seconds")
+            .attr("x", function (d, i) { return self.x(i + 1) + (barWidth / 2); })
+            .attr("y", function (d) { return height - self.y(d); })
+        group.select("text.clicks")
+            .attr("x", function (d, i) { return self.x(i + 1) + (barWidth / 2); })
+            .attr("y", function (d) { return height - self.y(d); });
+
+        // move the average
+        var mean = this.mean(this.state.histogram, this.props.clicksTracked);
+        var meanX = this.x(mean + .5);
+        svg.select("line.average")
+            .attr("x1", meanX)
+            .attr("x2", meanX)
+            .attr("y2", height);
+        svg.select("text.average")
+            .attr("x", meanX);
+
+        // move the active number
+        var lastValue = (this.props.clicks.length ?
+            this.props.clicks.slice(-1)[0].seconds : 60);
+        svg.select("g.last").select("rect")
+            .attr("x", this.x(lastValue))
+            .attr("width", this.x(lastValue + 1) - this.x(lastValue))
+            .attr("y", height - this.y(this.state.histogram[lastValue - 1]))
+            .attr("height", this.y(1));
+
         this.setState({
-            lastSynced: moment().valueOf(),
-            lastTime: props.secondsRemaining
+            height: height,
+            width: width
         });
     },
-    componentDidUpdate: function () {
-        if (this.props.clicks.length > this.lastUpdate) {
-            this.lastUpdate = this.props.clicks.length;
-            this.histogram = this.getHistogram();
-            this.lastClick = this.props.clicks[this.props.clicks.length - 1];
-            this.buildChart();
+    componentWillReceiveProps: function (nextProps) {
+        if (nextProps.clicks.length > this.props.clicks.length) {
+            var histogram = this.state.histogram.slice();
+            nextProps.clicks.slice(this.props.clicks.length).forEach(function (click) {
+                // console.log('new click', click);
+                histogram[click.seconds - 1] = histogram[click.seconds - 1] + click.clicks;
+            });
+            this.setState({histogram: histogram, mean: this.mean(histogram, nextProps.clicksTracked)});
         }
     },
-    getHistogram: function () {
-        var histogram = [];
-        for (i = 60; i > 0; i--) {
-            histogram.push({seconds: i, clicks: this.getClickCount(i, this.props.clicks)});
+    componentDidUpdate: function (prevProps) {
+        if (this.props.clicks.length > prevProps.clicks.length) {
+            this.updateChart();
         }
-        return histogram;
-    },
-    getClickCount: function (seconds, data) {
-        var count = 0;
-
-        for (var i = 0; i < data.length; i++) {
-            if (data[i].seconds == seconds) {
-                count = count + 1;
-            }
-        }
-        return count;
-    },
-    updateActiveBar: function() {
-        if (this.props.connected) {
-
-        }
-        window.requestAnimationFrame(this.updateActiveBar);
-    },
-    chartHeight: function () {
-        return (
-            ((this.state.barHeight + 1) * (60)) +
-            // add 5 pixels of padding to top and bottom when bars are short
-            // so that their text labels fully show
-            (this.state.barHeight < 10 ? 10 : 0));
-    },
-    handleSlider: function () {
-        this.setState({
-            barHeight:
-                parseInt(React.findDOMNode(this.refs.slider).value, 10)
-        });
     },
     render: function () {
-        return (
-            <div>
-                <svg className="histogram-chart" ref="chart"></svg>
-            </div>);
+        return (<div className="chart-container" ref="container">
+            <svg className="histogram-chart" ref="chart"></svg>
+        </div>);
     }
 });
 

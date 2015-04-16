@@ -370,10 +370,8 @@ var ButtonSnitch = React.createClass({
             case "histogram":
                 selectedChart = <HistogramChart
                     clicks={this.state.clicks}
+                    clicksTracked={this.state.clicksTracked}
                     flairClass={this.flairClass}
-                    width={this.state.windowWidth}
-                    secondsRemaining={this.state.secondsRemaining}
-                    connected={this.state.connected}
                     />
                 break;
             default:
