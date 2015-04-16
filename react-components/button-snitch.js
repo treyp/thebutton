@@ -19,6 +19,7 @@ var ButtonSnitch = React.createClass({
         var clickCount;
         var flairClass;
         var totalClicks = 0;
+        var sum = 0;
         while (remaining > 0) {
             duration = 60 -
                 (Math.round(Math.pow(Math.random(), 10) * 60e3) / 1000);
@@ -33,12 +34,15 @@ var ButtonSnitch = React.createClass({
             });
             colorCounts[flairClass] = colorCounts[flairClass] + clickCount;
             totalClicks = totalClicks + clickCount;
+            sum = sum + (clickCount * Math.round(duration));
             remaining = remaining - clickCount;
         }
         return {
             clicks: clicks,
             colorCounts: colorCounts,
-            clicksTracked: totalClicks
+            clicksTracked: totalClicks,
+            sum: sum,
+            mean: (sum / totalClicks)
         };
     },
     getInitialStateFake: function (quantity) {
@@ -54,6 +58,8 @@ var ButtonSnitch = React.createClass({
             ticks: clickData.clicks.length * 5,
             clicks: clickData.clicks,
             colorCounts: clickData.colorCounts,
+            sum: clickData.sum,
+            mean: clickData.mean,
             windowWidth: 0,
             alertTime: null,
             deniedNotificationPermission: false,
@@ -81,6 +87,8 @@ var ButtonSnitch = React.createClass({
                 "flair-press-5": 0,
                 "flair-press-6": 0
             },
+            sum: 0,
+            mean: 60,
             windowWidth: 0,
             alertTime: null,
             deniedNotificationPermission: false,
@@ -99,6 +107,7 @@ var ButtonSnitch = React.createClass({
         var colorCounts = this.state.colorCounts;
         colorCounts[this.flairClass(seconds)] =
             colorCounts[this.flairClass(seconds)] + clicks;
+        var sum = this.state.sum + (seconds * clicks);
         this.setState({
             clicksTracked: this.state.clicksTracked + clicks,
             clicks: this.state.clicks.concat({
@@ -108,6 +117,8 @@ var ButtonSnitch = React.createClass({
                 clicks: clicks
             }),
             colorCounts: colorCounts,
+            sum: sum,
+            mean: sum / (this.state.clicksTracked + clicks),
             notifiedForCurrentClick: false
         });
         if (this.state.beep) {
@@ -139,6 +150,12 @@ var ButtonSnitch = React.createClass({
         "flair-press-3": "Yellow",
         "flair-press-2": "Orange",
         "flair-press-1": "Red"
+    },
+    calculateMean: function () {
+        if (!this.state.clicksTracked) {
+            return 60;
+        }
+        return this.state.sum / this.state.clicksTracked;
     },
     updateChartSelection: function (chart) {
         this.setState({chartSelected: chart});
@@ -363,6 +380,7 @@ var ButtonSnitch = React.createClass({
                     started={this.state.started}
                     clicks={this.state.clicks}
                     flairClass={this.flairClass}
+                    mean={this.state.mean}
                     secondsRemaining={this.state.secondsRemaining}
                     connected={this.state.connected}
                     />;
@@ -372,6 +390,7 @@ var ButtonSnitch = React.createClass({
                     clicks={this.state.clicks}
                     clicksTracked={this.state.clicksTracked}
                     flairClass={this.flairClass}
+                    mean={this.state.mean}
                     />
                 break;
             default:

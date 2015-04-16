@@ -1,7 +1,7 @@
 var TimeChart = React.createClass({
     mixins: [React.addons.PureRenderMixin],
     minimumDuration: 180e3,
-    margins: {top: 20, left: 45, right: 10, bottom: 30},
+    margins: {top: 20, left: 50, right: 20, bottom: 30},
     getInitialState: function () {
         return {
             dotSize: 5,
@@ -10,12 +10,17 @@ var TimeChart = React.createClass({
             chartWidth: 0,
             chartHeight: 0,
             displayLabels: true,
+            displayGrid: true,
+            displayMean: true,
             startingXMax: (moment().valueOf() + this.minimumDuration)
         };
     },
     componentDidMount: function () {
         var chart = d3.select(React.findDOMNode(this.refs.chart));
         var container = React.findDOMNode(this.refs.container);
+        var width = container.offsetWidth;
+        var height = container.offsetHeight;
+        var self = this;
 
         this.xScale = this.calculateXRange(
             d3.scale.linear()
@@ -24,28 +29,37 @@ var TimeChart = React.createClass({
                         this.props.started.valueOf() : this.state.lastSynced,
                     this.state.startingXMax
                 ]),
-            container.offsetWidth);
+            width);
         this.yScale = this.calculateYRange(
             d3.scale.linear()
                 .domain([0, 60]),
-            container.offsetHeight);
+            height);
 
+        this.grid = chart.selectAll("line.grid")
+            .data([60,51,41,31,21,11])
+            .enter()
+            .append("line")
+            .attr("class", function(d) {
+                return "grid " + self.props.flairClass(d);
+            })
+            .attr("x1", this.margins.left)
+            .attr("y1", function (d) { return self.yScale(d); })
+            .attr("x2", width - this.margins.right)
+            .attr("y2", function (d) { return self.yScale(d); });
         this.xAxis = d3.svg.axis()
             .scale(this.xScale)
             .orient("bottom")
             .tickFormat(function (d) { return moment(d).format("h:mm:ss A"); });
         this.xAxisEl = chart.append("g")
             .attr("transform", "translate(0," +
-                (container.offsetHeight - this.margins.top -
-                    this.margins.bottom) +
-                ")")
+                (height - this.margins.top - this.margins.bottom) + ")")
             .attr("class", "axis x-axis")
             .call(this.xAxis);
         this.xAxisLabel = chart.append("text")
             .attr("class", "label x-label")
             .attr("text-anchor", "center")
-            .attr("x", container.offsetWidth / 2)
-            .attr("y", container.offsetHeight - 5)
+            .attr("x", width / 2)
+            .attr("y", height - 5)
             .text("Time");
         this.yAxis = d3.svg.axis()
             .scale(this.yScale)
@@ -57,26 +71,45 @@ var TimeChart = React.createClass({
         this.yAxisLabel = chart.append("text")
             .attr("class", "label y-label")
             .attr("text-anchor", "center")
-            .attr("x", -1 * container.offsetHeight / 2)
+            .attr("x", -1 * height / 2)
             .attr("y", 12)
             .attr("transform", "rotate(-90)")
             .text("Seconds Remaining");
 
         this.addDotsToSelection(
             chart
-                .attr("width", container.offsetWidth)
-                .attr("height", container.offsetHeight)
+                .attr("width", width)
+                .attr("height", height)
                 .selectAll("g.dot")
                 .data(this).enter()
         );
+
+        var meanY = this.yScale(this.props.mean);
+        this.mean = chart.append("line")
+            .attr("class", "average" +
+                (this.props.clicks.length && this.state.displayMean ?
+                    "" : " hidden"))
+            .attr("x1", this.margins.left)
+            .attr("y1", meanY)
+            .attr("x2", width - this.margins.right)
+            .attr("y2", meanY);
+        this.meanLabel = chart.append("text")
+            .attr("class", "average" +
+                (this.props.clicks.length && this.state.displayMean ?
+                    "" : " hidden"))
+            .attr("y", meanY)
+            .attr("x", this.margins.left)
+            .attr("dy", ".35em")
+            .attr("dx", -5)
+            .text("Ø " + Math.round(this.props.mean * 1000) / 1000);
 
         window.addEventListener("resize", this.windowResized);
 
         window.requestAnimationFrame(this.updateActiveDot);
 
         this.setState({
-            chartWidth: container.offsetWidth,
-            chartHeight: container.offsetHeight
+            chartWidth: width,
+            chartHeight: height
         });
     },
     componentWillUnmount: function () {
@@ -130,6 +163,20 @@ var TimeChart = React.createClass({
                     clicksWithActiveTime.slice(-1)[0].time)
             ]), this.state.chartWidth);
         this.xAxisEl.call(this.xAxis);
+
+        var meanY = this.yScale(this.props.mean);
+        this.mean = this.mean
+            .attr("class", "average" +
+                (this.props.clicks.length && this.state.displayMean ?
+                    "" : " hidden"))
+            .attr("y1", meanY)
+            .attr("y2", meanY);
+        this.meanLabel = this.meanLabel
+            .attr("class", "average" +
+                (this.props.clicks.length && this.state.displayMean ?
+                    "" : " hidden"))
+            .attr("y", meanY)
+            .text("Ø " + Math.round(this.props.mean * 1000) / 1000);
     },
     calculateYRange: function (scale, height) {
         return scale.range([this.margins.top, Math.max(
@@ -140,7 +187,7 @@ var TimeChart = React.createClass({
     calculateXRange: function (scale, width) {
         return scale.range([this.margins.left, Math.max(
                 this.margins.left,
-                width - this.margins.left - this.margins.right
+                width - this.margins.right
             )]);
     },
     windowResized: function () {
@@ -148,10 +195,18 @@ var TimeChart = React.createClass({
         var container = React.findDOMNode(this.refs.container);
         var height = container.offsetHeight;
         var width = container.offsetWidth;
+        var self = this;
 
         chart
             .attr("width", width)
             .attr("height", height);
+
+        this.yScale = this.calculateYRange(this.yScale, height);
+
+        this.grid = this.grid
+            .attr("y1", function (d) { return self.yScale(d); })
+            .attr("x2", width - this.margins.right)
+            .attr("y2", function (d) { return self.yScale(d); });
         this.xAxisLabel
             .attr("x", width / 2)
             .attr("y", height - 5);
@@ -160,11 +215,18 @@ var TimeChart = React.createClass({
                 (height - this.margins.top -
                     this.margins.bottom) +
                 ")");
-        this.yScale = this.calculateYRange(this.yScale, height);
         this.yAxisEl
             .call(this.yAxis);
         this.yAxisLabel
             .attr("x", -1 * height / 2);
+
+        var meanY = this.yScale(this.props.mean);
+        this.mean = this.mean
+            .attr("y1", meanY)
+            .attr("x2", width - this.margins.right)
+            .attr("y2", meanY);
+        this.meanLabel = this.meanLabel
+            .attr("y", meanY);
 
         this.setState({chartWidth: width, chartHeight: height});
     },
@@ -235,8 +297,17 @@ var TimeChart = React.createClass({
     },
     handleLabels: function () {
         this.setState({
-            displayLabels:
-                React.findDOMNode(this.refs.labels).checked
+            displayLabels: React.findDOMNode(this.refs.labels).checked
+        });
+    },
+    handleGrid: function () {
+        this.setState({
+            displayGrid: React.findDOMNode(this.refs.grid).checked
+        });
+    },
+    handleMean: function () {
+        this.setState({
+            displayMean: React.findDOMNode(this.refs.mean).checked
         });
     },
     render: function () {
@@ -261,11 +332,29 @@ var TimeChart = React.createClass({
                         id="labels-visible"
                         ref="labels"
                         onChange={this.handleLabels} />
+                    <label htmlFor="grid-visible">
+                        Grid visible?
+                    </label>
+                    <input type="checkbox"
+                        defaultChecked={this.state.displayGrid}
+                        id="grid-visible"
+                        ref="grid"
+                        onChange={this.handleGrid} />
+                    <label htmlFor="mean-visible">
+                        Average (mean) visible?
+                    </label>
+                    <input type="checkbox"
+                        defaultChecked={this.state.displayMean}
+                        id="mean-visible"
+                        ref="mean"
+                        onChange={this.handleMean} />
                 </div>
                 <div className="chart-container" ref="container">
                     <svg className={"time-chart " +
                         (this.state.displayLabels ?
-                            "with-labels" : "without-labels")
+                            "with-labels" : "without-labels") + " " +
+                        (this.state.displayGrid ?
+                            "with-grid" : "without-grid")
                     } ref="chart"></svg>
                 </div>
             </div>);

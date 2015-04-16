@@ -228,6 +228,10 @@ a {
     bottom: 20px;
 }
 
+.time-chart .hidden {
+    display: none;
+}
+
 .time-chart .dot text {
     text-anchor: middle;
 }
@@ -291,6 +295,15 @@ a {
     fill-opacity: 0.999;
 }
 
+.time-chart .grid {
+    opacity: 0.5;
+}
+
+.time-chart.without-grid .grid,
+.histogram-chart.without-grid .grid {
+    display: none;
+}
+
 .time-chart .axis line,
 .time-chart .axis path {
     stroke: #000;
@@ -305,6 +318,17 @@ a {
 
 .time-chart text.label {
     font: 12px sans-serif;
+}
+
+.time-chart line.average {
+    stroke: #888;
+}
+
+.time-chart text.average {
+    text-anchor: end;
+    font-size: 10px;
+    fill: #777;
+    text-shadow: 0 0 1px #fff;
 }
 
 .log-chart text {
@@ -424,11 +448,6 @@ line.flair-press-6 {
     font-size: 12px;
     fill: #777;
     text-shadow: 0 0 1px #fff;
-}
-
-.histogram-chart line.average.loading,
-.histogram-chart text.average.loading {
-    display: none;
 }
 
 .histogram-chart .last rect {

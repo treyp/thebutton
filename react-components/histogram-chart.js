@@ -8,10 +8,11 @@ var HistogramChart = React.createClass({
         }
         return {
             histogram: histogram,
-            mean: 60,
             height: 0,
             width: 0,
-            displayHighlight: true
+            displayHighlight: true,
+            displayGrid: true,
+            displayMean: true
         };
     },
     componentDidMount: function () {
@@ -121,23 +122,24 @@ var HistogramChart = React.createClass({
             .text(function (d) { return d3.format("0,000")(d); });
 
         // draw the average
-        var mean = this.mean(histogram, this.props.clicksTracked);
-        var meanX = this.xScale(mean);
+        var meanX = this.xScale(this.props.mean);
         chart.append("line")
             .attr("class", "average" +
-                (this.props.clicks.length ? "" : " loading"))
+                (this.props.clicks.length && this.state.displayMean ?
+                    "" : " hidden"))
             .attr("x1", meanX)
             .attr("y1", this.margins.top)
             .attr("x2", meanX)
             .attr("y2", height - this.margins.bottom);
         chart.append("text")
             .attr("class", "average" +
-                (this.props.clicks.length ? "" : " loading"))
+                (this.props.clicks.length && this.state.displayMean ?
+                    "" : " hidden"))
             .attr("x", meanX)
             .attr("y", this.margins.top)
             .attr("dx", "-.35em")
             .attr("dy", 10)
-            .text("Ø " + Math.round(mean * 1000) / 1000);
+            .text("Ø " + Math.round(this.props.mean * 1000) / 1000);
 
         // draw the active number
         var lastValue = (this.props.clicks.length ?
@@ -157,22 +159,13 @@ var HistogramChart = React.createClass({
         this.setState({
             histogram: histogram,
             height: height,
-            width: width,
-            mean: mean
+            width: width
         });
 
         window.addEventListener("resize", this.windowResized);
     },
     componentWillUnmount: function () {
         window.removeEventListener("resize", this.windowResized);
-    },
-    mean: function (histogram, clicksTracked) {
-        if (!clicksTracked) {
-            return 60;
-        }
-        return (d3.sum(histogram.map(function (clicks, seconds) {
-            return (seconds + 1) * clicks;
-        })) / clicksTracked);
     },
     updateChart: function () {
         var chart = d3.select(React.findDOMNode(this.refs.chart));
@@ -213,17 +206,19 @@ var HistogramChart = React.createClass({
             .text(function (d) { return d3.format("0,000")(d); });
 
         // update the mean
-        var meanX = this.xScale(this.state.mean);
+        var meanX = this.xScale(this.props.mean);
         chart.select("line.average")
             .attr("x1", meanX)
             .attr("x2", meanX)
             .attr("class", "average" +
-                (this.props.clicks.length ? "" : " loading"));
+                (this.props.clicks.length && this.state.displayMean ?
+                    "" : " hidden"));
         chart.select("text.average")
             .attr("x", meanX)
-            .text("Ø " + Math.round(this.state.mean * 1000) / 1000)
+            .text("Ø " + Math.round(this.props.mean * 1000) / 1000)
             .attr("class", "average" +
-                (this.props.clicks.length ? "" : " loading"));
+                (this.props.clicks.length && this.state.displayMean ?
+                    "" : " hidden"));
 
         // update the active number
         var lastValue = (this.props.clicks.length ?
@@ -306,7 +301,7 @@ var HistogramChart = React.createClass({
             .attr("y", function (d) { return self.yScale(d); });
 
         // move the average
-        var meanX = this.xScale(this.state.mean);
+        var meanX = this.xScale(this.props.mean);
         chart.select("line.average")
             .attr("x1", meanX)
             .attr("y1", this.margins.top)
@@ -340,10 +335,7 @@ var HistogramChart = React.createClass({
                     histogram[click.seconds - 1] =
                         histogram[click.seconds - 1] + click.clicks;
                 });
-            this.setState({
-                histogram: histogram,
-                mean: this.mean(histogram, nextProps.clicksTracked)
-            });
+            this.setState({histogram: histogram});
         }
     },
     componentDidUpdate: function (prevProps) {
@@ -353,6 +345,16 @@ var HistogramChart = React.createClass({
         this.setState({
             displayHighlight:
                 React.findDOMNode(this.refs.highlight).checked
+        });
+    },
+    handleGrid: function () {
+        this.setState({
+            displayGrid: React.findDOMNode(this.refs.grid).checked
+        });
+    },
+    handleMean: function () {
+        this.setState({
+            displayMean: React.findDOMNode(this.refs.mean).checked
         });
     },
     render: function () {
@@ -367,9 +369,27 @@ var HistogramChart = React.createClass({
                         id="display-highlight"
                         ref="highlight"
                         onChange={this.handleHighlight} />
+                    <label htmlFor="grid-visible">
+                        Grid visible?
+                    </label>
+                    <input type="checkbox"
+                        defaultChecked={this.state.displayGrid}
+                        id="grid-visible"
+                        ref="grid"
+                        onChange={this.handleGrid} />
+                    <label htmlFor="mean-visible">
+                        Average (mean) visible?
+                    </label>
+                    <input type="checkbox"
+                        defaultChecked={this.state.displayMean}
+                        id="mean-visible"
+                        ref="mean"
+                        onChange={this.handleMean} />
                 </div>
                 <div className="chart-container" ref="container">
-                    <svg className="histogram-chart" ref="chart"></svg>
+                    <svg className={"histogram-chart " +
+                        (this.state.displayGrid ?
+                            "with-grid" : "without-grid")} ref="chart"></svg>
                 </div>
             </div>);
     }
