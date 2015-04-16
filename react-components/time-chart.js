@@ -51,7 +51,7 @@ var TimeChart = React.createClass({
             .scale(this.yScale)
             .orient("left");
         this.yAxisEl = chart.append("g")
-            .attr("transform", "translate(" +  this.margins.left + ",0)")
+            .attr("transform", "translate(" + this.margins.left + ",0)")
             .attr("class", "axis y-axis")
             .call(this.yAxis);
         this.yAxisLabel = chart.append("text")
