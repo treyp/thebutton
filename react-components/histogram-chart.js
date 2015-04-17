@@ -183,6 +183,7 @@ var HistogramChart = React.createClass({
                 d3.max(this.props.histogram, function (d) { return d; }), 8
             ), 0
         ]);
+        this.yAxisEl.call(this.yAxis);
 
         // update the bars
         var group = chart.selectAll("g.bar")
