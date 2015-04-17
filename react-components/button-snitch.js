@@ -120,7 +120,11 @@ var ButtonSnitch = React.createClass({
         this.setState({secondsRemaining: this.state.secondsRemaining - 0.1});
     },
     addTime: function (seconds, clicks) {
-        var colorCounts = this.state.colorCounts;
+        var colorCounts = {};
+        // shallow clone of this.state.colorCounts
+        for (var k in this.state.colorCounts) {
+            colorCounts[k] = this.state.colorCounts[k];
+        }
         colorCounts[this.flairClass(seconds)] =
             colorCounts[this.flairClass(seconds)] + clicks;
         var sum = this.state.sum + (seconds * clicks);
