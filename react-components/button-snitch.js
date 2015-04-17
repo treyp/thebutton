@@ -434,7 +434,9 @@ var ButtonSnitch = React.createClass({
                     flairClass={this.flairClass}
                     mean={this.state.mean}
                     histogram={this.state.histogram}
-                    />
+                    secondsRemaining={this.state.secondsRemaining}
+                    connected={this.state.connected}
+                    />;
                 break;
             default:
                 selectedChart = <Settings

@@ -7,7 +7,9 @@ var HistogramChart = React.createClass({
             width: 0,
             displayHighlight: true,
             displayGrid: true,
-            displayMean: true
+            displayMean: true,
+            lastSynced: moment().valueOf(),
+            lastTime: 60
         };
     },
     componentDidMount: function () {
@@ -17,7 +19,7 @@ var HistogramChart = React.createClass({
         var width = container.offsetWidth;
         var height = container.offsetHeight;
         this.xScale = d3.scale.linear()
-            .domain([.5, 60.5])
+            .domain([0.5, 60.5])
             .range([
                 this.margins.left, Math.max(0, width - this.margins.right)
             ]);
@@ -29,7 +31,9 @@ var HistogramChart = React.createClass({
 
         chart.attr("width", width).attr("height", height);
         this.yScale = this.yScale.domain([
-            Math.max(d3.max(this.props.histogram, function (d) { return d; }), 8), 0
+            Math.max(d3.max(this.props.histogram, function (d) {
+                return d;
+            }), 8), 0
         ]);
 
         // draw the axes and lines
@@ -145,14 +149,28 @@ var HistogramChart = React.createClass({
                 .attr("y", this.yScale(this.props.histogram[lastValue - 1]))
                 .attr("height", this.yScale(0) - this.yScale(lastClicks));
 
+        // draw the current timer
+        var timerX = this.xScale(this.props.secondsRemaining);
+        this.timerLine = chart.append("line")
+            .attr("class", "timer " + (this.props.connected ? "" : "hidden ") +
+                this.props.flairClass(this.props.secondsRemaining))
+            .attr("x1", timerX)
+            .attr("y1", this.margins.top)
+            .attr("x2", timerX)
+            .attr("y2", height - this.margins.bottom);
+
         this.setState({
             height: height,
             width: width
         });
 
+        window.requestAnimationFrame(this.updateTimerLine);
+
         window.addEventListener("resize", this.windowResized);
     },
     componentWillUnmount: function () {
+        window.cancelAnimationFrame(this.updateTimerLine);
+
         window.removeEventListener("resize", this.windowResized);
     },
     updateChart: function () {
@@ -223,6 +241,20 @@ var HistogramChart = React.createClass({
                     this.xScale(lastValue + 1) - this.xScale(lastValue))
                 .attr("y", this.yScale(this.props.histogram[lastValue - 1]))
                 .attr("height", this.yScale(0) - this.yScale(lastClicks));
+
+        this.updateTimerLine();
+    },
+    updateTimerLine: function () {
+        var secondsRemaining = this.state.lastTime -
+            ((moment() - this.state.lastSynced) / 1000);
+        var timerX = this.xScale(secondsRemaining + 0.5);
+        this.timerLine
+            .attr("class", "timer " + (this.props.connected ? "" : "hidden ") +
+                this.props.flairClass(secondsRemaining))
+            .attr("x1", timerX)
+            .attr("x2", timerX);
+
+        window.requestAnimationFrame(this.updateTimerLine);
     },
     windowResized: function () {
         var self = this;
@@ -310,13 +342,28 @@ var HistogramChart = React.createClass({
             .attr("y", this.yScale(this.props.histogram[lastValue - 1]))
             .attr("height", this.yScale(0) - this.yScale(lastClicks));
 
+        // move the timer line
+        this.timerLine
+            .attr("y1", this.margins.top)
+            .attr("y2", height - this.margins.bottom);
+
         this.setState({
             height: height,
             width: width
         });
     },
+    componentWillReceiveProps: function(nextProps) {
+        if (this.props.secondsRemaining !== nextProps.secondsRemaining) {
+            this.setState({
+                lastSynced: moment().valueOf(),
+                lastTime: nextProps.secondsRemaining
+            });
+        }
+    },
     componentDidUpdate: function (prevProps) {
-        this.updateChart();
+        if (prevProps.histogram !== this.props.histogram) {
+            this.updateChart();
+        }
     },
     handleHighlight: function () {
         this.setState({

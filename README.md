@@ -20,7 +20,7 @@ Monitor [Reddit](//www.reddit.com/)'s [/r/thebutton](//www.reddit.com/r/thebutto
 - [x] Add a histogram chart
 - [x] ~~Hide animations when page not visible (for performance reasons)~~ D3 uses requestAnimationFrame which takes care of this
 - [x] Throw away data older than X minutes (for performance reasons)
-- [ ] Add current time to histogram chart
+- [x] Add current time to histogram chart
 - [ ] Beep support like Squire
 - [ ] Scroll to zoom
 - [ ] Horizontal option for log chart

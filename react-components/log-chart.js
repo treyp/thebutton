@@ -28,11 +28,13 @@ var LogChart = React.createClass({
     componentWillUnmount: function () {
         window.cancelAnimationFrame(this.updateActiveBar);
     },
-    componentWillReceiveProps: function(props) {
-        this.setState({
-            lastSynced: moment().valueOf(),
-            lastTime: props.secondsRemaining
-        });
+    componentWillReceiveProps: function(nextProps) {
+        if (this.props.secondsRemaining !== nextProps.secondsRemaining) {
+            this.setState({
+                lastSynced: moment().valueOf(),
+                lastTime: nextProps.secondsRemaining
+            });
+        }
     },
     componentDidUpdate: function () {
         var chart = d3.select(React.findDOMNode(this.refs.chart));
