@@ -242,8 +242,6 @@ var HistogramChart = React.createClass({
                     this.xScale(lastValue + 1) - this.xScale(lastValue))
                 .attr("y", this.yScale(this.props.histogram[lastValue - 1]))
                 .attr("height", this.yScale(0) - this.yScale(lastClicks));
-
-        this.updateTimerLine();
     },
     updateTimerLine: function () {
         var secondsRemaining = this.state.lastTime -

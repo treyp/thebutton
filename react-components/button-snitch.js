@@ -142,8 +142,10 @@ var ButtonSnitch = React.createClass({
                     click.clicks;
                 sum = sum - click.clicks;
             });
-            started = moment(this.state.clicks[numToDelete].time -
-                ((60 - this.state.clicks[numToDelete].seconds) * 1000));
+            started = this.state.clicks.length > numToDelete ?
+                moment(this.state.clicks[numToDelete].time -
+                ((60 - this.state.clicks[numToDelete].seconds) * 1000))
+                : moment();
         }
         this.setState({
             clicksTracked: clicksTracked,
