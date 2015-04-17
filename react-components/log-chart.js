@@ -23,9 +23,13 @@ var LogChart = React.createClass({
 
         chart.attr("height", this.chartHeight());
 
+        window.addEventListener("resize", this.windowResized);
+
         window.requestAnimationFrame(this.updateActiveBar);
     },
     componentWillUnmount: function () {
+        window.removeEventListener("resize", this.windowResized);
+
         window.cancelAnimationFrame(this.updateActiveBar);
     },
     componentWillReceiveProps: function(nextProps) {
@@ -36,17 +40,18 @@ var LogChart = React.createClass({
             });
         }
     },
-    componentDidUpdate: function () {
+    componentDidUpdate: function (prevProps, prevState) {
         var chart = d3.select(React.findDOMNode(this.refs.chart));
-        chart.attr("width", this.props.width);
-        this.xScale = this.xScale.range([0, this.props.width]);
 
-        var selection = chart
-            .selectAll("g").data(this.clicksWithActiveTime());
-        this.updateBarsInSelection(selection);
-        this.addBarsToSelection(selection.enter());
-        selection.exit().remove();
-        chart.attr("height", this.chartHeight());
+        if (this.props.clicks !== prevProps.clicks ||
+            this.state.barHeight !== prevState.barHeight) {
+            var selection = chart
+                .selectAll("g").data(this.clicksWithActiveTime());
+            this.updateBarsInSelection(selection);
+            this.addBarsToSelection(selection.enter());
+            selection.exit().remove();
+            chart.attr("height", this.chartHeight());
+        }
     },
     clicksWithActiveTime: function () {
         return this.props.clicks.concat({
@@ -127,6 +132,11 @@ var LogChart = React.createClass({
                 return Math.round(d.seconds) +
                     (d.clicks > 1 ? (" × " + d.clicks) : "");
             });
+    },
+    windowResized: function () {
+        var chart = d3.select(React.findDOMNode(this.refs.chart));
+        chart.attr("width", this.props.width);
+        this.xScale = this.xScale.range([0, this.props.width]);
     },
     handleSlider: function () {
         this.setState({
