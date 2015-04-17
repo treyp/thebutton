@@ -140,7 +140,7 @@ var ButtonSnitch = React.createClass({
                     click.clicks;
                 histogram[click.seconds - 1] = histogram[click.seconds - 1] -
                     click.clicks;
-                sum = sum - click.clicks;
+                sum = sum - (click.seconds * click.clicks);
             });
             started = this.state.clicks.length > numToDelete ?
                 moment(this.state.clicks[numToDelete].time -

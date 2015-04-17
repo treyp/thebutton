@@ -359,8 +359,11 @@ var HistogramChart = React.createClass({
             });
         }
     },
-    componentDidUpdate: function (prevProps) {
-        if (prevProps.histogram !== this.props.histogram) {
+    componentDidUpdate: function (prevProps, prevState) {
+        if (prevProps.histogram !== this.props.histogram ||
+            prevState.displayHighlight !== this.state.displayHighlight ||
+            prevState.displayGrid !== this.state.displayGrid ||
+            prevState.displayMean !== this.state.displayMean) {
             this.updateChart();
         }
     },
