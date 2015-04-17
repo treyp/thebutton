@@ -18,10 +18,15 @@ Monitor [Reddit](//www.reddit.com/)'s [/r/thebutton](//www.reddit.com/r/thebutto
 - [x] Support beep noise for new clicks
 - [x] Update favicon and window title to reflect color and time remaining
 - [x] Add a histogram chart
+- [x] ~~Hide animations when page not visible (for performance reasons) ~~ D3 uses requestAnimationFrame which takes care of this
+- [ ] Add current time to histogram chart
+- [ ] Beep support like Squire
+- [ ] Throw away data older than X minutes (for performance reasons)
+- [ ] Scroll to zoom
+- [ ] Horizontal option for log chart
 - [ ] Export graph to an image
 - [ ] Make header responsive
 - [ ] Replace pulse dot with a clearer "live" text that fades out after 1 second (with a 1 second fade)
 - [ ] Auto dot size and bar height option: starts large, shrinks down based on window size, minimum of 1
-- [ ] Hide animations when browser tab not visible (for performance reasons)
 - [ ] Add pause button
 - [ ] Cookie to save settings
