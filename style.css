@@ -461,7 +461,7 @@ line.flair-press-6 {
     stroke-width: 5;
 }
 
-.alert-settings {
+.setting {
     padding: 20px;
     width: 20em;
     background-color: #e7e7e7;
@@ -469,15 +469,15 @@ line.flair-press-6 {
     margin: 20px;
 }
 
-.alert-settings .row {
+.setting .row {
     padding-bottom: 3px;
 }
 
-.alert-settings .input-row {
+.setting .input-row {
     line-height: 40px;
 }
 
-.alert-settings #alert-time-input {
+.setting input[type="number"] {
     font-size: 28px;
     line-height: 1;
     width: 2em;
@@ -485,12 +485,20 @@ line.flair-press-6 {
     margin-right: 10px;
 }
 
-.alert-settings .detail {
+.setting input#discard-input {
+    width: 5em;
+}
+
+.setting .detail {
     color: #888;
     font-size: 14px;
 }
 
-.alert-settings .error {
+.setting .detail + .detail {
+    margin-top: 10px;
+}
+
+.setting .error {
     color: red;
 }
 

@@ -8,14 +8,19 @@ var Settings = React.createClass({
     updateBeep: function () {
         this.props.updateBeep(React.findDOMNode(this.refs.beep).checked);
     },
+    updateDiscardAfter: function () {
+        this.props.updateDiscardAfter(
+            React.findDOMNode(this.refs.discard).value.trim()
+        );
+    },
     render: function () {
         return (
             <div>
                 {!window.Notification ?
-                    <div className="alert-settings">{
+                    <div className="setting">{
                         "Sorry, but your browser doesn't support notifications."
                     }</div> :
-                    (<div className="alert-settings">
+                    (<div className="setting">
                         <div className="row">
                             <label htmlFor="alert-time-input">
                                 Notify me every time the timer passes:
@@ -25,6 +30,8 @@ var Settings = React.createClass({
                             <input
                                 type="number"
                                 id="alert-time-input"
+                                min="0"
+                                max="60"
                                 value={this.props.alertTime}
                                 onChange={this.updateAlertTime}
                                 ref="time" />
@@ -40,7 +47,7 @@ var Settings = React.createClass({
                             : ""}
                     </div>)
                 }
-                <div className="alert-settings">
+                <div className="setting">
                     <div className="row">
                         <input
                             type="checkbox"
@@ -52,6 +59,25 @@ var Settings = React.createClass({
                             Play a beep for new clicks?
                         </label>
                     </div>
+                </div>
+                <div className="setting">
+                        <div className="row">
+                            <label htmlFor="discard-input">
+                                Discard data older than:
+                            </label>
+                        </div>
+                        <div className="row input-row">
+                            <input
+                                type="number"
+                                min="1"
+                                id="discard-input"
+                                value={this.props.discardAfter}
+                                onChange={this.updateDiscardAfter}
+                                ref="discard" />
+                            <label htmlFor="discard-input">entries</label>
+                        </div>
+                        <div className="row detail">Leave blank to retain all data</div>
+                        <div className="row detail">Each data entry (seen as one dot or row) may represent multiple clicks</div>
                 </div>
             </div>
         );

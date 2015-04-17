@@ -16,25 +16,32 @@ var ButtonSnitch = React.createClass({
         var remaining = quantity;
         var lastClickTime = moment().valueOf();
         var duration;
+        var seconds;
         var clickCount;
+        var histogram = new Array(60);
         var flairClass;
         var totalClicks = 0;
         var sum = 0;
+        for (var i = 0; i < 60; i = i + 1) {
+            histogram[i] = 0;
+        }
         while (remaining > 0) {
             duration = 60 -
                 (Math.round(Math.pow(Math.random(), 10) * 60e3) / 1000);
+            seconds = Math.round(duration);
             lastClickTime = lastClickTime - (duration * 1000);
             clickCount = Math.ceil(Math.pow(Math.random(), 10) * 10);
-            flairClass = this.flairClass(Math.round(duration));
+            flairClass = this.flairClass(seconds);
             clicks.unshift({
-                seconds: Math.round(duration),
+                seconds: seconds,
                 time: lastClickTime,
                 color: flairClass,
                 clicks: clickCount,
             });
             colorCounts[flairClass] = colorCounts[flairClass] + clickCount;
+            histogram[seconds - 1] = histogram[seconds - 1] + clickCount;
             totalClicks = totalClicks + clickCount;
-            sum = sum + (clickCount * Math.round(duration));
+            sum = sum + (clickCount * seconds);
             remaining = remaining - clickCount;
         }
         return {
@@ -42,7 +49,8 @@ var ButtonSnitch = React.createClass({
             colorCounts: colorCounts,
             clicksTracked: totalClicks,
             sum: sum,
-            mean: (sum / totalClicks)
+            mean: (sum / totalClicks),
+            histogram: histogram
         };
     },
     getInitialStateFake: function (quantity) {
@@ -58,6 +66,7 @@ var ButtonSnitch = React.createClass({
             ticks: clickData.clicks.length * 5,
             clicks: clickData.clicks,
             colorCounts: clickData.colorCounts,
+            histogram: clickData.histogram,
             sum: clickData.sum,
             mean: clickData.mean,
             windowWidth: 0,
@@ -65,10 +74,15 @@ var ButtonSnitch = React.createClass({
             deniedNotificationPermission: false,
             notifiedForCurrentClick: false,
             lastTimeTrackedForCurrentClick: 60,
-            beep: false
+            beep: false,
+            discardAfter: false
         };
     },
     getInitialStateReal: function () {
+        var histogram = new Array(60);
+        for (var i = 0; i < 60; i = i + 1) {
+            histogram[i] = 0;
+        }
         return {
             chartSelected: "time",
             connected: false,
@@ -87,6 +101,7 @@ var ButtonSnitch = React.createClass({
                 "flair-press-5": 0,
                 "flair-press-6": 0
             },
+            histogram: histogram,
             sum: 0,
             mean: 60,
             windowWidth: 0,
@@ -94,7 +109,8 @@ var ButtonSnitch = React.createClass({
             deniedNotificationPermission: false,
             notifiedForCurrentClick: false,
             lastTimeTrackedForCurrentClick: 60,
-            beep: false
+            beep: false,
+            discardAfter: false
         };
     },
     tick: function () {
@@ -108,18 +124,41 @@ var ButtonSnitch = React.createClass({
         colorCounts[this.flairClass(seconds)] =
             colorCounts[this.flairClass(seconds)] + clicks;
         var sum = this.state.sum + (seconds * clicks);
+        var clicksTracked = (this.state.clicksTracked + clicks);
+        var started = this.state.started;
+        var histogram = this.state.histogram.slice();
+        histogram[seconds - 1] = histogram[seconds - 1] + clicks;
+        var numToDelete = 0;
+        if (this.state.discardAfter &&
+            this.state.clicks.length >= this.state.discardAfter) {
+            numToDelete = (this.state.clicks.length + 1) -
+                this.state.discardAfter;
+            // iterate over all the entries to be deleted
+            this.state.clicks.slice(0, numToDelete).forEach(function (click) {
+                clicksTracked = clicksTracked - click.clicks;
+                colorCounts[click.color] = colorCounts[click.color] -
+                    click.clicks;
+                histogram[click.seconds - 1] = histogram[click.seconds - 1] -
+                    click.clicks;
+                sum = sum - click.clicks;
+            });
+            started = moment(this.state.clicks[numToDelete].time -
+                ((60 - this.state.clicks[numToDelete].seconds) * 1000));
+        }
         this.setState({
-            clicksTracked: this.state.clicksTracked + clicks,
-            clicks: this.state.clicks.concat({
+            clicksTracked: clicksTracked,
+            clicks: this.state.clicks.slice(numToDelete).concat({
                 seconds: seconds,
                 time: moment().valueOf(),
                 color: this.flairClass(seconds),
                 clicks: clicks
             }),
             colorCounts: colorCounts,
+            histogram: histogram,
             sum: sum,
-            mean: sum / (this.state.clicksTracked + clicks),
-            notifiedForCurrentClick: false
+            mean: sum / clicksTracked,
+            notifiedForCurrentClick: false,
+            started: started
         });
         if (this.state.beep) {
             React.findDOMNode(this.refs.audio).play();
@@ -190,6 +229,10 @@ var ButtonSnitch = React.createClass({
     },
     updateBeep: function (beep) {
         this.setState({beep: beep});
+    },
+    updateDiscardAfter: function (clicks) {
+        clicks = parseInt(clicks, 10) || false;
+        this.setState({discardAfter: clicks});
     },
     sendNecessaryNotifications: function (seconds) {
         if (!this.state.alertTime && this.state.alertTime !== 0) {
@@ -388,9 +431,9 @@ var ButtonSnitch = React.createClass({
             case "histogram":
                 selectedChart = <HistogramChart
                     clicks={this.state.clicks}
-                    clicksTracked={this.state.clicksTracked}
                     flairClass={this.flairClass}
                     mean={this.state.mean}
+                    histogram={this.state.histogram}
                     />
                 break;
             default:
@@ -400,7 +443,9 @@ var ButtonSnitch = React.createClass({
                     alertTime={this.state.alertTime}
                     updateAlertTime={this.updateAlertTime}
                     beep={this.state.beep}
-                    updateBeep={this.updateBeep} />;
+                    updateBeep={this.updateBeep}
+                    discardAfter={this.state.discardAfter}
+                    updateDiscardAfter={this.updateDiscardAfter} />;
         }
         return (
             <div>

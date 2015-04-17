@@ -2,12 +2,7 @@ var HistogramChart = React.createClass({
     mixins: [React.addons.PureRenderMixin],
     margins: {top: 15, left: 45, right: 5, bottom: 40},
     getInitialState: function () {
-        var histogram = new Array(60);
-        for (var i = 0; i < 60; i++) {
-            histogram[i] = 0;
-        }
         return {
-            histogram: histogram,
             height: 0,
             width: 0,
             displayHighlight: true,
@@ -19,7 +14,6 @@ var HistogramChart = React.createClass({
         var self = this;
         var chart = d3.select(React.findDOMNode(this.refs.chart));
         var container = React.findDOMNode(this.refs.container);
-        var histogram = this.state.histogram.slice();
         var width = container.offsetWidth;
         var height = container.offsetHeight;
         this.xScale = d3.scale.linear()
@@ -33,14 +27,9 @@ var HistogramChart = React.createClass({
             ]);
         var barWidth = this.xScale(60) - this.xScale(59);
 
-        this.props.clicks.forEach(function (click) {
-            histogram[click.seconds - 1] =
-                histogram[click.seconds - 1] + click.clicks;
-        });
-
         chart.attr("width", width).attr("height", height);
         this.yScale = this.yScale.domain([
-            Math.max(d3.max(histogram, function (d) { return d; }), 8), 0
+            Math.max(d3.max(this.props.histogram, function (d) { return d; }), 8), 0
         ]);
 
         // draw the axes and lines
@@ -86,7 +75,7 @@ var HistogramChart = React.createClass({
 
         // draw the bars
         var group = chart.selectAll("g.bar")
-            .data(histogram)
+            .data(this.props.histogram)
             .enter()
             .append("g")
             .attr("class", function (d) {
@@ -153,11 +142,10 @@ var HistogramChart = React.createClass({
             .append("rect")
                 .attr("x", this.xScale(lastValue - 0.5))
                 .attr("width", barWidth)
-                .attr("y", this.yScale(histogram[lastValue - 1]))
+                .attr("y", this.yScale(this.props.histogram[lastValue - 1]))
                 .attr("height", this.yScale(0) - this.yScale(lastClicks));
 
         this.setState({
-            histogram: histogram,
             height: height,
             width: width
         });
@@ -174,13 +162,13 @@ var HistogramChart = React.createClass({
 
         this.yScale = this.yScale.domain([
             Math.max(
-                d3.max(this.state.histogram, function (d) { return d; }), 8
+                d3.max(this.props.histogram, function (d) { return d; }), 8
             ), 0
         ]);
 
         // update the bars
         var group = chart.selectAll("g.bar")
-            .data(this.state.histogram)
+            .data(this.props.histogram)
             .attr("class", function (d) {
                 return "bar" + (d === 0 ? " hidden" : "");
             });
@@ -233,7 +221,7 @@ var HistogramChart = React.createClass({
                 .attr("x", this.xScale(lastValue - 0.5))
                 .attr("width",
                     this.xScale(lastValue + 1) - this.xScale(lastValue))
-                .attr("y", this.yScale(this.state.histogram[lastValue - 1]))
+                .attr("y", this.yScale(this.props.histogram[lastValue - 1]))
                 .attr("height", this.yScale(0) - this.yScale(lastClicks));
     },
     windowResized: function () {
@@ -319,24 +307,13 @@ var HistogramChart = React.createClass({
         chart.select("g.last").select("rect")
             .attr("x", this.xScale(lastValue - 0.5))
             .attr("width", this.xScale(lastValue + 1) - this.xScale(lastValue))
-            .attr("y", this.yScale(this.state.histogram[lastValue - 1]))
+            .attr("y", this.yScale(this.props.histogram[lastValue - 1]))
             .attr("height", this.yScale(0) - this.yScale(lastClicks));
 
         this.setState({
             height: height,
             width: width
         });
-    },
-    componentWillReceiveProps: function (nextProps) {
-        if (nextProps.clicks.length > this.props.clicks.length) {
-            var histogram = this.state.histogram.slice();
-            nextProps.clicks.slice(this.props.clicks.length)
-                .forEach(function (click) {
-                    histogram[click.seconds - 1] =
-                        histogram[click.seconds - 1] + click.clicks;
-                });
-            this.setState({histogram: histogram});
-        }
     },
     componentDidUpdate: function (prevProps) {
         this.updateChart();
