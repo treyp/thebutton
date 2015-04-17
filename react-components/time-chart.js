@@ -227,6 +227,10 @@ var TimeChart = React.createClass({
             .attr("y2", meanY);
         this.meanLabel = this.meanLabel
             .attr("y", meanY);
+
+        this.updateDots(
+            chart.selectAll("g.dot").data(this.clicksWithActiveTime())
+        );
     },
     clicksWithActiveTime: function () {
         return this.props.clicks.concat({
