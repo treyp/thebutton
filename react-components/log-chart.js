@@ -3,6 +3,7 @@ var LogChart = React.createClass({
     getInitialState: function () {
         return {
             barHeight: 20,
+            gapSize: 1,
             lastSynced: moment().valueOf(),
             lastTime: 60
         };
@@ -44,7 +45,8 @@ var LogChart = React.createClass({
         var chart = d3.select(React.findDOMNode(this.refs.chart));
 
         if (this.props.clicks !== prevProps.clicks ||
-            this.state.barHeight !== prevState.barHeight) {
+            this.state.barHeight !== prevState.barHeight ||
+            this.state.gapSize !== prevState.gapSize) {
             var selection = chart
                 .selectAll("g").data(this.clicksWithActiveTime());
             this.updateBarsInSelection(selection);
@@ -79,7 +81,8 @@ var LogChart = React.createClass({
     },
     chartHeight: function () {
         return (
-            ((this.state.barHeight + 1) * (this.props.clicks.length + 1)) +
+            ((this.state.barHeight + this.state.gapSize) *
+                (this.props.clicks.length + 1)) +
             // add 5 pixels of padding to top and bottom when bars are short
             // so that their text labels fully show
             (this.state.barHeight < 10 ? 10 : 0));
@@ -100,7 +103,7 @@ var LogChart = React.createClass({
                     (
                         (
                             (self.props.clicks.length - i) *
-                            (self.state.barHeight + 1)
+                            (self.state.barHeight + self.state.gapSize)
                         ) + (self.state.barHeight < 10 ? 5 : 0)
                     ) +
                     ")";
@@ -144,6 +147,11 @@ var LogChart = React.createClass({
                 parseInt(React.findDOMNode(this.refs.slider).value, 10)
         });
     },
+    handleGap: function () {
+        this.setState({
+            gapSize: React.findDOMNode(this.refs.gap).checked ? 1 : 0
+        });
+    },
     render: function () {
         return (
             <div>
@@ -158,6 +166,14 @@ var LogChart = React.createClass({
                         id="bar-height-slider"
                         ref="slider"
                         onChange={this.handleSlider} />
+                    <label htmlFor="gap-checkbox">
+                        Gap between bars?
+                    </label>
+                    <input type="checkbox"
+                        defaultChecked={!!this.state.gapSize}
+                        id="gap-checkbox"
+                        ref="gap"
+                        onChange={this.handleGap} />
                 </div>
                 <svg className="log-chart" ref="chart"></svg>
             </div>);
