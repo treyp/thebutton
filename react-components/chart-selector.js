@@ -5,6 +5,14 @@ var ChartSelector = React.createClass({
             (this.props.chartSelected === choice ? " selected" : "");
     },
     render: function () {
+        var alertsDescription =
+            (this.props.alertTime && this.props.alertTime !== 0 ?
+            <span className="tab-description">
+                Alerts at <strong>{this.props.alertTime}</strong>s
+            </span>
+            :
+            <span className="tab-description">No alerts</span>
+            );
         return (
             <div className="chart-selector">
                 <a className={this.chartOptionLinkClass("time")}
@@ -22,11 +30,7 @@ var ChartSelector = React.createClass({
                 <a className={this.chartOptionLinkClass("settings")}
                     onClick={this.props.updateChartSelection.bind(null, "settings")}>
                     <span className="tab-name">Settings</span>
-                    {this.props.alertTime && this.props.alertTime !== 0 ?
-                        <span className="tab-description">
-                            Alerts at <strong>{this.props.alertTime}</strong>s
-                        </span>
-                        : ""}
+                    {alertsDescription}
                 </a>
             </div>
         );
