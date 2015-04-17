@@ -140,6 +140,8 @@ var LogChart = React.createClass({
         var chart = d3.select(React.findDOMNode(this.refs.chart));
         chart.attr("width", this.props.width);
         this.xScale = this.xScale.range([0, this.props.width]);
+        this.updateBarsWidth(
+            chart.selectAll("g").data(this.clicksWithActiveTime()));
     },
     handleSlider: function () {
         this.setState({
