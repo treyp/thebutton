@@ -19,12 +19,12 @@ var ChartSelector = React.createClass({
                     onClick={this.props.updateChartSelection.bind(null, "histogram")}>
                     <span className="tab-name">Distribution</span>
                 </a>
-                <a className={this.chartOptionLinkClass("alerts")}
-                    onClick={this.props.updateChartSelection.bind(null, "alerts")}>
-                    <span className="tab-name">Alerts</span>
+                <a className={this.chartOptionLinkClass("settings")}
+                    onClick={this.props.updateChartSelection.bind(null, "settings")}>
+                    <span className="tab-name">Settings</span>
                     {this.props.alertTime && this.props.alertTime !== 0 ?
                         <span className="tab-description">
-                            at <strong>{this.props.alertTime}</strong>s
+                            Alerts at <strong>{this.props.alertTime}</strong>s
                         </span>
                         : ""}
                 </a>

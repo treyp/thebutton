@@ -394,7 +394,7 @@ var ButtonSnitch = React.createClass({
                     />
                 break;
             default:
-                selectedChart = <AlertSettings
+                selectedChart = <Settings
                     deniedNotificationPermission={
                         this.state.deniedNotificationPermission}
                     alertTime={this.state.alertTime}

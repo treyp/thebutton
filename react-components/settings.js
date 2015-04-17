@@ -1,4 +1,4 @@
-var AlertSettings = React.createClass({
+var Settings = React.createClass({
     mixins: [React.addons.PureRenderMixin],
     updateAlertTime: function () {
         this.props.updateAlertTime(
