@@ -7,8 +7,6 @@ var TimeChart = React.createClass({
             dotSize: 5,
             lastSynced: moment().valueOf(),
             lastTime: 60,
-            chartWidth: 0,
-            chartHeight: 0,
             displayLabels: true,
             displayGrid: true,
             displayMean: false,
@@ -106,11 +104,6 @@ var TimeChart = React.createClass({
         window.addEventListener("resize", this.windowResized);
 
         window.requestAnimationFrame(this.updateActiveDot);
-
-        this.setState({
-            chartWidth: width,
-            chartHeight: height
-        });
     },
     componentWillUnmount: function () {
         window.cancelAnimationFrame(this.updateActiveDot);
@@ -137,13 +130,34 @@ var TimeChart = React.createClass({
 
         var clicksWithActiveTime = this.clicksWithActiveTime();
 
+        if (this.props.clicks !== prevProps.clicks) {
+            this.xScale = this.calculateXRange(this.xScale.domain([
+                    this.props.started.valueOf(),
+                    Math.max(
+                        this.state.startingXMax,
+                        clicksWithActiveTime.slice(-1)[0].time)
+                ]), React.findDOMNode(this.refs.container).offsetWidth);
+            this.xAxisEl.call(this.xAxis);
+
+            var meanY = this.yScale(this.props.mean);
+            this.mean
+                .attr("class", "average" +
+                    (this.props.clicks.length && this.state.displayMean ?
+                        "" : " hidden"))
+                .attr("y1", meanY)
+                .attr("y2", meanY);
+            this.meanLabel
+                .attr("class", "average" +
+                    (this.props.clicks.length && this.state.displayMean ?
+                        "" : " hidden"))
+                .attr("y", meanY)
+                .text("Ø " + Math.round(this.props.mean * 1000) / 1000);
+        }
         // performance optimization: if we have a lot of elements on the page,
         // only update the old dots (which probably don't need to move) when
         // a new dot shows up
         if (this.props.clicks.length > 300 &&
-            this.props.clicks.length === prevProps.clicks.length &&
-            this.state.chartWidth === prevState.chartWidth &&
-            this.state.chartHeight === prevState.chartHeight) {
+            this.props.clicks === prevProps.clicks) {
             // update active dot
             this.updateDots(chart
                 .select("g.dot:last-child")
@@ -155,28 +169,6 @@ var TimeChart = React.createClass({
             this.addDotsToSelection(selection.enter());
             selection.exit().remove();
         }
-
-        this.xScale = this.calculateXRange(this.xScale.domain([
-                this.props.started.valueOf(),
-                Math.max(
-                    this.state.startingXMax,
-                    clicksWithActiveTime.slice(-1)[0].time)
-            ]), this.state.chartWidth);
-        this.xAxisEl.call(this.xAxis);
-
-        var meanY = this.yScale(this.props.mean);
-        this.mean = this.mean
-            .attr("class", "average" +
-                (this.props.clicks.length && this.state.displayMean ?
-                    "" : " hidden"))
-            .attr("y1", meanY)
-            .attr("y2", meanY);
-        this.meanLabel = this.meanLabel
-            .attr("class", "average" +
-                (this.props.clicks.length && this.state.displayMean ?
-                    "" : " hidden"))
-            .attr("y", meanY)
-            .text("Ø " + Math.round(this.props.mean * 1000) / 1000);
     },
     calculateYRange: function (scale, height) {
         return scale.range([this.margins.top, Math.max(
@@ -207,6 +199,13 @@ var TimeChart = React.createClass({
             .attr("y1", function (d) { return self.yScale(d); })
             .attr("x2", width - this.margins.right)
             .attr("y2", function (d) { return self.yScale(d); });
+
+        this.xScale = this.calculateXRange(this.xScale.domain([
+                this.props.started.valueOf(),
+                Math.max(
+                    this.state.startingXMax,
+                    moment().valueOf())
+            ]), width);
         this.xAxisLabel
             .attr("x", width / 2)
             .attr("y", height - 5);
@@ -214,7 +213,8 @@ var TimeChart = React.createClass({
             .attr("transform", "translate(0," +
                 (height - this.margins.top -
                     this.margins.bottom) +
-                ")");
+                ")")
+            .call(this.xAxis);
         this.yAxisEl
             .call(this.yAxis);
         this.yAxisLabel
@@ -227,8 +227,6 @@ var TimeChart = React.createClass({
             .attr("y2", meanY);
         this.meanLabel = this.meanLabel
             .attr("y", meanY);
-
-        this.setState({chartWidth: width, chartHeight: height});
     },
     clicksWithActiveTime: function () {
         return this.props.clicks.concat({
