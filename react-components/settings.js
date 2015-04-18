@@ -13,6 +13,9 @@ var Settings = React.createClass({
             React.findDOMNode(this.refs.discard).value.trim()
         );
     },
+    updateNightMode: function () {
+        this.props.updateNightMode(React.findDOMNode(this.refs.night).checked);
+    },
     render: function () {
         return (
             <div>
@@ -78,6 +81,19 @@ var Settings = React.createClass({
                         </div>
                         <div className="row detail">Leave blank to retain all data</div>
                         <div className="row detail">Each data entry (seen as one dot or row) may represent multiple clicks</div>
+                </div>
+                <div className="setting">
+                    <div className="row">
+                        <input
+                            type="checkbox"
+                            defaultChecked={this.props.nightMode}
+                            id="night-mode"
+                            ref="night"
+                            onChange={this.updateNightMode} />
+                        <label htmlFor="night-mode">
+                            Enable night mode?
+                        </label>
+                    </div>
                 </div>
             </div>
         );

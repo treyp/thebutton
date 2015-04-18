@@ -4,6 +4,11 @@ html, body {
     margin: 0;
 }
 
+.night-mode {
+    background-color: #000;
+    color: #ccc;
+}
+
 body {
     font: 14px/1.2857 sans-serif;
 }
@@ -14,12 +19,21 @@ a {
     cursor: pointer;
 }
 
+.night-mode a {
+    color: #3D90C3;
+}
+
 #nav {
     display: block;
     padding: 0 10px;
     background-color: #f8f8f8;
     border-bottom: 1px solid #e7e7e7;
     overflow: hidden;
+}
+
+.night-mode #nav {
+    background-color: #080808;
+    border-bottom-color: #191919;
 }
 
 .right-nav {
@@ -67,6 +81,10 @@ a {
     background-color: #fff;
 }
 
+.night-mode .ticker.odd {
+    background-color: #000;
+}
+
 .tick.disconnected {
     display: none;
 }
@@ -95,6 +113,11 @@ a {
     color: #000;
 }
 
+.night-mode .chart-selector .chart-choice.selected {
+    background-color: #191919;
+    color: #fff;
+}
+
 .chart-selector .chart-choice .tab-name {
     display: inline-block;
     font-size: 16px;
@@ -120,14 +143,28 @@ a {
     border-bottom: 1px solid #e7e7e7;
 }
 
+.night-mode .rainbow-distribution {
+    background-color: #000;
+    border-bottom-color: #191919;
+}
+
 .rainbow-distribution.text {
     color: #000;
+}
+
+.night-mode .rainbow-distribution.text {
+    color: #fff;
 }
 
 .rainbow-distribution.disconnected {
     background-color: #e7e7e7;
     color: #333;
     cursor: default;
+}
+
+.night-mode .rainbow-distribution.disconnected {
+    background-color: #191919;
+    color: #ccc;
 }
 
 .rainbow-distribution > div {
@@ -202,6 +239,11 @@ a {
     line-height: 20px;
 }
 
+.night-mode .options {
+    background-color: #080808;
+    border-bottom-color: #191919;
+}
+
 .options label {
     margin-left: 2em;
     padding-right: 1em;
@@ -244,6 +286,11 @@ a {
 .time-chart.with-labels .dot text {
     font-size: 10px;
     text-shadow: 0 0 1px #fff;
+}
+
+.night-mode .time-chart.with-labels .dot text {
+    text-shadow: 0 0 1px #000;
+    fill: #ccc;
 }
 
 .time-chart.with-labels .dot:hover text {
@@ -316,13 +363,29 @@ a {
     fill: none;
 }
 
-.time-chart .axis text, .histogram-chart .axis text {
+.night-mode .time-chart .axis line,
+.night-mode .time-chart .axis path {
+    stroke: #ccc;
+}
+
+.time-chart .axis text,
+.histogram-chart .axis text {
     font: 10px sans-serif;
     fill: #000;
 }
 
+.night-mode .time-chart .axis text,
+.night-mode .histogram-chart .axis text {
+    fill: #ccc;
+}
+
 .time-chart text.label {
     font: 12px sans-serif;
+}
+
+.night-mode .time-chart text.label,
+.night-mode .histogram-chart text.label {
+    fill: #ccc;
 }
 
 .time-chart line.average {
@@ -336,6 +399,11 @@ a {
     text-shadow: 0 0 1px #fff;
 }
 
+.night-mode .time-chart text.average {
+    fill: #999;
+    text-shadow: 0 0 1px #000;
+}
+
 .log-chart text {
     font: 10px sans-serif;
     text-anchor: end;
@@ -347,10 +415,18 @@ a {
     text-anchor: start;
 }
 
+.night-mode .log-chart text.outside {
+    fill: #ccc;
+}
+
 .log-chart g.axis path {
     stroke: #333;
     stroke-width: 1;
     fill: none;
+}
+
+.night-mode .log-chart g.axis path {
+    stroke: #ccc;
 }
 
 .log-chart line.grid {
@@ -359,10 +435,20 @@ a {
     fill: none;
 }
 
-.histogram-chart .axis path,.histogram-chart .axis line {
+.night-mode .log-chart line.grid {
+    stroke: #222;
+}
+
+.histogram-chart .axis path,
+.histogram-chart .axis line {
     stroke: #000;
     stroke-width: 2;
     fill: none;
+}
+
+.night-mode .histogram-chart .axis path,
+.night-mode .histogram-chart .axis line {
+    stroke: #ccc;
 }
 
 circle.flair-no-press,
@@ -444,6 +530,10 @@ line.flair-press-6 {
     fill: #777;
 }
 
+.night-mode .histogram-chart .clicks {
+    fill: #ccc;
+}
+
 .histogram-chart line.average {
     stroke: #888;
 }
@@ -455,10 +545,18 @@ line.flair-press-6 {
     text-shadow: 0 0 1px #fff;
 }
 
+.night-mode .histogram-chart text.average {
+    fill: #999;
+}
+
 .histogram-chart .last rect {
     fill: none;
     stroke: #000;
     stroke-width: 5;
+}
+
+.night-mode .histogram-chart .last rect {
+    stroke: #fff;
 }
 
 .setting {
@@ -467,6 +565,11 @@ line.flair-press-6 {
     background-color: #e7e7e7;
     border-radius: 10px;
     margin: 20px;
+}
+
+.night-mode .setting {
+    background-color: #191919;
+    color: #ccc;
 }
 
 .setting .row {
@@ -492,6 +595,10 @@ line.flair-press-6 {
 .setting .detail {
     color: #888;
     font-size: 14px;
+}
+
+.night-mode .setting .detail {
+    color: #666;
 }
 
 .setting .detail + .detail {

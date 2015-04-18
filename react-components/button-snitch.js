@@ -75,7 +75,8 @@ var ButtonSnitch = React.createClass({
             notifiedForCurrentClick: false,
             lastTimeTrackedForCurrentClick: 60,
             beep: false,
-            discardAfter: false
+            discardAfter: false,
+            nightMode: false
         };
     },
     getInitialStateReal: function () {
@@ -110,7 +111,8 @@ var ButtonSnitch = React.createClass({
             notifiedForCurrentClick: false,
             lastTimeTrackedForCurrentClick: 60,
             beep: false,
-            discardAfter: false
+            discardAfter: false,
+            nightMode: false
         };
     },
     tick: function () {
@@ -239,6 +241,14 @@ var ButtonSnitch = React.createClass({
     updateDiscardAfter: function (clicks) {
         clicks = parseInt(clicks, 10) || false;
         this.setState({discardAfter: clicks});
+    },
+    updateNightMode: function (nightMode) {
+        if (nightMode) {
+            document.documentElement.classList.add('night-mode');
+        } else {
+            document.documentElement.classList.remove('night-mode');
+        }
+        this.setState({nightMode: nightMode});
     },
     sendNecessaryNotifications: function (seconds) {
         if (!this.state.alertTime && this.state.alertTime !== 0) {
@@ -453,7 +463,9 @@ var ButtonSnitch = React.createClass({
                     beep={this.state.beep}
                     updateBeep={this.updateBeep}
                     discardAfter={this.state.discardAfter}
-                    updateDiscardAfter={this.updateDiscardAfter} />;
+                    updateDiscardAfter={this.updateDiscardAfter}
+                    nightMode={this.state.nightMode}
+                    updateNightMode={this.updateNightMode} />;
         }
         return (
             <div>
