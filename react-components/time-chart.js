@@ -25,7 +25,11 @@ var TimeChart = React.createClass({
                 .domain([
                     this.props.connected ?
                         this.props.started.valueOf() : this.state.lastSynced,
-                    this.state.startingXMax
+                    Math.max(
+                        (this.props.clicks.length ?
+                            this.props.clicks.slice(-1)[0].time : 0),
+                        this.state.startingXMax
+                    )
                 ]),
             width);
         this.yScale = this.calculateYRange(
@@ -130,33 +134,20 @@ var TimeChart = React.createClass({
 
         var clicksWithActiveTime = this.clicksWithActiveTime();
 
-
         if (this.state.displayMean !== prevState.displayMean ||
-            this.props.clicks !== prevProps.clicks) {
-            this.mean
-                .attr("class", "average" +
-                    (this.props.clicks.length && this.state.displayMean ?
-                        "" : " hidden"));
-            this.meanLabel
-                .attr("class", "average" +
-                    (this.props.clicks.length && this.state.displayMean ?
-                        "" : " hidden"));
-        }
-
-        if (this.props.clicks !== prevProps.clicks) {
-            this.xScale = this.calculateXRange(this.xScale.domain([
-                    this.props.started.valueOf(),
-                    Math.max(
-                        this.state.startingXMax,
-                        clicksWithActiveTime.slice(-1)[0].time)
-                ]), React.findDOMNode(this.refs.container).offsetWidth);
-            this.xAxisEl.call(this.xAxis);
-
+            this.props.mean !== prevProps.mean ||
+            this.props.clicks.length !== prevProps.clicks.length) {
             var meanY = this.yScale(this.props.mean);
             this.mean
+                .attr("class", "average" +
+                    (this.props.clicks.length && this.state.displayMean ?
+                        "" : " hidden"))
                 .attr("y1", meanY)
                 .attr("y2", meanY);
             this.meanLabel
+                .attr("class", "average" +
+                    (this.props.clicks.length && this.state.displayMean ?
+                        "" : " hidden"))
                 .attr("y", meanY)
                 .text("Ø " + Math.round(this.props.mean * 1000) / 1000);
         }
@@ -170,6 +161,14 @@ var TimeChart = React.createClass({
                 .select("g.dot:last-child")
                 .data(clicksWithActiveTime.slice(-1)[0]));
         } else {
+            this.xScale = this.calculateXRange(this.xScale.domain([
+                    this.props.started.valueOf(),
+                    Math.max(
+                        this.state.startingXMax,
+                        clicksWithActiveTime.slice(-1)[0].time)
+                ]), React.findDOMNode(this.refs.container).offsetWidth);
+            this.xAxisEl.call(this.xAxis);
+
             var selection = chart
                 .selectAll("g.dot").data(clicksWithActiveTime);
             this.updateDots(selection);
