@@ -15,12 +15,14 @@ Monitor [Reddit](//www.reddit.com/)'s [/r/thebutton](//www.reddit.com/r/thebutto
 - [x] Change counting of simultaenous clicks so all clickers get the proper flair (instead of 60s for the "missed" presses)
 - [x] Show distribution of flair colors in tracked clicks
 - [x] Better handling of connection errors/disconnects
-- [x] Support beep noise for new clicks
+- [x] Support beep noise for new clicks (suggestion from [/u/crazykoala](//www.reddit.com/user/crazykoala))
 - [x] Update favicon and window title to reflect color and time remaining
-- [x] Add a histogram chart
+- [x] Add a histogram chart (started as [a pull request from renoth](//github.com/treyp/thebutton/pull/1))
 - [x] ~~Hide animations when page not visible (for performance reasons)~~ D3 uses requestAnimationFrame which takes care of this
-- [x] Throw away data older than X minutes (for performance reasons)
-- [x] Add current time to histogram chart
+- [x] Throw away data older than X minutes for performance reasons (suggestion from RedGuardAspirant)
+- [x] Add current time to histogram chart (suggestion from [/u/shotgun_nancy](//www.reddit.com/user/shotgun_nancy))
+- [x] Fix all the bugs introduced by the data discarding feature (reported by [/u/TOTALLY_ATHIEST](//www.reddit.com/user/TOTALLY_ATHIEST))
+- [x] Add a new darker theme called night mode (suggestion from [/u/SohnoJam](//www.reddit.com/user/SohnoJam))
 - [ ] Beep support like Squire
 - [ ] Scroll to zoom
 - [ ] Horizontal option for log chart
