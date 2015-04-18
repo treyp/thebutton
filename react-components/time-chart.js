@@ -130,6 +130,19 @@ var TimeChart = React.createClass({
 
         var clicksWithActiveTime = this.clicksWithActiveTime();
 
+
+        if (this.state.displayMean !== prevState.displayMean ||
+            this.props.clicks !== prevProps.clicks) {
+            this.mean
+                .attr("class", "average" +
+                    (this.props.clicks.length && this.state.displayMean ?
+                        "" : " hidden"));
+            this.meanLabel
+                .attr("class", "average" +
+                    (this.props.clicks.length && this.state.displayMean ?
+                        "" : " hidden"));
+        }
+
         if (this.props.clicks !== prevProps.clicks) {
             this.xScale = this.calculateXRange(this.xScale.domain([
                     this.props.started.valueOf(),
@@ -141,15 +154,9 @@ var TimeChart = React.createClass({
 
             var meanY = this.yScale(this.props.mean);
             this.mean
-                .attr("class", "average" +
-                    (this.props.clicks.length && this.state.displayMean ?
-                        "" : " hidden"))
                 .attr("y1", meanY)
                 .attr("y2", meanY);
             this.meanLabel
-                .attr("class", "average" +
-                    (this.props.clicks.length && this.state.displayMean ?
-                        "" : " hidden"))
                 .attr("y", meanY)
                 .text("Ø " + Math.round(this.props.mean * 1000) / 1000);
         }
