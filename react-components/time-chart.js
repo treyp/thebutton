@@ -83,7 +83,7 @@ var TimeChart = React.createClass({
                 .attr("width", width)
                 .attr("height", height)
                 .selectAll("g.dot")
-                .data(this).enter()
+                .data(this.props.clicks).enter()
         );
 
         var meanY = this.yScale(this.props.mean);
