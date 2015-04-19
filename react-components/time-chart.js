@@ -28,7 +28,9 @@ var TimeChart = React.createClass({
                     Math.max(
                         (this.props.clicks.length ?
                             this.props.clicks.slice(-1)[0].time : 0),
-                        this.state.startingXMax
+                        (this.props.connected ?
+                            this.props.started + this.minimumDuration :
+                            this.state.startingXMax)
                     )
                 ]),
             width);
