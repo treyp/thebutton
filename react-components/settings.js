@@ -137,24 +137,36 @@ var Settings = React.createClass({
                     </div>
                 </div>
                 <div className="setting">
-                    <div className="row">
-                        <form onSubmit={this.submitImport}>
+                    <form onSubmit={this.submitImport}>
+                        <div className="row">
                             <label htmlFor="import-input">
                                 Import click data
                             </label>
+                        </div>
+                        <div className="row">
                             <textarea
                                 ref="importInput"
                                 id="import-input"
                                 autocomplete="off"
                                 spellcheck="false" />
+                        </div>
+                        <div className="row detail">
+                            Pasting large amounts of data here will probably
+                            cause your browser to freeze for several seconds
+                        </div>
+                        <div className="row">
                             <input
                                 type="submit"
                                 value="Import"
                                 id="import-submit" />
-                        </form>
+                        </div>
+                    </form>
+                    <div className="row">
                         <label htmlFor="export-input">
                             Click data for export <a>Select all</a>
                         </label>
+                    </div>
+                    <div className="row">
                         <textarea
                             ref="exportInput"
                             id="export-input"
