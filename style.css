@@ -609,6 +609,19 @@ line.flair-press-6 {
     color: red;
 }
 
+.setting textarea {
+    display: block;
+    margin: 10px 0;
+    width: 100%;
+    height: 5em;
+    line-height: 1;
+    box-sizing: border-box;
+}
+
+.setting #import-submit {
+    margin-bottom: 20px;
+}
+
 .audio {
     display: none;
 }

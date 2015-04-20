@@ -3,6 +3,44 @@ var ButtonSnitch = React.createClass({
         return this.getInitialStateReal();
         // return this.getInitialStateFake(5e3);
     },
+    importSavedClicks: function (clickData) {
+        try {
+            var clicks = JSON.parse(clickData);
+        } catch (e) {
+            // couldn't parse JSON
+            return;
+        }
+        if (Array.isArray ? !Array.isArray(clicks) :
+            Object.prototype.toString.call(clicks) !== "[object Array]") {
+            // not an array
+            return;
+        }
+        var colorCounts = {};
+        // shallow clone of this.state.colorCounts
+        for (var k in this.state.colorCounts) {
+            colorCounts[k] = this.state.colorCounts[k];
+        }
+        var totalClicks = this.state.clicksTracked;
+        var sum = this.state.sum;
+        var histogram = this.state.histogram.slice();
+        clicks.forEach(function (click) {
+            colorCounts[click.color] = colorCounts[click.color] + click.clicks;
+            totalClicks = totalClicks + click.clicks;
+            sum = sum + (click.clicks * click.seconds);
+            histogram[click.seconds - 1] =
+                histogram[click.seconds - 1] + click.clicks;
+        });
+        this.setState({
+            clicks: clicks.concat(this.state.clicks),
+            colorCounts: colorCounts,
+            clicksTracked: totalClicks,
+            sum: sum,
+            mean: (sum / totalClicks),
+            histogram: histogram,
+            started: (clicks.length ?
+                moment(clicks[0].time - clicks[0].seconds) : this.state.started)
+        });
+    },
     generateFakeClicks: function (quantity) {
         var clicks = [];
         var colorCounts = {
@@ -465,7 +503,9 @@ var ButtonSnitch = React.createClass({
                     discardAfter={this.state.discardAfter}
                     updateDiscardAfter={this.updateDiscardAfter}
                     nightMode={this.state.nightMode}
-                    updateNightMode={this.updateNightMode} />;
+                    updateNightMode={this.updateNightMode}
+                    import={this.importSavedClicks}
+                    clicks={this.state.clicks} />;
         }
         return (
             <div>

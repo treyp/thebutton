@@ -1,5 +1,16 @@
 var Settings = React.createClass({
     mixins: [React.addons.PureRenderMixin],
+    componentDidMount: function () {
+        var exportEl = React.findDOMNode(this.refs.exportInput);
+        exportEl.onfocus = function () {
+            exportEl.select();
+            // work around a problem in chrome on first mouse up
+            exportEl.onmouseup = function () {
+                exportEl.onmouseup = null;
+                return false;
+            };
+        }
+    },
     updateAlertTime: function () {
         this.props.updateAlertTime(
             React.findDOMNode(this.refs.time).value.trim()
@@ -15,6 +26,12 @@ var Settings = React.createClass({
     },
     updateNightMode: function () {
         this.props.updateNightMode(React.findDOMNode(this.refs.night).checked);
+    },
+    submitImport: function (e) {
+        e.preventDefault();
+        var el = React.findDOMNode(this.refs.importInput);
+        this.props.import(el.value.trim());
+        el.value = "";
     },
     render: function () {
         return (
@@ -93,6 +110,29 @@ var Settings = React.createClass({
                         <label htmlFor="night-mode">
                             Enable night mode?
                         </label>
+                    </div>
+                </div>
+                <div className="setting">
+                    <div className="row">
+                        <form onSubmit={this.submitImport}>
+                            <label htmlFor="import-input">
+                                Import click data
+                            </label>
+                            <textarea
+                                ref="importInput"
+                                id="import-input" />
+                            <input
+                                type="submit"
+                                value="Import"
+                                id="import-submit" />
+                        </form>
+                        <label htmlFor="export-input">
+                            Click data for export <a>Select all</a>
+                        </label>
+                        <textarea
+                            ref="exportInput"
+                            id="export-input"
+                            value={JSON.stringify(this.props.clicks)} />
                     </div>
                 </div>
             </div>

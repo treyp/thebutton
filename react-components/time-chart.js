@@ -10,7 +10,9 @@ var TimeChart = React.createClass({
             displayLabels: true,
             displayGrid: true,
             displayMean: false,
-            startingXMax: (moment().valueOf() + this.minimumDuration)
+            startingXMax: (this.props.started ?
+                this.props.started + this.minimumDuration :
+                (moment().valueOf() + this.minimumDuration))
         };
     },
     componentDidMount: function () {
@@ -23,14 +25,12 @@ var TimeChart = React.createClass({
         this.xScale = this.calculateXRange(
             d3.scale.linear()
                 .domain([
-                    this.props.connected ?
+                    this.props.started ?
                         this.props.started.valueOf() : this.state.lastSynced,
                     Math.max(
                         (this.props.clicks.length ?
                             this.props.clicks.slice(-1)[0].time : 0),
-                        (this.props.connected ?
-                            this.props.started + this.minimumDuration :
-                            this.state.startingXMax)
+                        this.state.startingXMax
                     )
                 ]),
             width);
@@ -156,7 +156,7 @@ var TimeChart = React.createClass({
         // performance optimization: if we have a lot of elements on the page,
         // only update the old dots (which probably don't need to move) when
         // a new dot shows up
-        if (this.props.clicks.length > 300 &&
+        if (this.props.clicks.length > 300 && this.props.connected &&
             this.props.clicks === prevProps.clicks) {
             // update active dot
             this.updateDots(chart
@@ -164,10 +164,12 @@ var TimeChart = React.createClass({
                 .data(clicksWithActiveTime.slice(-1)[0]));
         } else {
             this.xScale = this.calculateXRange(this.xScale.domain([
-                    this.props.started.valueOf(),
+                    this.props.started ?
+                        this.props.started.valueOf() : this.state.lastSynced,
                     Math.max(
-                        this.state.startingXMax,
-                        clicksWithActiveTime.slice(-1)[0].time)
+                        (this.props.clicks.length ?
+                            clicksWithActiveTime.slice(-1)[0].time : 0),
+                        this.state.startingXMax)
                 ]), React.findDOMNode(this.refs.container).offsetWidth);
             this.xAxisEl.call(this.xAxis);
 
@@ -241,6 +243,9 @@ var TimeChart = React.createClass({
         );
     },
     clicksWithActiveTime: function () {
+        if (!this.props.connected) {
+            return this.props.clicks;
+        }
         return this.props.clicks.concat({
             seconds: this.props.secondsRemaining,
             time: moment().valueOf(),
