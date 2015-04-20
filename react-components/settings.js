@@ -1,5 +1,10 @@
 var Settings = React.createClass({
     mixins: [React.addons.PureRenderMixin],
+    getInitialState: function () {
+        return {
+            discardAfter: this.props.discardAfter
+        };
+    },
     componentDidMount: function () {
         var exportEl = React.findDOMNode(this.refs.exportInput);
         exportEl.onfocus = function () {
@@ -11,6 +16,11 @@ var Settings = React.createClass({
             };
         }
     },
+    componentDidReceiveProps: function (newProps) {
+        if (this.props.discardAfter !== newProps.discardAfter) {
+            this.setState({discardAfter: newProps.discardAfter});
+        }
+    },
     updateAlertTime: function () {
         this.props.updateAlertTime(
             React.findDOMNode(this.refs.time).value.trim()
@@ -19,10 +29,16 @@ var Settings = React.createClass({
     updateBeep: function () {
         this.props.updateBeep(React.findDOMNode(this.refs.beep).checked);
     },
-    updateDiscardAfter: function () {
+    submitDiscard: function (e) {
+        e.preventDefault();
         this.props.updateDiscardAfter(
             React.findDOMNode(this.refs.discard).value.trim()
         );
+    },
+    updateDiscard: function () {
+        this.setState({
+            discardAfter: React.findDOMNode(this.refs.discard).value.trim()
+        });
     },
     updateNightMode: function () {
         this.props.updateNightMode(React.findDOMNode(this.refs.night).checked);
@@ -86,16 +102,24 @@ var Settings = React.createClass({
                                 Discard data older than:
                             </label>
                         </div>
-                        <div className="row input-row">
-                            <input
-                                type="number"
-                                min="1"
-                                id="discard-input"
-                                value={this.props.discardAfter}
-                                onChange={this.updateDiscardAfter}
-                                ref="discard" />
-                            <label htmlFor="discard-input">entries</label>
-                        </div>
+                        <form onSubmit={this.submitDiscard}>
+                            <div className="row input-row">
+                                <input
+                                    type="number"
+                                    min="1"
+                                    id="discard-input"
+                                    value={this.state.discardAfter}
+                                    onChange={this.updateDiscard}
+                                    ref="discard" />
+                                <label htmlFor="discard-input">entries</label>
+                            </div>
+                            <div className="row">
+                                <input
+                                    type="submit"
+                                    id="discard-submit"
+                                    value="Save" />
+                            </div>
+                        </form>
                         <div className="row detail">Leave blank to retain all data</div>
                         <div className="row detail">Each data entry (seen as one dot or row) may represent multiple clicks</div>
                 </div>
@@ -120,7 +144,9 @@ var Settings = React.createClass({
                             </label>
                             <textarea
                                 ref="importInput"
-                                id="import-input" />
+                                id="import-input"
+                                autocomplete="off"
+                                spellcheck="false" />
                             <input
                                 type="submit"
                                 value="Import"
@@ -132,6 +158,8 @@ var Settings = React.createClass({
                         <textarea
                             ref="exportInput"
                             id="export-input"
+                            autocomplete="off"
+                            spellcheck="false"
                             value={JSON.stringify(this.props.clicks)} />
                     </div>
                 </div>

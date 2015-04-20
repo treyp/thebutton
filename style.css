@@ -609,6 +609,10 @@ line.flair-press-6 {
     color: red;
 }
 
+.setting #discard-submit {
+    margin-bottom: 10px;
+}
+
 .setting textarea {
     display: block;
     margin: 10px 0;
