@@ -8,6 +8,7 @@ var HistogramChart = React.createClass({
             displayHighlight: true,
             displayGrid: true,
             displayMean: true,
+            displayMedian: true,
             lastSynced: moment().valueOf(),
             lastTime: 60
         };
@@ -114,25 +115,25 @@ var HistogramChart = React.createClass({
             .attr("dy", "-.35em")
             .text(function (d) { return d3.format("0,000")(d); });
 
-        // draw the average
-        var meanX = this.xScale(this.props.mean);
-        chart.append("line")
-            .attr("class", "average" +
-                (this.props.clicks.length && this.state.displayMean ?
-                    "" : " hidden"))
-            .attr("x1", meanX)
+        // draw the averages
+        this.mean = chart.append("line")
             .attr("y1", this.margins.top)
-            .attr("x2", meanX)
             .attr("y2", height - this.margins.bottom);
-        chart.append("text")
-            .attr("class", "average" +
-                (this.props.clicks.length && this.state.displayMean ?
-                    "" : " hidden"))
-            .attr("x", meanX)
+        this.meanText = chart.append("text")
             .attr("y", this.margins.top)
             .attr("dx", "-.35em")
-            .attr("dy", 10)
-            .text("Ø " + Math.round(this.props.mean * 1000) / 1000);
+            .attr("dy", 10);
+        this.updateAverage(this.mean, this.meanText, this.props.mean,
+            this.state.displayMean, "x̅");
+        this.median = chart.append("line")
+            .attr("y1", this.margins.top)
+            .attr("y2", height - this.margins.bottom);
+        this.medianText = chart.append("text")
+            .attr("y", this.margins.top)
+            .attr("dx", "-.35em")
+            .attr("dy", 10);
+        this.updateAverage(this.median, this.medianText, this.props.median,
+            this.state.displayMedian, "M");
 
         // draw the active number
         var lastValue = (this.props.clicks.length ?
@@ -212,20 +213,11 @@ var HistogramChart = React.createClass({
             .attr("y", function (d) { return self.yScale(d); })
             .text(function (d) { return d3.format("0,000")(d); });
 
-        // update the mean
-        var meanX = this.xScale(this.props.mean);
-        chart.select("line.average")
-            .attr("x1", meanX)
-            .attr("x2", meanX)
-            .attr("class", "average" +
-                (this.props.clicks.length && this.state.displayMean ?
-                    "" : " hidden"));
-        chart.select("text.average")
-            .attr("x", meanX)
-            .text("Ø " + Math.round(this.props.mean * 1000) / 1000)
-            .attr("class", "average" +
-                (this.props.clicks.length && this.state.displayMean ?
-                    "" : " hidden"));
+        // update the averages
+        this.updateAverage(this.mean, this.meanText, this.props.mean,
+            this.state.displayMean, "x̅");
+        this.updateAverage(this.median, this.medianText, this.props.median,
+            this.state.displayMedian, "M");
 
         // update the active number
         var lastValue = (this.props.clicks.length ?
@@ -242,6 +234,21 @@ var HistogramChart = React.createClass({
                     this.xScale(lastValue + 1) - this.xScale(lastValue))
                 .attr("y", this.yScale(this.props.histogram[lastValue - 1]))
                 .attr("height", this.yScale(0) - this.yScale(lastClicks));
+    },
+    updateAverage: function (selection, labelSelection, prop, state, label) {
+        if (prop !== null) {
+            var meanX = this.xScale(prop);
+            selection
+                .attr("class", "average" +
+                    (prop !== null && state ? "" : " hidden"))
+                .attr("x1", meanX)
+                .attr("x2", meanX);
+            labelSelection
+                .attr("class", "average" +
+                    (prop !== null && state ? "" : " hidden"))
+                .attr("x", meanX)
+                .text(label + " " + Math.round(prop * 1000) / 1000);
+        }
     },
     updateTimerLine: function () {
         var secondsRemaining = this.state.lastTime -
@@ -319,16 +326,21 @@ var HistogramChart = React.createClass({
             })
             .attr("y", function (d) { return self.yScale(d); });
 
-        // move the average
-        var meanX = this.xScale(this.props.mean);
-        chart.select("line.average")
-            .attr("x1", meanX)
+        // move the averages
+        this.mean
             .attr("y1", this.margins.top)
-            .attr("x2", meanX)
             .attr("y2", height - this.margins.bottom);
-        chart.select("text.average")
-            .attr("x", meanX)
+        this.meanText
             .attr("y", this.margins.top);
+        this.updateAverage(this.mean, this.meanText, this.props.mean,
+            this.state.displayMean, "x̅");
+        this.median
+            .attr("y1", this.margins.top)
+            .attr("y2", height - this.margins.bottom);
+        this.medianText
+            .attr("y", this.margins.top);
+        this.updateAverage(this.median, this.medianText, this.props.median,
+            this.state.displayMedian, "M");
 
         // move the active number
         var lastValue = (this.props.clicks.length ?
@@ -367,50 +379,46 @@ var HistogramChart = React.createClass({
             this.updateChart();
         }
     },
-    handleHighlight: function () {
-        this.setState({
-            displayHighlight:
-                React.findDOMNode(this.refs.highlight).checked
-        });
-    },
-    handleGrid: function () {
-        this.setState({
-            displayGrid: React.findDOMNode(this.refs.grid).checked
-        });
-    },
-    handleMean: function () {
-        this.setState({
-            displayMean: React.findDOMNode(this.refs.mean).checked
-        });
+    handleChecked: function (stateAttribute) {
+        var self = this;
+        return function (e) {
+            var state = {};
+            state[stateAttribute] = e.target.checked;
+            self.setState(state);
+        };
     },
     render: function () {
         return (
             <div>
                 <div className="options">
                     <label htmlFor="display-highlight">
-                        Outline last click?
+                        Outline last click
                     </label>
                     <input type="checkbox"
                         defaultChecked={this.state.displayHighlight}
                         id="display-highlight"
-                        ref="highlight"
-                        onChange={this.handleHighlight} />
+                        onChange={this.handleChecked("displayHighlight")} />
                     <label htmlFor="grid-visible">
-                        Grid visible?
+                        Grid
                     </label>
                     <input type="checkbox"
                         defaultChecked={this.state.displayGrid}
                         id="grid-visible"
-                        ref="grid"
-                        onChange={this.handleGrid} />
+                        onChange={this.handleChecked("displayGrid")} />
                     <label htmlFor="mean-visible">
-                        Average (mean) visible?
+                        Mean (x̅)
                     </label>
                     <input type="checkbox"
                         defaultChecked={this.state.displayMean}
                         id="mean-visible"
-                        ref="mean"
-                        onChange={this.handleMean} />
+                        onChange={this.handleChecked("displayMean")} />
+                    <label htmlFor="median-visible">
+                        Median (M)
+                    </label>
+                    <input type="checkbox"
+                        defaultChecked={this.state.displayMedian}
+                        id="median-visible"
+                        onChange={this.handleChecked("displayMedian")} />
                 </div>
                 <div className="chart-container" ref="container">
                     <svg className={"histogram-chart " +

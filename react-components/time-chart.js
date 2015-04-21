@@ -10,6 +10,7 @@ var TimeChart = React.createClass({
             displayLabels: true,
             displayGrid: true,
             displayMean: false,
+            displayMedian: false,
             startingXMax: (this.props.started ?
                 this.props.started + this.minimumDuration :
                 (moment().valueOf() + this.minimumDuration))
@@ -88,24 +89,24 @@ var TimeChart = React.createClass({
                 .data(this.props.clicks).enter()
         );
 
-        var meanY = this.yScale(this.props.mean);
         this.mean = chart.append("line")
-            .attr("class", "average" +
-                (this.props.clicks.length && this.state.displayMean ?
-                    "" : " hidden"))
             .attr("x1", this.margins.left)
-            .attr("y1", meanY)
-            .attr("x2", width - this.margins.right)
-            .attr("y2", meanY);
+            .attr("x2", width - this.margins.right);
         this.meanLabel = chart.append("text")
-            .attr("class", "average" +
-                (this.props.clicks.length && this.state.displayMean ?
-                    "" : " hidden"))
-            .attr("y", meanY)
             .attr("x", this.margins.left)
             .attr("dy", ".35em")
-            .attr("dx", -5)
-            .text("Ø " + Math.round(this.props.mean * 1000) / 1000);
+            .attr("dx", -5);
+        this.updateAverage(this.mean, this.meanLabel, this.props.mean,
+            this.state.displayMean, "x̅");
+        this.median = chart.append("line")
+            .attr("x1", this.margins.left)
+            .attr("x2", width - this.margins.right);
+        this.medianLabel = chart.append("text")
+            .attr("x", this.margins.left)
+            .attr("dy", ".35em")
+            .attr("dx", -5);
+        this.updateAverage(this.median, this.medianLabel, this.props.median,
+            this.state.displayMedian, "M");
 
         window.addEventListener("resize", this.windowResized);
 
@@ -136,23 +137,18 @@ var TimeChart = React.createClass({
 
         var clicksWithActiveTime = this.clicksWithActiveTime();
 
+        // if we have a mean and it has changed, update the mean
         if (this.state.displayMean !== prevState.displayMean ||
-            this.props.mean !== prevProps.mean ||
-            this.props.clicks.length !== prevProps.clicks.length) {
-            var meanY = this.yScale(this.props.mean);
-            this.mean
-                .attr("class", "average" +
-                    (this.props.clicks.length && this.state.displayMean ?
-                        "" : " hidden"))
-                .attr("y1", meanY)
-                .attr("y2", meanY);
-            this.meanLabel
-                .attr("class", "average" +
-                    (this.props.clicks.length && this.state.displayMean ?
-                        "" : " hidden"))
-                .attr("y", meanY)
-                .text("Ø " + Math.round(this.props.mean * 1000) / 1000);
+            this.props.mean !== prevProps.mean) {
+            this.updateAverage(this.mean, this.meanLabel, this.props.mean,
+                this.state.displayMean, "x̅");
         }
+        if (this.state.displayMedian !== prevState.displayMedian ||
+            this.props.median !== prevProps.median) {
+            this.updateAverage(this.median, this.medianLabel, this.props.median,
+                this.state.displayMedian, "M");
+        }
+
         // performance optimization: if we have a lot of elements on the page,
         // only update the old dots (which probably don't need to move) when
         // a new dot shows up
@@ -230,13 +226,14 @@ var TimeChart = React.createClass({
         this.yAxisLabel
             .attr("x", -1 * height / 2);
 
-        var meanY = this.yScale(this.props.mean);
-        this.mean = this.mean
-            .attr("y1", meanY)
-            .attr("x2", width - this.margins.right)
-            .attr("y2", meanY);
-        this.meanLabel = this.meanLabel
-            .attr("y", meanY);
+        this.mean
+            .attr("x2", width - this.margins.right);
+        this.updateAverage(this.mean, this.meanLabel, this.props.mean,
+            this.state.displayMean, "x̅");
+        this.median
+            .attr("x2", width - this.margins.right);
+        this.updateAverage(this.median, this.medianLabel, this.props.median,
+            this.state.displayMedian, "M");
 
         this.updateDots(
             chart.selectAll("g.dot").data(this.clicksWithActiveTime())
@@ -304,26 +301,34 @@ var TimeChart = React.createClass({
                     (d.clicks > 1 ? (" × " + d.clicks) : "");
             });
     },
+    updateAverage: function (selection, labelSelection, prop, state, label) {
+        if (prop !== null) {
+            var meanY = this.yScale(prop);
+            selection
+                .attr("class", "average" +
+                    (prop !== null && state ? "" : " hidden"))
+                .attr("y1", meanY)
+                .attr("y2", meanY);
+            labelSelection
+                .attr("class", "average" +
+                    (prop !== null && state ? "" : " hidden"))
+                .attr("y", meanY)
+                .text(label + " " + Math.round(prop * 1000) / 1000);
+        }
+    },
     handleSlider: function () {
         this.setState({
             dotSize:
                 parseInt(React.findDOMNode(this.refs.slider).value, 10)
         });
     },
-    handleLabels: function () {
-        this.setState({
-            displayLabels: React.findDOMNode(this.refs.labels).checked
-        });
-    },
-    handleGrid: function () {
-        this.setState({
-            displayGrid: React.findDOMNode(this.refs.grid).checked
-        });
-    },
-    handleMean: function () {
-        this.setState({
-            displayMean: React.findDOMNode(this.refs.mean).checked
-        });
+    handleChecked: function (stateAttribute) {
+        var self = this;
+        return function (e) {
+            var state = {};
+            state[stateAttribute] = e.target.checked;
+            self.setState(state);
+        };
     },
     render: function () {
         return (
@@ -340,29 +345,33 @@ var TimeChart = React.createClass({
                         ref="slider"
                         onChange={this.handleSlider} />
                     <label htmlFor="labels-visible">
-                        Labels visible?
+                        Labels
                     </label>
                     <input type="checkbox"
                         defaultChecked={this.state.displayLabels}
                         id="labels-visible"
-                        ref="labels"
-                        onChange={this.handleLabels} />
+                        onChange={this.handleChecked("displayLabels")} />
                     <label htmlFor="grid-visible">
-                        Grid visible?
+                        Grid
                     </label>
                     <input type="checkbox"
                         defaultChecked={this.state.displayGrid}
                         id="grid-visible"
-                        ref="grid"
-                        onChange={this.handleGrid} />
+                        onChange={this.handleChecked("displayGrid")} />
                     <label htmlFor="mean-visible">
-                        Average (mean) visible?
+                        Mean (x̅)
                     </label>
                     <input type="checkbox"
                         defaultChecked={this.state.displayMean}
                         id="mean-visible"
-                        ref="mean"
-                        onChange={this.handleMean} />
+                        onChange={this.handleChecked("displayMean")} />
+                    <label htmlFor="median-visible">
+                        Median (M)
+                    </label>
+                    <input type="checkbox"
+                        defaultChecked={this.state.displayMedian}
+                        id="median-visible"
+                        onChange={this.handleChecked("displayMedian")} />
                 </div>
                 <div className="chart-container" ref="container">
                     <svg className={"time-chart " +

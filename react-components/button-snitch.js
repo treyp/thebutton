@@ -36,6 +36,7 @@ var ButtonSnitch = React.createClass({
             clicksTracked: totalClicks,
             sum: sum,
             mean: (sum / totalClicks),
+            median: this.calculateMedian(histogram, totalClicks),
             histogram: histogram,
             started: (clicks.length ?
                 moment(clicks[0].time - clicks[0].seconds) : this.state.started)
@@ -88,6 +89,7 @@ var ButtonSnitch = React.createClass({
             clicksTracked: totalClicks,
             sum: sum,
             mean: (sum / totalClicks),
+            median: this.calculateMedian(histogram, totalClicks),
             histogram: histogram
         };
     },
@@ -107,6 +109,7 @@ var ButtonSnitch = React.createClass({
             histogram: clickData.histogram,
             sum: clickData.sum,
             mean: clickData.mean,
+            median: clickData.median,
             windowWidth: 0,
             alertTime: null,
             deniedNotificationPermission: false,
@@ -142,7 +145,8 @@ var ButtonSnitch = React.createClass({
             },
             histogram: histogram,
             sum: 0,
-            mean: 60,
+            mean: null,
+            median: null,
             windowWidth: 0,
             alertTime: null,
             deniedNotificationPermission: false,
@@ -203,6 +207,7 @@ var ButtonSnitch = React.createClass({
             histogram: histogram,
             sum: sum,
             mean: sum / clicksTracked,
+            median: this.calculateMedian(histogram, clicksTracked),
             notifiedForCurrentClick: false,
             started: started
         });
@@ -238,9 +243,41 @@ var ButtonSnitch = React.createClass({
     },
     calculateMean: function () {
         if (!this.state.clicksTracked) {
-            return 60;
+            return null;
         }
         return this.state.sum / this.state.clicksTracked;
+    },
+    calculateMedian: function (histogram, clicksTracked) {
+        // instead of iterating over all clicks, we can use the histogram
+        // counts to more quickly find the median
+        if (!clicksTracked) {
+            return null;
+        }
+        // for even number of clicks, we have to average the two middle values
+        var sampleIsEven = (clicksTracked % 2 === 0);
+        var midRangeBottomDistanceFromEnd =
+            clicksTracked - (Math.ceil(clicksTracked / 2));
+        var midRangeTopDistanceFromEnd =
+            midRangeBottomDistanceFromEnd - (sampleIsEven ?  1 : 0);
+        var midRangeTop;
+        var midRangeBottom;
+        // iterate from the end to the beginning of the histogram since typical
+        // distribution is back-heavy (most clicks are purples)
+        var histogramIndex = histogram.length;
+        var distanceFromEnd = 0;
+        // we need to pass midRangeTopDistanceFromEnd clicks,
+        // then midRangeTop is the next value
+        while (distanceFromEnd <= midRangeTopDistanceFromEnd) {
+            histogramIndex = histogramIndex - 1;
+            distanceFromEnd = distanceFromEnd + histogram[histogramIndex];
+        }
+        midRangeTop = (histogramIndex + 1);
+        while (distanceFromEnd <= midRangeBottomDistanceFromEnd) {
+            histogramIndex = histogramIndex - 1;
+            distanceFromEnd = distanceFromEnd + histogram[histogramIndex];
+        }
+        midRangeBottom = (histogramIndex + 1);
+        return (midRangeTop + midRangeBottom) / 2;
     },
     updateChartSelection: function (chart) {
         this.setState({chartSelected: chart});
@@ -478,6 +515,7 @@ var ButtonSnitch = React.createClass({
                     clicks={this.state.clicks}
                     flairClass={this.flairClass}
                     mean={this.state.mean}
+                    median={this.state.median}
                     secondsRemaining={this.state.secondsRemaining}
                     connected={this.state.connected}
                     />;
@@ -487,6 +525,7 @@ var ButtonSnitch = React.createClass({
                     clicks={this.state.clicks}
                     flairClass={this.flairClass}
                     mean={this.state.mean}
+                    median={this.state.median}
                     histogram={this.state.histogram}
                     secondsRemaining={this.state.secondsRemaining}
                     connected={this.state.connected}

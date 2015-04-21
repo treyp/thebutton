@@ -169,7 +169,7 @@ var LogChart = React.createClass({
                         ref="slider"
                         onChange={this.handleSlider} />
                     <label htmlFor="gap-checkbox">
-                        Gap between bars?
+                        Gap between bars
                     </label>
                     <input type="checkbox"
                         defaultChecked={!!this.state.gapSize}
