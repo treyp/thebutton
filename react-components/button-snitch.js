@@ -347,6 +347,25 @@ var ButtonSnitch = React.createClass({
     windowResized: function () {
         this.setState({windowWidth: React.findDOMNode(this).offsetWidth});
     },
+    downloadClickHistory: function () {
+        var self = this;
+        var xhr = new XMLHttpRequest();
+        xhr.addEventListener("readystatechange", function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    return;
+                    // TODO: finish implementation of this. releasing so
+                    // traffic keeps the heroku dyno live.
+                    if (confirm ("Would you like to import some of the click " +
+                        "data before you got here?")) {
+                        self.importSavedClicks(this.responseText);
+                    }
+                }
+            }
+        }, false);
+        xhr.open("get", "//thebuttonsnitch.herokuapp.com/", true);
+        xhr.send();
+    },
     findWebSocketFromReddit: function () {
         var self = this;
         var xhr = new XMLHttpRequest();
@@ -492,6 +511,8 @@ var ButtonSnitch = React.createClass({
         }
 
         this.findWebSocketFromReddit();
+
+        this.downloadClickHistory();
     },
     componentWillUnmount: function () {
         clearInterval(this.interval);
