@@ -92,7 +92,7 @@ var Settings = React.createClass({
                             ref="beep"
                             onChange={this.updateBeep} />
                         <label htmlFor="alert-beep">
-                            Play a beep for new clicks?
+                            Play a beep for new clicks
                         </label>
                     </div>
                 </div>
@@ -132,7 +132,7 @@ var Settings = React.createClass({
                             ref="night"
                             onChange={this.updateNightMode} />
                         <label htmlFor="night-mode">
-                            Enable night mode?
+                            Enable night mode
                         </label>
                     </div>
                 </div>
