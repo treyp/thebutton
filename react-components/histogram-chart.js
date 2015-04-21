@@ -121,8 +121,7 @@ var HistogramChart = React.createClass({
             .attr("y2", height - this.margins.bottom);
         this.meanText = chart.append("text")
             .attr("y", this.margins.top)
-            .attr("dx", "-.35em")
-            .attr("dy", 10);
+            .attr("dy", -5);
         this.updateAverage(this.mean, this.meanText, this.props.mean,
             this.state.displayMean, "x̅");
         this.median = chart.append("line")
@@ -130,8 +129,7 @@ var HistogramChart = React.createClass({
             .attr("y2", height - this.margins.bottom);
         this.medianText = chart.append("text")
             .attr("y", this.margins.top)
-            .attr("dx", "-.35em")
-            .attr("dy", 10);
+            .attr("dy", -5);
         this.updateAverage(this.median, this.medianText, this.props.median,
             this.state.displayMedian, "M");
 
@@ -375,7 +373,8 @@ var HistogramChart = React.createClass({
         if (prevProps.histogram !== this.props.histogram ||
             prevState.displayHighlight !== this.state.displayHighlight ||
             prevState.displayGrid !== this.state.displayGrid ||
-            prevState.displayMean !== this.state.displayMean) {
+            prevState.displayMean !== this.state.displayMean ||
+            prevState.displayMedian !== this.state.displayMedian) {
             this.updateChart();
         }
     },

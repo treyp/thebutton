@@ -539,7 +539,7 @@ line.flair-press-6 {
 }
 
 .histogram-chart text.average {
-    text-anchor: end;
+    text-anchor: middle;
     font-size: 12px;
     fill: #777;
     text-shadow: 0 0 1px #fff;
