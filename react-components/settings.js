@@ -2,7 +2,8 @@ var Settings = React.createClass({
     mixins: [React.addons.PureRenderMixin],
     getInitialState: function () {
         return {
-            discardAfter: this.props.discardAfter
+            discardAfter: this.props.discardAfter,
+            replaySpeed: 1
         };
     },
     componentDidMount: function () {
@@ -49,6 +50,19 @@ var Settings = React.createClass({
         this.props.import(el.value.trim());
         el.value = "";
     },
+    submitReplay: function (e) {
+        e.preventDefault();
+        var replay = React.findDOMNode(this.refs.replayInput);
+        var speed = React.findDOMNode(this.refs.speedInput);
+        this.props.replay(replay.value.trim(),speed.value.trim());
+        replay.value = "";
+    },
+    updateReplaySpeed: function () {
+        this.setState({
+            replaySpeed: React.findDOMNode(this.refs.speedInput).value.trim()
+        });
+    },
+    
     render: function () {
         return (
             <div>
@@ -174,6 +188,38 @@ var Settings = React.createClass({
                             spellcheck="false"
                             value={JSON.stringify(this.props.clicks)} />
                     </div>
+                </div>
+                <div className="setting">
+                    <form onSubmit={this.submitReplay}>
+                        <div className="row">
+                            <label htmlFor="replay-input">
+                                Replay click data
+                            </label>
+                        </div>
+                        <div className="row">
+                            <textarea
+                                ref="replayInput"
+                                id="replay-input"
+                                autocomplete="off"
+                                spellcheck="false" />
+                        </div>
+                        <div className="row">
+                                <input
+                                    type="number"
+                                    min="1"
+                                    id="speed-input"
+                                    value={this.state.replaySpeed}
+                                    onChange={this.updateReplaySpeed}
+                                    ref="speedInput" />
+                                <label htmlFor="speed-input">x replay speed</label>
+                        </div>
+                        <div className="row">
+                            <input
+                                type="submit"
+                                value="Replay"
+                                id="replay-submit" />
+                        </div>
+                    </form>
                 </div>
             </div>
         );

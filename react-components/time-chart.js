@@ -5,7 +5,7 @@ var TimeChart = React.createClass({
     getInitialState: function () {
         return {
             dotSize: 5,
-            lastSynced: moment().valueOf(),
+            lastSynced: (this.props.now_moment ? this.props.now_moment.valueOf() : moment().valueOf()),
             lastTime: 60,
             displayLabels: true,
             displayGrid: true,
@@ -13,7 +13,7 @@ var TimeChart = React.createClass({
             displayMedian: false,
             startingXMax: (this.props.started ?
                 this.props.started + this.minimumDuration :
-                (moment().valueOf() + this.minimumDuration))
+                ((this.props.now_moment ? this.props.now_moment.valueOf() : moment().valueOf()) + this.minimumDuration))
         };
     },
     componentDidMount: function () {
@@ -120,7 +120,7 @@ var TimeChart = React.createClass({
     },
     componentWillReceiveProps: function(props) {
         this.setState({
-            lastSynced: moment().valueOf(),
+            lastSynced: (props.now_moment? props.now_moment.valueOf():moment().valueOf()),
             lastTime: props.secondsRemaining,
             startingXMax: props.started ?
                 props.started + this.minimumDuration : 0
@@ -210,7 +210,7 @@ var TimeChart = React.createClass({
                 this.props.started.valueOf(),
                 Math.max(
                     this.state.startingXMax,
-                    moment().valueOf())
+                    (this.props.now_moment ? this.props.now_moment.valueOf() : moment().valueOf()))
             ]), width);
         this.xAxisLabel
             .attr("x", width / 2)
@@ -245,7 +245,7 @@ var TimeChart = React.createClass({
         }
         return this.props.clicks.concat({
             seconds: this.props.secondsRemaining,
-            time: moment().valueOf(),
+            time: (this.props.now_moment ? this.props.now_moment.valueOf() : moment().valueOf()),
             color: this.props.flairClass(this.props.secondsRemaining),
             clicks: 0
         });
@@ -257,8 +257,8 @@ var TimeChart = React.createClass({
                     .select("g.dot:last-child")
                     .data([{
                         seconds: this.state.lastTime -
-                            ((moment() - this.state.lastSynced) / 1000),
-                        time: moment(),
+                            (((this.props.now_moment ? this.props.now_moment : moment()) - this.state.lastSynced) / 1000),
+                        time: (this.props.now_moment ? this.props.now_moment : moment()),
                         color: this.props.flairClass(this.state.lastTime),
                         clicks: 0
                     }])
