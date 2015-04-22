@@ -4,7 +4,7 @@ var LogChart = React.createClass({
         return {
             barHeight: 20,
             gapSize: 1,
-            lastSynced: moment().valueOf(),
+            lastSynced: (this.props.now_moment ? this.props.now_moment.valueOf() : moment().valueOf()),
             lastTime: 60
         };
     },
@@ -36,7 +36,7 @@ var LogChart = React.createClass({
     componentWillReceiveProps: function(nextProps) {
         if (this.props.secondsRemaining !== nextProps.secondsRemaining) {
             this.setState({
-                lastSynced: moment().valueOf(),
+                lastSynced: (this.props.now_moment ? this.props.now_moment.valueOf() : moment().valueOf()),
                 lastTime: nextProps.secondsRemaining
             });
         }
@@ -70,7 +70,7 @@ var LogChart = React.createClass({
                     .select("g:last-child")
                     .data([{
                         seconds: this.state.lastTime -
-                            ((moment() - this.state.lastSynced) / 1000),
+                            (((this.props.now_moment ? this.props.now_moment : moment()) - this.state.lastSynced) / 1000),
                         time: null, // we don't use this here anyway
                         color: this.props.flairClass(this.state.lastTime),
                         clicks: 0

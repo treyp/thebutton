@@ -5,8 +5,11 @@ var StatsDisplay = React.createClass({
         var runningDuration = "Loading…";
         if (this.props.connected) {
             runningSince = "since " + this.props.started.format("LTS");
-            runningDuration =
-                moment.duration(moment().diff(this.props.started)).humanize();
+            if (this.props.now_moment) {
+                runningDuration = moment.duration(this.props.now_moment.diff(this.props.started)).humanize();
+            } else {
+                runningDuration = moment.duration(moment().diff(this.props.started)).humanize();
+            }
         }
         return (
             <div className="stats">
