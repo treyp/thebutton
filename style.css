@@ -283,6 +283,10 @@ a {
     text-anchor: middle;
 }
 
+.night-mode .time-chart .dot text {
+    fill: #ccc;
+}
+
 .time-chart.with-labels .dot text {
     font-size: 10px;
     text-shadow: 0 0 1px #fff;
@@ -290,7 +294,6 @@ a {
 
 .night-mode .time-chart.with-labels .dot text {
     text-shadow: 0 0 1px #000;
-    fill: #ccc;
 }
 
 .time-chart.with-labels .dot:hover text {
