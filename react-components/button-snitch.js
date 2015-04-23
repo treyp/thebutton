@@ -582,7 +582,7 @@ var ButtonSnitch = React.createClass({
                 clearNotice={this.clearNotice} />;
         }
         return (
-            <div>
+            <div className={this.state.displayImportNotice ? "with-notice" : ""}>
                 {importNotice}
                 <header id="nav">
                     <div className="right-nav">

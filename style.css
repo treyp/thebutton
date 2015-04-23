@@ -232,13 +232,16 @@ a {
 }
 
 .options {
-    position: relative;
-    z-index: 1;
     background-color: #f8f8f8;
     border-bottom: 1px solid #e7e7e7;
     padding: 0 10px;
     margin-bottom: 20px;
     line-height: 20px;
+}
+
+.with-notice .options {
+    position: relative;
+    z-index: 1;
 }
 
 .night-mode .options {
