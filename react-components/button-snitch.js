@@ -43,6 +43,12 @@ var ButtonSnitch = React.createClass({
                 moment(clicks[0].time - ((60-clicks[0].seconds) * 1000)) : this.state.started)
         });
     },
+    now: function () {
+        if (this.replayTick) {
+            return this.replayTick.displayMoment;
+        }
+        return moment();
+    },
     replayClicks: function(data, speed) {
         if (this.state.replayInterval) {
             window.clearInterval(this.state.replayInterval);
@@ -67,7 +73,7 @@ var ButtonSnitch = React.createClass({
         this.replayTick = {
             participants: 0,
             seconds_left: 60.0,
-            now_moment: moment(clicks[0].time - ((60-clicks[0].seconds) * 1000)),
+            displayMoment: moment(clicks[0].time - ((60-clicks[0].seconds) * 1000)),
             speed: speed
         };
         //make sure this exists
@@ -93,11 +99,11 @@ var ButtonSnitch = React.createClass({
         
         //update the fake tick data
         this.replayTick.seconds_left-=.5;
-        this.replayTick.now_moment.add(.5,'s');
+        this.replayTick.displayMoment.add(.5,'s');
 
         //check to see if there were clicks
         var click;
-        while (this.replayTick.now_moment.isAfter(self.state.replayClicks[0].time)) {
+        while (this.replayTick.displayMoment.isAfter(self.state.replayClicks[0].time)) {
             click = self.state.replayClicks.shift();
             this.replayTick.participants+=click.clicks;
             this.replayTick.seconds_left=60.0;
@@ -275,8 +281,9 @@ var ButtonSnitch = React.createClass({
     },
     addTime: function (seconds, clicks, clickMoment) {
         var colorCounts = {};
-        if (!clickMoment) {clickMoment = moment().valueOf(); }
-        
+        if (!clickMoment) {
+            clickMoment = moment().valueOf();
+        }
         // shallow clone of this.state.colorCounts
         for (var k in this.state.colorCounts) {
             colorCounts[k] = this.state.colorCounts[k];
@@ -632,7 +639,7 @@ var ButtonSnitch = React.createClass({
                    flairClass={this.flairClass}
                    secondsRemaining={this.state.secondsRemaining}
                    connected={this.state.connected}
-                   now_moment={this.replayTick?this.replayTick.now_moment:null}
+                   now={this.now}
                    />;
                 break;
             case "time":
@@ -644,7 +651,7 @@ var ButtonSnitch = React.createClass({
                     median={this.state.median}
                     secondsRemaining={this.state.secondsRemaining}
                     connected={this.state.connected}
-                    now_moment={this.replayTick?this.replayTick.now_moment:null}
+                    now={this.now}
                     />;
                 break;
             case "histogram":
@@ -714,7 +721,7 @@ var ButtonSnitch = React.createClass({
                         participants={this.state.participants}
                         connected={this.state.connected}
                         count={this.state.ticks}
-                        now_moment={this.replayTick?this.replayTick.now_moment:null} />
+                        now={this.now} />
                     <ChartSelector
                         updateChartSelection={this.updateChartSelection}
                         chartSelected={this.state.chartSelected}
