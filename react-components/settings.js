@@ -44,7 +44,7 @@ var Settings = React.createClass({
         this.props.updateNightMode(React.findDOMNode(this.refs.night).checked);
     },
     clearData: function () {
-        if (this.props.clicks.length - this.props.entriesImported > 0) {
+        if (this.props.clicks.length - this.props.entriesImported > 10) {
             var confirmation = "You've tracked more than ten entries. " +
                 "Are you sure you want to clear everything out?";
             if (!window.confirm(confirmation)) {
