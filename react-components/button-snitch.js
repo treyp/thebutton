@@ -126,7 +126,6 @@ var ButtonSnitch = React.createClass({
             sum: clickData.sum,
             mean: clickData.mean,
             median: clickData.median,
-            windowWidth: 0,
             alertTime: null,
             deniedNotificationPermission: false,
             notifiedForCurrentClick: false,
@@ -165,7 +164,6 @@ var ButtonSnitch = React.createClass({
             sum: 0,
             mean: null,
             median: null,
-            windowWidth: 0,
             alertTime: null,
             deniedNotificationPermission: false,
             notifiedForCurrentClick: false,
@@ -363,9 +361,6 @@ var ButtonSnitch = React.createClass({
             this.setState({notifiedForCurrentClick: true});
         }
     },
-    windowResized: function () {
-        this.setState({windowWidth: React.findDOMNode(this).offsetWidth});
-    },
     downloadClickHistory: function () {
         var self = this;
         var xhr = new XMLHttpRequest();
@@ -517,11 +512,6 @@ var ButtonSnitch = React.createClass({
     componentDidMount: function () {
         this.interval = setInterval(this.tick, 100);
 
-        // thanks to React's autobinding, no need to worry about 'this' in the
-        // handler call
-        window.addEventListener("resize", this.windowResized);
-        this.windowResized();
-
         window.addEventListener("beforeunload", this.promptToExit);
 
         if (window.Notification && Notification.permission === "denied") {
@@ -534,7 +524,6 @@ var ButtonSnitch = React.createClass({
     },
     componentWillUnmount: function () {
         clearInterval(this.interval);
-        window.removeEventListener("resize", this.windowResized);
     },
     render: function () {
         var selectedChart;
@@ -544,7 +533,6 @@ var ButtonSnitch = React.createClass({
                selectedChart = <LogChart
                    clicks={this.state.clicks}
                    flairClass={this.flairClass}
-                   width={this.state.windowWidth}
                    secondsRemaining={this.state.secondsRemaining}
                    connected={this.state.connected}
                    />;

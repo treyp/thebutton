@@ -10,14 +10,15 @@ var LogChart = React.createClass({
     },
     componentDidMount: function () {
         var chart = d3.select(React.findDOMNode(this.refs.chart));
+        var width = document.body.offsetWidth;
 
         this.xScale = d3.scale.linear()
             .domain([0, 60])
-            .range([0, this.props.width]);
+            .range([0, width]);
 
         this.addBarsToSelection(
             chart
-                .attr("width", this.props.width)
+                .attr("width", width)
                 .selectAll("g")
                 .data(this.clicksWithActiveTime()).enter()
         );
@@ -137,9 +138,10 @@ var LogChart = React.createClass({
             });
     },
     windowResized: function () {
+        var width = document.body.offsetWidth;
         var chart = d3.select(React.findDOMNode(this.refs.chart));
-        chart.attr("width", this.props.width);
-        this.xScale = this.xScale.range([0, this.props.width]);
+        chart.attr("width", width);
+        this.xScale = this.xScale.range([0, width]);
         this.updateBarsWidth(
             chart.selectAll("g").data(this.clicksWithActiveTime()));
     },
