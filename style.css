@@ -273,6 +273,7 @@ a {
     left: 20px;
     right: 20px;
     bottom: 20px;
+    z-index: -1;
 }
 
 .time-chart .hidden {
