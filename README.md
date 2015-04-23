@@ -23,8 +23,12 @@ Monitor [Reddit](//www.reddit.com/)'s [/r/thebutton](//www.reddit.com/r/thebutto
 - [x] Add current time to histogram chart (suggestion from [/u/shotgun_nancy](//www.reddit.com/user/shotgun_nancy))
 - [x] Fix all the bugs introduced by the data discarding feature (reported by [/u/TOTALLY_ATHIEST](//www.reddit.com/user/TOTALLY_ATHIEST))
 - [x] Add a new darker theme called night mode (suggestion from [/u/SohnoJam](//www.reddit.com/user/SohnoJam))
+- [ ] Import historical data on first load
+- [ ] Show time zone on time axes
+- [ ] Dual chart display (request from [/u/argash](//www.reddit.com/user/argash))
+- [ ] Breakdown of percentage of time spent in each color (request from [/u/carpevirginem](//www.reddit.com/user/carpevirginem))
 - [ ] Beep support like Squire
-- [ ] Scroll to zoom
+- [ ] Scroll to zoom, or at least support clamping to start/end times selectable in options bar
 - [ ] Horizontal option for log chart
 - [ ] Export graph to an image
 - [ ] Make header responsive
