@@ -239,6 +239,11 @@ a {
     line-height: 20px;
 }
 
+.with-notice .options {
+    position: relative;
+    z-index: 1;
+}
+
 .night-mode .options {
     background-color: #080808;
     border-bottom-color: #191919;
@@ -273,7 +278,6 @@ a {
     left: 20px;
     right: 20px;
     bottom: 20px;
-    z-index: -1;
 }
 
 .time-chart .hidden {
