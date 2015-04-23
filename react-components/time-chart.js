@@ -7,7 +7,7 @@ var TimeChart = React.createClass({
             dotSize: 5,
             lastSynced: moment().valueOf(),
             lastTime: 60,
-            displayLabels: true,
+            displayLabels: false,
             displayGrid: true,
             displayMean: false,
             displayMedian: false,
@@ -129,8 +129,7 @@ var TimeChart = React.createClass({
     componentDidUpdate: function (prevProps, prevState) {
         var chart = d3.select(React.findDOMNode(this.refs.chart));
 
-        if (!this.props.connected) {
-            // remove the active dot
+        if (!this.props.connected && this.props.clicks === prevProps.clicks) {
             chart.selectAll("g.dot").data(this.props.clicks).exit().remove();
             return;
         }

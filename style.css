@@ -625,6 +625,38 @@ line.flair-press-6 {
     margin-bottom: 20px;
 }
 
+.import-notice {
+    padding-left: 10px;
+    background-color: #333;
+    color: #e7e7e7;
+    line-height: 38px;
+}
+
+.night-mode .import-notice {
+    background-color: #ccc;
+    color: #191919;
+}
+
+.import-notice .close {
+    float: right;
+    margin-left: 10px;
+    font-size: 25px;
+    color: red;
+    font-weight: bold;
+    padding: 0 10px;
+}
+
+.import-notice .time-remaining {
+    display: inline-block;
+    vertical-align: middle;
+    width: 2em;
+    font-size: 24px;
+}
+
+.import-notice .action {
+    margin-left: 2em;
+}
+
 .audio {
     display: none;
 }

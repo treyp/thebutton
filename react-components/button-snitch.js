@@ -34,12 +34,27 @@ var ButtonSnitch = React.createClass({
             clicks: clicks.concat(this.state.clicks),
             colorCounts: colorCounts,
             clicksTracked: totalClicks,
+            entriesImported: this.state.entriesImported + clicks.length,
             sum: sum,
             mean: (sum / totalClicks),
             median: this.calculateMedian(histogram, totalClicks),
             histogram: histogram,
             started: (clicks.length ?
                 moment(clicks[0].time - clicks[0].seconds) : this.state.started)
+        });
+    },
+    clearClicks: function () {
+        var initialState = this.getInitialState();
+        this.setState({
+            clicks: initialState.clicks,
+            colorCounts: initialState.colorCounts,
+            clicksTracked: initialState.clicksTracked,
+            entriesImported: initialState.entriesImported,
+            sum: initialState.sum,
+            mean: initialState.mean,
+            median: initialState.median,
+            histogram: initialState.histogram,
+            started: moment(),
         });
     },
     generateFakeClicks: function (quantity) {
@@ -100,6 +115,7 @@ var ButtonSnitch = React.createClass({
             connected: true,
             started: moment(clickData.clicks[0].time),
             clicksTracked: clickData.clicksTracked,
+            entriesImported: 0,
             lag: Math.round(Math.random() * 2000),
             participants: 0,
             secondsRemaining: 60.0,
@@ -117,7 +133,8 @@ var ButtonSnitch = React.createClass({
             lastTimeTrackedForCurrentClick: 60,
             beep: false,
             discardAfter: false,
-            nightMode: false
+            nightMode: false,
+            displayImportNotice: false
         };
     },
     getInitialStateReal: function () {
@@ -130,6 +147,7 @@ var ButtonSnitch = React.createClass({
             connected: false,
             started: null,
             clicksTracked: 0,
+            entriesImported: 0,
             lag: 0,
             participants: 0,
             secondsRemaining: 60.0,
@@ -154,7 +172,8 @@ var ButtonSnitch = React.createClass({
             lastTimeTrackedForCurrentClick: 60,
             beep: false,
             discardAfter: false,
-            nightMode: false
+            nightMode: false,
+            displayImportNotice: false
         };
     },
     tick: function () {
@@ -353,13 +372,10 @@ var ButtonSnitch = React.createClass({
         xhr.addEventListener("readystatechange", function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    return;
                     // TODO: finish implementation of this. releasing so
                     // traffic keeps the heroku dyno live.
-                    if (confirm ("Would you like to import some of the click " +
-                        "data before you got here?")) {
-                        self.importSavedClicks(this.responseText);
-                    }
+                    self.importSavedClicks(this.responseText);
+                    self.setState({displayImportNotice: true});
                 }
             }
         }, false);
@@ -433,7 +449,6 @@ var ButtonSnitch = React.createClass({
         socket.onmessage = function (event) {
             /* jshint camelcase: false */
             // disabling camelcase since reddit uses underscore style here
-            // also bumping maxstatements until i have a chance to refactor
             /*
             sample tick data:
             {
@@ -489,12 +504,15 @@ var ButtonSnitch = React.createClass({
         };
     },
     promptToExit: function (event) {
-        if (this.state.clicksTracked > 10) {
-            var confirmation = "You've tracked more than ten clicks. " +
+        if (this.state.clicks.length - this.state.entriesImported > 10) {
+            var confirmation = "You've tracked more than ten entries. " +
                 "Are you sure you want to leave?";
             (event || window.event).returnValue = confirmation;
             return confirmation;
         }
+    },
+    clearNotice: function () {
+        this.setState({displayImportNotice: false});
     },
     componentDidMount: function () {
         this.interval = setInterval(this.tick, 100);
@@ -520,6 +538,7 @@ var ButtonSnitch = React.createClass({
     },
     render: function () {
         var selectedChart;
+        var importNotice;
         switch (this.state.chartSelected) {
             case "log":
                selectedChart = <LogChart
@@ -567,8 +586,14 @@ var ButtonSnitch = React.createClass({
                     import={this.importSavedClicks}
                     clicks={this.state.clicks} />;
         }
+        if (this.state.displayImportNotice) {
+            importNotice = <ImportNotice
+                clearClicks={this.clearClicks}
+                clearNotice={this.clearNotice} />;
+        }
         return (
             <div>
+                {importNotice}
                 <header id="nav">
                     <div className="right-nav">
                         <span className="row links">
