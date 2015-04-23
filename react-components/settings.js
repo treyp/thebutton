@@ -44,6 +44,16 @@ var Settings = React.createClass({
     updateNightMode: function () {
         this.props.updateNightMode(React.findDOMNode(this.refs.night).checked);
     },
+    clearData: function () {
+        if (this.props.clicks.length - this.props.entriesImported > 10) {
+            var confirmation = "You've tracked more than ten entries. " +
+                "Are you sure you want to clear everything out?";
+            if (!window.confirm(confirmation)) {
+                return;
+            }
+        }
+        this.props.clearClicks();
+    },
     submitImport: function (e) {
         e.preventDefault();
         var el = React.findDOMNode(this.refs.importInput);
@@ -111,6 +121,24 @@ var Settings = React.createClass({
                     </div>
                 </div>
                 <div className="setting">
+                    <div className="row">
+                        <input
+                            type="checkbox"
+                            defaultChecked={this.props.nightMode}
+                            id="night-mode"
+                            ref="night"
+                            onChange={this.updateNightMode} />
+                        <label htmlFor="night-mode">
+                            Enable night mode
+                        </label>
+                    </div>
+                </div>
+                <div className="setting">
+                    <div className="row">
+                        <a onClick={this.clearData}>Clear all data and start over</a>
+                    </div>
+                </div>
+                <div className="setting">
                         <div className="row">
                             <label htmlFor="discard-input">
                                 Discard data older than:
@@ -136,19 +164,6 @@ var Settings = React.createClass({
                         </form>
                         <div className="row detail">Leave blank to retain all data</div>
                         <div className="row detail">Each data entry (seen as one dot or row) may represent multiple clicks</div>
-                </div>
-                <div className="setting">
-                    <div className="row">
-                        <input
-                            type="checkbox"
-                            defaultChecked={this.props.nightMode}
-                            id="night-mode"
-                            ref="night"
-                            onChange={this.updateNightMode} />
-                        <label htmlFor="night-mode">
-                            Enable night mode
-                        </label>
-                    </div>
                 </div>
                 <div className="setting">
                     <form onSubmit={this.submitImport}>

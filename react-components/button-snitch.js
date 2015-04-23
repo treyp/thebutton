@@ -34,6 +34,7 @@ var ButtonSnitch = React.createClass({
             clicks: clicks.concat(this.state.clicks),
             colorCounts: colorCounts,
             clicksTracked: totalClicks,
+            entriesImported: this.state.entriesImported + clicks.length,
             sum: sum,
             mean: (sum / totalClicks),
             median: this.calculateMedian(histogram, totalClicks),
@@ -129,6 +130,20 @@ var ButtonSnitch = React.createClass({
         this.previousSecondsLeft = this.replayTick.seconds_left;
         this.previousParticipants = currentParticipants;
     },
+    clearClicks: function () {
+        var initialState = this.getInitialState();
+        this.setState({
+            clicks: initialState.clicks,
+            colorCounts: initialState.colorCounts,
+            clicksTracked: initialState.clicksTracked,
+            entriesImported: initialState.entriesImported,
+            sum: initialState.sum,
+            mean: initialState.mean,
+            median: initialState.median,
+            histogram: initialState.histogram,
+            started: moment(),
+        });
+    },
     generateFakeClicks: function (quantity) {
         var clicks = [];
         var colorCounts = {
@@ -188,6 +203,7 @@ var ButtonSnitch = React.createClass({
             socket: null,            
             started: moment(clickData.clicks[0].time),
             clicksTracked: clickData.clicksTracked,
+            entriesImported: 0,
             lag: Math.round(Math.random() * 2000),
             participants: 0,
             secondsRemaining: 60.0,
@@ -198,7 +214,6 @@ var ButtonSnitch = React.createClass({
             sum: clickData.sum,
             mean: clickData.mean,
             median: clickData.median,
-            windowWidth: 0,
             alertTime: null,
             deniedNotificationPermission: false,
             notifiedForCurrentClick: false,
@@ -207,8 +222,8 @@ var ButtonSnitch = React.createClass({
             discardAfter: false,
             nightMode: false,
             replayInterval:null,
-            replayClicks:null
-            
+            replayClicks:null,
+            displayImportNotice: false
         };
     },
     getInitialStateReal: function () {
@@ -222,6 +237,7 @@ var ButtonSnitch = React.createClass({
             socket: null,
             started: null,
             clicksTracked: 0,
+            entriesImported: 0,
             lag: 0,
             participants: 0,
             secondsRemaining: 60.0,
@@ -239,7 +255,6 @@ var ButtonSnitch = React.createClass({
             sum: 0,
             mean: null,
             median: null,
-            windowWidth: 0,
             alertTime: null,
             deniedNotificationPermission: false,
             notifiedForCurrentClick: false,
@@ -248,8 +263,8 @@ var ButtonSnitch = React.createClass({
             discardAfter: false,
             nightMode: false,
             replayInterval:null,
-            replayClicks:null
-            
+            replayClicks:null,
+            displayImportNotice: false
         };
     },
     tick: function () {
@@ -441,22 +456,16 @@ var ButtonSnitch = React.createClass({
             this.setState({notifiedForCurrentClick: true});
         }
     },
-    windowResized: function () {
-        this.setState({windowWidth: React.findDOMNode(this).offsetWidth});
-    },
     downloadClickHistory: function () {
         var self = this;
         var xhr = new XMLHttpRequest();
         xhr.addEventListener("readystatechange", function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    return;
                     // TODO: finish implementation of this. releasing so
                     // traffic keeps the heroku dyno live.
-                    if (confirm ("Would you like to import some of the click " +
-                        "data before you got here?")) {
-                        self.importSavedClicks(this.responseText);
-                    }
+                    self.importSavedClicks(this.responseText);
+                    self.setState({displayImportNotice: true});
                 }
             }
         }, false);
@@ -532,7 +541,6 @@ var ButtonSnitch = React.createClass({
         socket.onmessage = function (event) {
             /* jshint camelcase: false */
             // disabling camelcase since reddit uses underscore style here
-            // also bumping maxstatements until i have a chance to refactor
             /*
             sample tick data:
             {
@@ -588,20 +596,18 @@ var ButtonSnitch = React.createClass({
         };
     },
     promptToExit: function (event) {
-        if (this.state.clicksTracked > 10) {
-            var confirmation = "You've tracked more than ten clicks. " +
+        if (this.state.clicks.length - this.state.entriesImported > 10) {
+            var confirmation = "You've tracked more than ten entries. " +
                 "Are you sure you want to leave?";
             (event || window.event).returnValue = confirmation;
             return confirmation;
         }
     },
+    clearNotice: function () {
+        this.setState({displayImportNotice: false});
+    },
     componentDidMount: function () {
         this.interval = setInterval(this.tick, 100);
-
-        // thanks to React's autobinding, no need to worry about 'this' in the
-        // handler call
-        window.addEventListener("resize", this.windowResized);
-        this.windowResized();
 
         window.addEventListener("beforeunload", this.promptToExit);
 
@@ -615,16 +621,15 @@ var ButtonSnitch = React.createClass({
     },
     componentWillUnmount: function () {
         clearInterval(this.interval);
-        window.removeEventListener("resize", this.windowResized);
     },
     render: function () {
         var selectedChart;
+        var importNotice;
         switch (this.state.chartSelected) {
             case "log":
                selectedChart = <LogChart
                    clicks={this.state.clicks}
                    flairClass={this.flairClass}
-                   width={this.state.windowWidth}
                    secondsRemaining={this.state.secondsRemaining}
                    connected={this.state.connected}
                    now_moment={this.replayTick?this.replayTick.now_moment:null}
@@ -667,10 +672,18 @@ var ButtonSnitch = React.createClass({
                     updateNightMode={this.updateNightMode}
                     import={this.importSavedClicks}
                     replay={this.replayClicks}
-                    clicks={this.state.clicks} />;
+                    clicks={this.state.clicks}
+                    entriesImported={this.state.entriesImported}
+                    clearClicks={this.clearClicks} />;
+        }
+        if (this.state.displayImportNotice) {
+            importNotice = <ImportNotice
+                clearClicks={this.clearClicks}
+                clearNotice={this.clearNotice} />;
         }
         return (
             <div>
+                {importNotice}
                 <header id="nav">
                     <div className="right-nav">
                         <span className="row links">
