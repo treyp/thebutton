@@ -499,8 +499,8 @@ var ButtonSnitch = React.createClass({
         };
     },
     promptToExit: function (event) {
-        if (this.state.clicks.length - this.state.entriesImported > 10) {
-            var confirmation = "You've tracked more than ten entries. " +
+        if (this.state.clicks.length - this.state.entriesImported > 1500) {
+            var confirmation = "You've tracked a lot of data. " +
                 "Are you sure you want to leave?";
             (event || window.event).returnValue = confirmation;
             return confirmation;
