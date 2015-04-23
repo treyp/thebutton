@@ -584,7 +584,9 @@ var ButtonSnitch = React.createClass({
                     nightMode={this.state.nightMode}
                     updateNightMode={this.updateNightMode}
                     import={this.importSavedClicks}
-                    clicks={this.state.clicks} />;
+                    clicks={this.state.clicks}
+                    entriesImported={this.state.entriesImported}
+                    clearClicks={this.clearClicks} />;
         }
         if (this.state.displayImportNotice) {
             importNotice = <ImportNotice
