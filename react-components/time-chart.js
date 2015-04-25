@@ -5,7 +5,7 @@ var TimeChart = React.createClass({
     getInitialState: function () {
         return {
             dotSize: 5,
-            lastSynced: moment().valueOf(),
+            lastSynced: this.props.now().valueOf(),
             lastTime: 60,
             displayLabels: false,
             displayGrid: true,
@@ -13,7 +13,7 @@ var TimeChart = React.createClass({
             displayMedian: false,
             startingXMax: (this.props.started ?
                 this.props.started + this.minimumDuration :
-                (moment().valueOf() + this.minimumDuration))
+                (this.props.now().valueOf() + this.minimumDuration))
         };
     },
     componentDidMount: function () {
@@ -120,7 +120,7 @@ var TimeChart = React.createClass({
     },
     componentWillReceiveProps: function(props) {
         this.setState({
-            lastSynced: moment().valueOf(),
+            lastSynced: this.props.now().valueOf(),
             lastTime: props.secondsRemaining,
             startingXMax: props.started ?
                 props.started + this.minimumDuration : 0
@@ -129,7 +129,8 @@ var TimeChart = React.createClass({
     componentDidUpdate: function (prevProps, prevState) {
         var chart = d3.select(React.findDOMNode(this.refs.chart));
 
-        if (!this.props.connected && this.props.clicks === prevProps.clicks) {
+        if (!this.props.connected && !this.props.replaying &&
+            this.props.clicks === prevProps.clicks) {
             chart.selectAll("g.dot").data(this.props.clicks).exit().remove();
             return;
         }
@@ -151,7 +152,8 @@ var TimeChart = React.createClass({
         // performance optimization: if we have a lot of elements on the page,
         // only update the old dots (which probably don't need to move) when
         // a new dot shows up
-        if (this.props.clicks.length > 300 && this.props.connected &&
+        if (this.props.clicks.length > 300 &&
+            (this.props.connected || this.props.replaying) &&
             this.props.clicks === prevProps.clicks &&
             this.state.dotSize == prevState.dotSize) {
             // update active dot
@@ -210,7 +212,7 @@ var TimeChart = React.createClass({
                 this.props.started.valueOf(),
                 Math.max(
                     this.state.startingXMax,
-                    moment().valueOf())
+                    this.props.now().valueOf())
             ]), width);
         this.xAxisLabel
             .attr("x", width / 2)
@@ -240,12 +242,12 @@ var TimeChart = React.createClass({
         );
     },
     clicksWithActiveTime: function () {
-        if (!this.props.connected) {
+        if (!this.props.connected && !this.props.replaying) {
             return this.props.clicks;
         }
         return this.props.clicks.concat({
             seconds: this.props.secondsRemaining,
-            time: moment().valueOf(),
+            time: this.props.now().valueOf(),
             color: this.props.flairClass(this.props.secondsRemaining),
             clicks: 0
         });
@@ -257,8 +259,8 @@ var TimeChart = React.createClass({
                     .select("g.dot:last-child")
                     .data([{
                         seconds: this.state.lastTime -
-                            ((moment() - this.state.lastSynced) / 1000),
-                        time: moment(),
+                            ((this.props.now() - this.state.lastSynced) / 1000),
+                        time: this.props.now(),
                         color: this.props.flairClass(this.state.lastTime),
                         clicks: 0
                     }])

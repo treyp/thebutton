@@ -2,7 +2,8 @@ var Settings = React.createClass({
     mixins: [React.addons.PureRenderMixin],
     getInitialState: function () {
         return {
-            discardAfter: this.props.discardAfter
+            discardAfter: this.props.discardAfter,
+            replaySpeed: 100
         };
     },
     componentDidMount: function () {
@@ -59,6 +60,19 @@ var Settings = React.createClass({
         this.props.import(el.value.trim());
         el.value = "";
     },
+    submitReplay: function (e) {
+        e.preventDefault();
+        var replay = React.findDOMNode(this.refs.replayInput);
+        var speed = React.findDOMNode(this.refs.speedInput);
+        this.props.replay(replay.value.trim(),speed.value.trim());
+        replay.value = "";
+    },
+    updateReplaySpeed: function () {
+        this.setState({
+            replaySpeed: React.findDOMNode(this.refs.speedInput).value.trim()
+        });
+    },
+    
     render: function () {
         return (
             <div>
@@ -169,7 +183,7 @@ var Settings = React.createClass({
                             Pasting large amounts of data here will probably
                             cause your browser to freeze for several seconds
                         </div>
-                        <div className="row">
+                        <div className="row spacer-row">
                             <input
                                 type="submit"
                                 value="Import"
@@ -178,7 +192,8 @@ var Settings = React.createClass({
                     </form>
                     <div className="row">
                         <label htmlFor="export-input">
-                            Click data for export <a>Select all</a>
+                            Export click data
+                            <a className="right">Select all</a>
                         </label>
                     </div>
                     <div className="row">
@@ -189,6 +204,48 @@ var Settings = React.createClass({
                             spellcheck="false"
                             value={JSON.stringify(this.props.clicks)} />
                     </div>
+                </div>
+                <div className="setting">
+                    <form onSubmit={this.submitReplay}>
+                        <div className="row">
+                            <label htmlFor="replay-input">
+                                Replay click data
+                            </label>
+                        </div>
+                        <div className="row spacer-row">
+                            <textarea
+                                ref="replayInput"
+                                id="replay-input"
+                                autocomplete="off"
+                                spellcheck="false" />
+                        </div>
+                        <div className="row">
+                            <label htmlFor="speed-input">Replay speed</label>
+                        </div>
+                        <div className="row spacer-row input-row">
+                            <input
+                                type="number"
+                                className="no-space"
+                                min="1"
+                                id="speed-input"
+                                value={this.state.replaySpeed}
+                                onChange={this.updateReplaySpeed}
+                                ref="speedInput" />
+                            X
+                        </div>
+                        <div className="row">
+                            <input
+                                type="submit"
+                                value="Replay"
+                                id="replay-submit" />
+                        </div>
+                        <div className="row detail">
+                            This will clear out all data saved up to this point.
+                            Replay will start after ten seconds. The page will
+                            stop in a disconnected state after the replay is
+                            complete. Refresh to start collecting data again.
+                        </div>
+                    </form>
                 </div>
             </div>
         );

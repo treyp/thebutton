@@ -581,11 +581,19 @@ line.flair-press-6 {
 }
 
 .setting .row {
-    padding-bottom: 3px;
+    margin-bottom: 3px;
+}
+
+.setting .spacer-row {
+    margin-bottom: 20px;
 }
 
 .setting .input-row {
-    line-height: 40px;
+    line-height: 47px;
+}
+
+.setting label .right {
+    float: right;
 }
 
 .setting input[type="number"] {
@@ -593,10 +601,16 @@ line.flair-press-6 {
     line-height: 1;
     width: 2em;
     padding: 5px;
-    margin-right: 10px;
+    margin-right: .5em;
+    vertical-align: middle;
 }
 
-.setting input#discard-input {
+.setting input[type="number"].no-space {
+    margin-right: .125em;
+}
+
+.setting input#discard-input,
+.setting input#speed-input {
     width: 5em;
 }
 
@@ -617,7 +631,7 @@ line.flair-press-6 {
     color: red;
 }
 
-.setting #discard-submit {
+.setting input[type="submit"] {
     margin-bottom: 10px;
 }
 
@@ -627,10 +641,6 @@ line.flair-press-6 {
     height: 5em;
     line-height: 1;
     box-sizing: border-box;
-}
-
-.setting #import-submit {
-    margin-bottom: 20px;
 }
 
 .import-notice {

@@ -3,10 +3,11 @@ var StatsDisplay = React.createClass({
     render: function () {
         var runningSince = "Loading…"; 
         var runningDuration = "Loading…";
-        if (this.props.connected) {
+        if (this.props.connected || this.props.stopped) {
             runningSince = "since " + this.props.started.format("LTS");
             runningDuration =
-                moment.duration(moment().diff(this.props.started)).humanize();
+                moment.duration(this.props.now().diff(this.props.started))
+                .humanize();
         }
         return (
             <div className="stats">
@@ -29,7 +30,9 @@ var StatsDisplay = React.createClass({
                 </div>
                 <div>
                     {"Participants: "}
-                    <span>{d3.format("0,000")(this.props.participants)}</span>
+                    <span>{this.props.participants ?
+                        d3.format("0,000")(this.props.participants) :
+                        "Unknown"}</span>
                 </div>
             </div>
         );

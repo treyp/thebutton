@@ -3,16 +3,23 @@ var ButtonSnitch = React.createClass({
         return this.getInitialStateReal();
         // return this.getInitialStateFake(5e3);
     },
-    importSavedClicks: function (clickData) {
+    parseJson: function (serializedJson) {
         try {
-            var clicks = JSON.parse(clickData);
+            var data = JSON.parse(serializedJson);
         } catch (e) {
             // couldn't parse JSON
             return;
         }
-        if (Array.isArray ? !Array.isArray(clicks) :
-            Object.prototype.toString.call(clicks) !== "[object Array]") {
+        if (Array.isArray ? !Array.isArray(data) :
+            Object.prototype.toString.call(data) !== "[object Array]") {
             // not an array
+            return;
+        }
+        return data;
+    },
+    importSavedClicks: function (clickData) {
+        var clicks = this.parseJson(clickData);
+        if (!clicks) {
             return;
         }
         var colorCounts = {};
@@ -40,8 +47,83 @@ var ButtonSnitch = React.createClass({
             median: this.calculateMedian(histogram, totalClicks),
             histogram: histogram,
             started: (clicks.length ?
-                moment(clicks[0].time - clicks[0].seconds) : this.state.started)
+                moment(clicks[0].time - ((60 - clicks[0].seconds) * 1000)) :
+                this.state.started)
         });
+    },
+    now: function () {
+        return this.state.now || moment();
+    },
+    stop: function () {
+        // this causes the websocket to self destruct (see websocket.onmessage)
+        this.setState({stopped: true});
+    },
+    replayClicks: function(data, speed) {
+        var self = this;
+        var clicks = this.parseJson(data);
+        if (!clicks || !clicks.length) {
+            return;
+        }
+
+        // in case we're already replaying, stop that
+        if (this.replayTimeout) {
+            window.clearTimeout(this.replayTimeout);
+            this.replayTimeout = null;
+        }
+        if (this.replayAnimation) {
+            window.cancelAnimationFrame(this.replayAnimation);
+            this.replayAnimation = null;
+        }
+
+        if (!this.state.stopped) {
+            this.stop();
+        }
+        this.clearClicks();
+
+        var animationStarted = moment().add(10, "s");
+        var startMoment =
+            moment(clicks[0].time - ((60 - clicks[0].seconds) * 1000));
+        this.setState({
+            started: startMoment,
+            secondsRemaining: 60,
+            participants: null,
+            replaying: true,
+            entriesImported: clicks.length
+        });
+
+        this.replayTimeout = window.setTimeout(function () {
+            self.replayTimeout = null;
+            self.replayAnimation = window.requestAnimationFrame(function frame() {
+                clicks = self.doFakeTick(
+                    clicks,
+                    startMoment + ((moment() - animationStarted) * speed)
+                );
+                // cancelAnimationFrame isn't working, so also check to see
+                // if self.replayAnimation is null
+                if (!clicks || !clicks.length || !self.replayAnimation) {
+                    // we've run out of data to replay
+                    self.setState({replaying: false});
+                    self.replayAnimation = null;
+                    return;
+                }
+                window.requestAnimationFrame(frame);
+            });
+        }, 10e3);
+    },
+    doFakeTick: function(replayClicks, displayTime) {
+        var click = replayClicks[0];
+        while (replayClicks.length && displayTime > replayClicks[0].time) {
+            click = replayClicks.shift();
+            this.addTime(click.seconds, click.clicks, click.time);
+        }
+
+        this.setState({
+            secondsRemaining: Math.max(click.seconds - 1, -1 *
+                (displayTime - (click.time + (click.seconds * 1000))) / 1000),
+            now: moment(displayTime)
+        });
+
+        return replayClicks;
     },
     clearClicks: function () {
         var initialState = this.getInitialState();
@@ -133,7 +215,10 @@ var ButtonSnitch = React.createClass({
             beep: false,
             discardAfter: false,
             nightMode: false,
-            displayImportNotice: false
+            displayImportNotice: false,
+            stopped: false,
+            replaying: false,
+            now: null
         };
     },
     getInitialStateReal: function () {
@@ -171,17 +256,23 @@ var ButtonSnitch = React.createClass({
             beep: false,
             discardAfter: false,
             nightMode: false,
-            displayImportNotice: false
+            displayImportNotice: false,
+            stopped: false,
+            replaying: false,
+            now: null
         };
     },
     tick: function () {
-        if (!this.state.connected) {
+        if (!this.state.connected || this.state.stopped) {
             return;
         }
         this.setState({secondsRemaining: this.state.secondsRemaining - 0.1});
     },
-    addTime: function (seconds, clicks) {
+    addTime: function (seconds, clicks, clickMoment) {
         var colorCounts = {};
+        if (!clickMoment) {
+            clickMoment = moment().valueOf();
+        }
         // shallow clone of this.state.colorCounts
         for (var k in this.state.colorCounts) {
             colorCounts[k] = this.state.colorCounts[k];
@@ -216,7 +307,7 @@ var ButtonSnitch = React.createClass({
             clicksTracked: clicksTracked,
             clicks: this.state.clicks.slice(numToDelete).concat({
                 seconds: seconds,
-                time: moment().valueOf(),
+                time: clickMoment,
                 color: this.flairClass(seconds),
                 clicks: clicks
             }),
@@ -378,6 +469,9 @@ var ButtonSnitch = React.createClass({
         xhr.send();
     },
     findWebSocketFromReddit: function () {
+        if (this.state.connected || this.state.stopped) {
+            return;
+        }
         var self = this;
         var xhr = new XMLHttpRequest();
         xhr.addEventListener("readystatechange", function () {
@@ -435,7 +529,7 @@ var ButtonSnitch = React.createClass({
             }
             self.setState({connected: true});
         };
-        socket.onclose = function () {
+        socket.onclose = function (reason) {
             self.setState({connected: false});
             document.title = "The Button Snitch";
             document.getElementById("favicon").href = "favicon/favicon.ico";
@@ -456,6 +550,13 @@ var ButtonSnitch = React.createClass({
                 }
             }
             */
+            if (self.state.stopped) {
+                socket.close();
+                // for some reason, the socket doesn't close until a
+                // minute later, so call onclose a bit early
+                socket.onclose();
+                return;
+            }
             var packet = JSON.parse(event.data);
             if (packet.type !== "ticking") {
                 return;
@@ -535,7 +636,7 @@ var ButtonSnitch = React.createClass({
                    flairClass={this.flairClass}
                    secondsRemaining={this.state.secondsRemaining}
                    connected={this.state.connected}
-                   />;
+                   now={this.now} />;
                 break;
             case "time":
                 selectedChart = <TimeChart
@@ -546,7 +647,9 @@ var ButtonSnitch = React.createClass({
                     median={this.state.median}
                     secondsRemaining={this.state.secondsRemaining}
                     connected={this.state.connected}
-                    />;
+                    stopped={this.state.stopped}
+                    replaying={this.state.replaying}
+                    now={this.now} />;
                 break;
             case "histogram":
                 selectedChart = <HistogramChart
@@ -557,7 +660,7 @@ var ButtonSnitch = React.createClass({
                     histogram={this.state.histogram}
                     secondsRemaining={this.state.secondsRemaining}
                     connected={this.state.connected}
-                    />;
+                    stopped={this.state.stopped} />;
                 break;
             default:
                 selectedChart = <Settings
@@ -572,6 +675,7 @@ var ButtonSnitch = React.createClass({
                     nightMode={this.state.nightMode}
                     updateNightMode={this.updateNightMode}
                     import={this.importSavedClicks}
+                    replay={this.replayClicks}
                     clicks={this.state.clicks}
                     entriesImported={this.state.entriesImported}
                     clearClicks={this.clearClicks} />;
@@ -606,21 +710,23 @@ var ButtonSnitch = React.createClass({
                     </div>
                     <TimerDisplay
                         secondsRemaining={this.state.secondsRemaining}
-                        connected={this.state.connected} />
+                        connected={this.state.connected}
+                        stopped={this.state.stopped} />
                     <StatsDisplay
                         started={this.state.started}
                         clicksTracked={this.state.clicksTracked}
                         lag={this.state.lag}
                         participants={this.state.participants}
                         connected={this.state.connected}
-                        count={this.state.ticks} />
+                        stopped={this.state.stopped}
+                        count={this.state.ticks}
+                        now={this.now} />
                     <ChartSelector
                         updateChartSelection={this.updateChartSelection}
                         chartSelected={this.state.chartSelected}
                         alertTime={this.state.alertTime} />
                 </header>
                 <RainbowDistribution
-                    connected={this.state.connected}
                     clicksTracked={this.state.clicksTracked}
                     colorCounts={this.state.colorCounts}
                     colorName={this.colorName} />

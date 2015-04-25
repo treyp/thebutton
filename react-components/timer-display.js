@@ -3,7 +3,7 @@ var TimerDisplay = React.createClass({
     render: function () {
         return (
             <div className="timer">
-                {this.props.connected ?
+                {this.props.connected || this.props.stopped ?
                     d3.format(".3n")(this.props.secondsRemaining) : "…"}
             </div>
         );
