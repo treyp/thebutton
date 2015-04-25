@@ -66,7 +66,12 @@ var ButtonSnitch = React.createClass({
         }
 
         // in case we're already replaying, stop that
+        if (this.replayTimeout) {
+            window.clearTimeout(this.replayTimeout);
+            this.replayTimeout = null;
+        }
         if (this.replayAnimation) {
+            console.log('canceling', this.replayAnimation);
             window.cancelAnimationFrame(this.replayAnimation);
             this.replayAnimation = null;
         }
@@ -76,7 +81,7 @@ var ButtonSnitch = React.createClass({
         }
         this.clearClicks();
 
-        var animationStarted = moment();
+        var animationStarted = moment().add(10, "s");
         var startMoment =
             moment(clicks[0].time - ((60 - clicks[0].seconds) * 1000));
         this.setState({
@@ -85,18 +90,25 @@ var ButtonSnitch = React.createClass({
             participants: 0,
             ticks: 0
         });
-        this.replayAnimation = window.requestAnimationFrame(function frame() {
-            clicks = self.doFakeTick(
-                clicks,
-                startMoment + ((moment() - animationStarted) * speed)
-            );
-            if (!clicks || !clicks.length) {
-                // we've run out of data to replay
-                self.replayAnimation = null;
-                return;
-            }
-            window.requestAnimationFrame(frame);
-        });
+
+        this.replayTimeout = window.setTimeout(function () {
+            self.replayTimeout = null;
+            self.replayAnimation = window.requestAnimationFrame(function frame() {
+                clicks = self.doFakeTick(
+                    clicks,
+                    startMoment + ((moment() - animationStarted) * speed)
+                );
+                // cancelAnimationFrame isn't working, so also check to see
+                // if self.replayAnimation is null
+                if (!clicks || !clicks.length || !self.replayAnimation) {
+                    // we've run out of data to replay
+                    self.replayAnimation = null;
+                    return;
+                }
+                window.requestAnimationFrame(frame);
+            });
+            console.log('adding', self.replayAnimation);
+        }, 10e3);
     },
     doFakeTick: function(replayClicks, displayTime) {
         var click = replayClicks[0];

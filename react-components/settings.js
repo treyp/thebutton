@@ -241,9 +241,9 @@ var Settings = React.createClass({
                         </div>
                         <div className="row detail">
                             This will clear out all data saved up to this point.
-                            The page will stop in a disconnected state after the
-                            replay is complete. Refresh to start collecting data
-                            again.
+                            Replay will start after ten seconds. The page will
+                            stop in a disconnected state after the replay is
+                            complete. Refresh to start collecting data again.
                         </div>
                     </form>
                 </div>
