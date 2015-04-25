@@ -523,7 +523,6 @@ var ButtonSnitch = React.createClass({
         var self = this;
 
         var socket = new WebSocket(websocketUrl);
-
         socket.onopen = function () {
             if (!self.state.started) {
                 self.setState({started: moment()});

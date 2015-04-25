@@ -129,7 +129,6 @@ var TimeChart = React.createClass({
     componentDidUpdate: function (prevProps, prevState) {
         var chart = d3.select(React.findDOMNode(this.refs.chart));
 
-
         if (!this.props.connected && !this.props.replaying &&
             this.props.clicks === prevProps.clicks) {
             chart.selectAll("g.dot").data(this.props.clicks).exit().remove();
@@ -243,7 +242,7 @@ var TimeChart = React.createClass({
         );
     },
     clicksWithActiveTime: function () {
-        if (!this.props.connected && !this.props.stopped) {
+        if (!this.props.connected && !this.props.replaying) {
             return this.props.clicks;
         }
         return this.props.clicks.concat({
