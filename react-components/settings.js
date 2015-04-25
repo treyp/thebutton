@@ -3,7 +3,7 @@ var Settings = React.createClass({
     getInitialState: function () {
         return {
             discardAfter: this.props.discardAfter,
-            replaySpeed: 1
+            replaySpeed: 100
         };
     },
     componentDidMount: function () {
@@ -183,7 +183,7 @@ var Settings = React.createClass({
                             Pasting large amounts of data here will probably
                             cause your browser to freeze for several seconds
                         </div>
-                        <div className="row">
+                        <div className="row spacer-row">
                             <input
                                 type="submit"
                                 value="Import"
@@ -192,7 +192,8 @@ var Settings = React.createClass({
                     </form>
                     <div className="row">
                         <label htmlFor="export-input">
-                            Click data for export <a>Select all</a>
+                            Export click data
+                            <a className="right">Select all</a>
                         </label>
                     </div>
                     <div className="row">
@@ -211,7 +212,7 @@ var Settings = React.createClass({
                                 Replay click data
                             </label>
                         </div>
-                        <div className="row">
+                        <div className="row spacer-row">
                             <textarea
                                 ref="replayInput"
                                 id="replay-input"
@@ -219,14 +220,18 @@ var Settings = React.createClass({
                                 spellcheck="false" />
                         </div>
                         <div className="row">
-                                <input
-                                    type="number"
-                                    min="1"
-                                    id="speed-input"
-                                    value={this.state.replaySpeed}
-                                    onChange={this.updateReplaySpeed}
-                                    ref="speedInput" />
-                                <label htmlFor="speed-input">x replay speed</label>
+                            <label htmlFor="speed-input">Replay speed</label>
+                        </div>
+                        <div className="row spacer-row input-row">
+                            <input
+                                type="number"
+                                className="no-space"
+                                min="1"
+                                id="speed-input"
+                                value={this.state.replaySpeed}
+                                onChange={this.updateReplaySpeed}
+                                ref="speedInput" />
+                            X
                         </div>
                         <div className="row">
                             <input
@@ -235,9 +240,10 @@ var Settings = React.createClass({
                                 id="replay-submit" />
                         </div>
                         <div className="row detail">
-                            This will clear out any data you&rsquo;ve saved up
-                            to this point. Data collection will start over after
-                            the replay is complete.
+                            This will clear out all data saved up to this point.
+                            The page will stop in a disconnected state after the
+                            replay is complete. Refresh to start collecting data
+                            again.
                         </div>
                     </form>
                 </div>
