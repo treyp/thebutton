@@ -3,7 +3,7 @@ var StatsDisplay = React.createClass({
     render: function () {
         var runningSince = "Loading…"; 
         var runningDuration = "Loading…";
-        if (this.props.connected) {
+        if (this.props.connected || this.props.stopped) {
             runningSince = "since " + this.props.started.format("LTS");
             runningDuration =
                 moment.duration(this.props.now().diff(this.props.started))
@@ -26,7 +26,8 @@ var StatsDisplay = React.createClass({
                         "Disconnected"}
                     <Tick
                         count={this.props.count}
-                        connected={this.props.connected} />
+                        connected={this.props.connected ||
+                            this.props.stopped} />
                 </div>
                 <div>
                     {"Participants: "}

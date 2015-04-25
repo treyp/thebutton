@@ -234,6 +234,11 @@ var Settings = React.createClass({
                                 value="Replay"
                                 id="replay-submit" />
                         </div>
+                        <div className="row detail">
+                            This will clear out any data you&rsquo;ve saved up
+                            to this point. Data collection will start over after
+                            the replay is complete.
+                        </div>
                     </form>
                 </div>
             </div>

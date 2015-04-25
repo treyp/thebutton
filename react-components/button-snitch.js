@@ -3,16 +3,23 @@ var ButtonSnitch = React.createClass({
         return this.getInitialStateReal();
         // return this.getInitialStateFake(5e3);
     },
-    importSavedClicks: function (clickData) {
+    parseJson: function (serializedJson) {
         try {
-            var clicks = JSON.parse(clickData);
+            var data = JSON.parse(serializedJson);
         } catch (e) {
             // couldn't parse JSON
             return;
         }
-        if (Array.isArray ? !Array.isArray(clicks) :
-            Object.prototype.toString.call(clicks) !== "[object Array]") {
+        if (Array.isArray ? !Array.isArray(data) :
+            Object.prototype.toString.call(data) !== "[object Array]") {
             // not an array
+            return;
+        }
+        return data;
+    },
+    importSavedClicks: function (clickData) {
+        var clicks = this.parseJson(clickData);
+        if (!clicks) {
             return;
         }
         var colorCounts = {};
@@ -40,101 +47,88 @@ var ButtonSnitch = React.createClass({
             median: this.calculateMedian(histogram, totalClicks),
             histogram: histogram,
             started: (clicks.length ?
-                moment(clicks[0].time - ((60-clicks[0].seconds) * 1000)) : this.state.started)
+                moment(clicks[0].time - ((60-clicks[0].seconds) * 1000)) :
+                this.state.started)
         });
     },
     now: function () {
-        if (this.replayTick) {
-            return this.replayTick.displayMoment;
-        }
-        return moment();
+        return this.state.now || moment();
     },
-    replayClicks: function(data, speed) {
-        if (this.state.replayInterval) {
-            window.clearInterval(this.state.replayInterval);
-            this.setState({replayInterval:null});
-        }
-        
-        //stop the reddit websocket
-        if (this.state.socket) {
-            this.state.socket.onclose = function(){};
-            this.state.socket.close();
-            this.setState({connected: false, socket: null});
-        }
-        //reset the state
-        this.setState(this.getInitialStateReal());
-        //trigger window resize so the log page works properly
-        this.windowResized();
-        
-        var clicks = JSON.parse(data);
-        var replayInterval = window.setInterval(this.doFakeTick, 500/speed);
-
-        //set up the initial fake tick data
-        this.replayTick = {
-            participants: 0,
-            seconds_left: 60.0,
-            displayMoment: moment(clicks[0].time - ((60-clicks[0].seconds) * 1000)),
-            speed: speed
-        };
-        //make sure this exists
-        this.previousParticipants=0;
-        this.setState({
-            started: (clicks.length ? moment(clicks[0].time - ((60-clicks[0].seconds) * 1000)) : this.state.started),
-            connected: true,
-            replayClicks:clicks,
-            replayInterval:replayInterval
+    stop: function () {
+        // this causes the websocket to self destruct (see websocket.onmessage)
+        this.setState({stopped: true});
+    },
+    start: function () {
+        this.setState({stopped: false}, function () {
+            this.findWebSocketFromReddit();
         });
     },
-    doFakeTick: function() {
+    replayClicks: function(data, speed) {
         var self = this;
-        
-        //we've run out of data to fake, stop the timer, and we're done
-        if ((Array.isArray ? !Array.isArray(self.state.replayClicks) :
-            (Object.prototype.toString.call(self.state.replayClicks) !== "[object Array]")) 
-            || self.state.replayClicks.length == 0) {
-            window.clearInterval(self.state.replayInterval);
-            this.setState({replayInterval:null});
+        var clicks = this.parseJson(data);
+        if (!clicks || !clicks.length) {
             return;
         }
-        
-        //update the fake tick data
-        this.replayTick.seconds_left-=.5;
-        this.replayTick.displayMoment.add(.5,'s');
 
-        //check to see if there were clicks
-        var click;
-        while (this.replayTick.displayMoment.isAfter(self.state.replayClicks[0].time)) {
-            click = self.state.replayClicks.shift();
-            this.replayTick.participants+=click.clicks;
-            this.replayTick.seconds_left=60.0;
-            self.addTime(
+        // in case we're already replaying, stop that
+        if (this.replayInterval) {
+            window.clearInterval(this.replayInterval);
+            this.replayInterval = null;
+        }
+
+        if (!this.state.stopped) {
+            this.stop();
+        }
+        // reset the state
+        this.clearClicks();
+
+        // set up the initial fake tick data
+        var displayMoment =
+            moment(clicks[0].time - ((60 - clicks[0].seconds) * 1000));
+        this.setState({
+            // clone displayMoment so it's not a reference to an updating var
+            started: moment(displayMoment),
+            secondsRemaining: 60,
+            participants: 0,
+            ticks: 0,
+            lag: 0,
+            connected: true
+        });
+        this.replayInterval = window.setInterval(function () {
+            clicks = self.doFakeTick(clicks, moment(displayMoment));
+            if (!clicks || !clicks.length) {
+                // we've run out of data. stop the timer and we're done.
+                window.clearInterval(self.replayInterval);
+                self.replayInterval = null;
+                self.start();
+                return;
+            }
+            displayMoment.add(.5, 's');
+        }, 500 / speed);
+    },
+    doFakeTick: function(replayClicks, displayMoment) {
+        // check to see if there were clicks
+        var click = replayClicks[0];
+        var participants = 0;
+        while (replayClicks.length && displayMoment > replayClicks[0].time) {
+            click = replayClicks.shift();
+            participants = participants + click.clicks;
+            this.addTime(
                 click.seconds,
                 click.clicks,
                 click.time
             );
         }
-        //pretend we just received a tick! (see setupWebSocket.onmessage)
-        //we don't need to send notifications
-        //self.sendNecessaryNotifications(tick.seconds_left);
-        
-        var currentParticipants = this.replayTick.participants;
-        var thisMoment = moment();
-        
-        self.setState({
-            ticks: self.state.ticks + 1,
-            lag: (this.lastMoment?thisMoment.diff(this.lastMoment)-(500/this.replayTick.speed):0),
-            participants: currentParticipants,
-            secondsRemaining: this.replayTick.seconds_left
+
+        this.setState({
+            ticks: this.state.ticks + 1,
+            participants: this.state.participants + participants,
+            secondsRemaining: -1 *
+                (displayMoment - (click.time + (click.seconds * 1000))) / 1000,
+            now: displayMoment
         });
 
-        document.title = this.replayTick.seconds_left + " | The Button Snitch";
-        document.getElementById("favicon").href = "favicon/" +
-            self.colorName[self.flairClass(this.replayTick.seconds_left)]
-            .toLowerCase() + ".ico";
-            
-        this.lastMoment = thisMoment;
-        this.previousSecondsLeft = this.replayTick.seconds_left;
-        this.previousParticipants = currentParticipants;
+        return replayClicks;
     },
     clearClicks: function () {
         var initialState = this.getInitialState();
@@ -206,7 +200,7 @@ var ButtonSnitch = React.createClass({
         return {
             chartSelected: "time",
             connected: true,
-            socket: null,            
+            socket: null,
             started: moment(clickData.clicks[0].time),
             clicksTracked: clickData.clicksTracked,
             entriesImported: 0,
@@ -227,9 +221,9 @@ var ButtonSnitch = React.createClass({
             beep: false,
             discardAfter: false,
             nightMode: false,
-            replayInterval:null,
-            replayClicks:null,
-            displayImportNotice: false
+            displayImportNotice: false,
+            stopped: false,
+            now: null
         };
     },
     getInitialStateReal: function () {
@@ -268,13 +262,13 @@ var ButtonSnitch = React.createClass({
             beep: false,
             discardAfter: false,
             nightMode: false,
-            replayInterval:null,
-            replayClicks:null,
-            displayImportNotice: false
+            displayImportNotice: false,
+            stopped: false,
+            now: null
         };
     },
     tick: function () {
-        if (!this.state.connected) {
+        if (!this.state.connected || this.state.stopped) {
             return;
         }
         this.setState({secondsRemaining: this.state.secondsRemaining - 0.1});
@@ -480,6 +474,9 @@ var ButtonSnitch = React.createClass({
         xhr.send();
     },
     findWebSocketFromReddit: function () {
+        if (this.state.stopped) {
+            return;
+        }
         var self = this;
         var xhr = new XMLHttpRequest();
         xhr.addEventListener("readystatechange", function () {
@@ -531,8 +528,7 @@ var ButtonSnitch = React.createClass({
         var self = this;
 
         var socket = new WebSocket(websocketUrl);
-        this.setState({socket: socket});
-        
+
         socket.onopen = function () {
             if (!self.state.started) {
                 self.setState({started: moment()});
@@ -560,6 +556,10 @@ var ButtonSnitch = React.createClass({
                 }
             }
             */
+            if (self.state.stopped) {
+                socket.close();
+                return;
+            }
             var packet = JSON.parse(event.data);
             if (packet.type !== "ticking") {
                 return;
