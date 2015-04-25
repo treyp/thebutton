@@ -65,7 +65,8 @@ var TimeChart = React.createClass({
             .attr("text-anchor", "center")
             .attr("x", width / 2)
             .attr("y", height - 5)
-            .text("Time");
+            .text("Time (" + jstz.determine().name() + ", UTC " +
+                moment().format("ZZ") + ")");
         this.yAxis = d3.svg.axis()
             .scale(this.yScale)
             .orient("left");
