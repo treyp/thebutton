@@ -1,1 +1,1 @@
-wss://wss.redditmedia.com/thebutton?h=18cf0ab4fc114130e06ef259282abe697580c26a&e=1429860555
+wss://wss.redditmedia.com/thebutton?h=a17e75f819924e11201ab4d9fbbeffd283cd16ca&e=1430043535
