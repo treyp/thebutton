@@ -71,9 +71,9 @@ var ButtonSnitch = React.createClass({
         }
 
         // in case we're already replaying, stop that
-        if (this.replayInterval) {
-            window.clearInterval(this.replayInterval);
-            this.replayInterval = null;
+        if (this.replayAnimation) {
+            window.cancelAnimationFrame(this.replayAnimation);
+            this.replayAnimation = null;
         }
 
         if (!this.state.stopped) {
@@ -83,34 +83,36 @@ var ButtonSnitch = React.createClass({
         this.clearClicks();
 
         // set up the initial fake tick data
-        var displayMoment =
+        var animationStarted = moment();
+        var startMoment =
             moment(clicks[0].time - ((60 - clicks[0].seconds) * 1000));
         this.setState({
-            // clone displayMoment so it's not a reference to an updating var
-            started: moment(displayMoment),
+            started: startMoment,
             secondsRemaining: 60,
             participants: 0,
             ticks: 0,
             lag: 0,
             connected: true
         });
-        this.replayInterval = window.setInterval(function () {
-            clicks = self.doFakeTick(clicks, moment(displayMoment));
+        this.replayAnimation = window.requestAnimationFrame(function frame() {
+            clicks = self.doFakeTick(
+                clicks,
+                startMoment + ((moment() - animationStarted) * speed)
+            );
             if (!clicks || !clicks.length) {
                 // we've run out of data. stop the timer and we're done.
-                window.clearInterval(self.replayInterval);
-                self.replayInterval = null;
+                self.replayAnimation = null;
                 self.start();
                 return;
             }
-            displayMoment.add(.5, 's');
-        }, 500 / speed);
+            window.requestAnimationFrame(frame);
+        });
     },
-    doFakeTick: function(replayClicks, displayMoment) {
+    doFakeTick: function(replayClicks, displayTime) {
         // check to see if there were clicks
         var click = replayClicks[0];
         var participants = 0;
-        while (replayClicks.length && displayMoment > replayClicks[0].time) {
+        while (replayClicks.length && displayTime > replayClicks[0].time) {
             click = replayClicks.shift();
             participants = participants + click.clicks;
             this.addTime(
@@ -124,8 +126,8 @@ var ButtonSnitch = React.createClass({
             ticks: this.state.ticks + 1,
             participants: this.state.participants + participants,
             secondsRemaining: -1 *
-                (displayMoment - (click.time + (click.seconds * 1000))) / 1000,
-            now: displayMoment
+                (displayTime - (click.time + (click.seconds * 1000))) / 1000,
+            now: moment(displayTime)
         });
 
         return replayClicks;
