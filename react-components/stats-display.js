@@ -26,8 +26,7 @@ var StatsDisplay = React.createClass({
                         "Disconnected"}
                     <Tick
                         count={this.props.count}
-                        connected={this.props.connected ||
-                            this.props.stopped} />
+                        connected={this.props.connected} />
                 </div>
                 <div>
                     {"Participants: "}

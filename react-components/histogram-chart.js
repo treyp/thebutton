@@ -151,7 +151,8 @@ var HistogramChart = React.createClass({
         // draw the current timer
         var timerX = this.xScale(this.props.secondsRemaining);
         this.timerLine = chart.append("line")
-            .attr("class", "timer " + (this.props.connected ? "" : "hidden ") +
+            .attr("class", "timer " +
+                (this.props.connected || this.props.stopped ? "" : "hidden ") +
                 this.props.flairClass(this.props.secondsRemaining))
             .attr("x1", timerX)
             .attr("y1", this.margins.top)
@@ -253,7 +254,8 @@ var HistogramChart = React.createClass({
             ((moment() - this.state.lastSynced) / 1000);
         var timerX = this.xScale(secondsRemaining + 0.5);
         this.timerLine
-            .attr("class", "timer " + (this.props.connected ? "" : "hidden ") +
+            .attr("class", "timer " +
+                (this.props.connected || this.props.stopped ? "" : "hidden ") +
                 this.props.flairClass(secondsRemaining))
             .attr("x1", timerX)
             .attr("x2", timerX);

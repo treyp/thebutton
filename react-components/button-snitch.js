@@ -58,11 +58,6 @@ var ButtonSnitch = React.createClass({
         // this causes the websocket to self destruct (see websocket.onmessage)
         this.setState({stopped: true});
     },
-    start: function () {
-        this.setState({stopped: false}, function () {
-            this.findWebSocketFromReddit();
-        });
-    },
     replayClicks: function(data, speed) {
         var self = this;
         var clicks = this.parseJson(data);
@@ -79,10 +74,8 @@ var ButtonSnitch = React.createClass({
         if (!this.state.stopped) {
             this.stop();
         }
-        // reset the state
         this.clearClicks();
 
-        // set up the initial fake tick data
         var animationStarted = moment();
         var startMoment =
             moment(clicks[0].time - ((60 - clicks[0].seconds) * 1000));
@@ -90,9 +83,7 @@ var ButtonSnitch = React.createClass({
             started: startMoment,
             secondsRemaining: 60,
             participants: 0,
-            ticks: 0,
-            lag: 0,
-            connected: true
+            ticks: 0
         });
         this.replayAnimation = window.requestAnimationFrame(function frame() {
             clicks = self.doFakeTick(
@@ -100,26 +91,20 @@ var ButtonSnitch = React.createClass({
                 startMoment + ((moment() - animationStarted) * speed)
             );
             if (!clicks || !clicks.length) {
-                // we've run out of data. stop the timer and we're done.
+                // we've run out of data to replay
                 self.replayAnimation = null;
-                self.start();
                 return;
             }
             window.requestAnimationFrame(frame);
         });
     },
     doFakeTick: function(replayClicks, displayTime) {
-        // check to see if there were clicks
         var click = replayClicks[0];
         var participants = 0;
         while (replayClicks.length && displayTime > replayClicks[0].time) {
             click = replayClicks.shift();
             participants = participants + click.clicks;
-            this.addTime(
-                click.seconds,
-                click.clicks,
-                click.time
-            );
+            this.addTime(click.seconds, click.clicks, click.time);
         }
 
         this.setState({
@@ -202,7 +187,6 @@ var ButtonSnitch = React.createClass({
         return {
             chartSelected: "time",
             connected: true,
-            socket: null,
             started: moment(clickData.clicks[0].time),
             clicksTracked: clickData.clicksTracked,
             entriesImported: 0,
@@ -236,7 +220,6 @@ var ButtonSnitch = React.createClass({
         return {
             chartSelected: "time",
             connected: false,
-            socket: null,
             started: null,
             clicksTracked: 0,
             entriesImported: 0,
@@ -476,7 +459,7 @@ var ButtonSnitch = React.createClass({
         xhr.send();
     },
     findWebSocketFromReddit: function () {
-        if (this.state.stopped) {
+        if (this.state.connected || this.state.stopped) {
             return;
         }
         var self = this;
@@ -537,8 +520,8 @@ var ButtonSnitch = React.createClass({
             }
             self.setState({connected: true});
         };
-        socket.onclose = function () {
-            self.setState({connected: false, socket: null});
+        socket.onclose = function (reason) {
+            self.setState({connected: false});
             document.title = "The Button Snitch";
             document.getElementById("favicon").href = "favicon/favicon.ico";
             window.setTimeout(self.findWebSocketFromReddit, 5e3);
@@ -560,6 +543,9 @@ var ButtonSnitch = React.createClass({
             */
             if (self.state.stopped) {
                 socket.close();
+                // for some reason, the socket doesn't close until a
+                // minute later, so call onclose a bit early
+                socket.onclose();
                 return;
             }
             var packet = JSON.parse(event.data);
@@ -641,8 +627,7 @@ var ButtonSnitch = React.createClass({
                    flairClass={this.flairClass}
                    secondsRemaining={this.state.secondsRemaining}
                    connected={this.state.connected}
-                   now={this.now}
-                   />;
+                   now={this.now} />;
                 break;
             case "time":
                 selectedChart = <TimeChart
@@ -653,8 +638,8 @@ var ButtonSnitch = React.createClass({
                     median={this.state.median}
                     secondsRemaining={this.state.secondsRemaining}
                     connected={this.state.connected}
-                    now={this.now}
-                    />;
+                    stopped={this.state.stopped}
+                    now={this.now} />;
                 break;
             case "histogram":
                 selectedChart = <HistogramChart
@@ -665,7 +650,7 @@ var ButtonSnitch = React.createClass({
                     histogram={this.state.histogram}
                     secondsRemaining={this.state.secondsRemaining}
                     connected={this.state.connected}
-                    />;
+                    stopped={this.state.stopped} />;
                 break;
             default:
                 selectedChart = <Settings
@@ -715,13 +700,15 @@ var ButtonSnitch = React.createClass({
                     </div>
                     <TimerDisplay
                         secondsRemaining={this.state.secondsRemaining}
-                        connected={this.state.connected} />
+                        connected={this.state.connected}
+                        stopped={this.state.stopped} />
                     <StatsDisplay
                         started={this.state.started}
                         clicksTracked={this.state.clicksTracked}
                         lag={this.state.lag}
                         participants={this.state.participants}
                         connected={this.state.connected}
+                        stopped={this.state.stopped}
                         count={this.state.ticks}
                         now={this.now} />
                     <ChartSelector
@@ -730,7 +717,6 @@ var ButtonSnitch = React.createClass({
                         alertTime={this.state.alertTime} />
                 </header>
                 <RainbowDistribution
-                    connected={this.state.connected}
                     clicksTracked={this.state.clicksTracked}
                     colorCounts={this.state.colorCounts}
                     colorName={this.colorName} />
