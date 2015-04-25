@@ -30,7 +30,9 @@ var StatsDisplay = React.createClass({
                 </div>
                 <div>
                     {"Participants: "}
-                    <span>{d3.format("0,000")(this.props.participants)}</span>
+                    <span>{this.props.participants ?
+                        d3.format("0,000")(this.props.participants) :
+                        "Unknown"}</span>
                 </div>
             </div>
         );

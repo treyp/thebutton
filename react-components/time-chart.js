@@ -129,7 +129,8 @@ var TimeChart = React.createClass({
     componentDidUpdate: function (prevProps, prevState) {
         var chart = d3.select(React.findDOMNode(this.refs.chart));
 
-        if (!this.props.connected && !this.props.stopped &&
+
+        if (!this.props.connected && !this.props.replaying &&
             this.props.clicks === prevProps.clicks) {
             chart.selectAll("g.dot").data(this.props.clicks).exit().remove();
             return;
@@ -153,7 +154,7 @@ var TimeChart = React.createClass({
         // only update the old dots (which probably don't need to move) when
         // a new dot shows up
         if (this.props.clicks.length > 300 &&
-            (this.props.connected || this.props.stopped) &&
+            (this.props.connected || this.props.replaying) &&
             this.props.clicks === prevProps.clicks &&
             this.state.dotSize == prevState.dotSize) {
             // update active dot

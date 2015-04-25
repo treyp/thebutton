@@ -47,7 +47,7 @@ var ButtonSnitch = React.createClass({
             median: this.calculateMedian(histogram, totalClicks),
             histogram: histogram,
             started: (clicks.length ?
-                moment(clicks[0].time - ((60-clicks[0].seconds) * 1000)) :
+                moment(clicks[0].time - ((60 - clicks[0].seconds) * 1000)) :
                 this.state.started)
         });
     },
@@ -71,7 +71,6 @@ var ButtonSnitch = React.createClass({
             this.replayTimeout = null;
         }
         if (this.replayAnimation) {
-            console.log('canceling', this.replayAnimation);
             window.cancelAnimationFrame(this.replayAnimation);
             this.replayAnimation = null;
         }
@@ -87,8 +86,9 @@ var ButtonSnitch = React.createClass({
         this.setState({
             started: startMoment,
             secondsRemaining: 60,
-            participants: 0,
-            ticks: 0
+            participants: null,
+            replaying: true,
+            entriesImported: clicks.length
         });
 
         this.replayTimeout = window.setTimeout(function () {
@@ -102,28 +102,24 @@ var ButtonSnitch = React.createClass({
                 // if self.replayAnimation is null
                 if (!clicks || !clicks.length || !self.replayAnimation) {
                     // we've run out of data to replay
+                    self.setState({replaying: false});
                     self.replayAnimation = null;
                     return;
                 }
                 window.requestAnimationFrame(frame);
             });
-            console.log('adding', self.replayAnimation);
         }, 10e3);
     },
     doFakeTick: function(replayClicks, displayTime) {
         var click = replayClicks[0];
-        var participants = 0;
         while (replayClicks.length && displayTime > replayClicks[0].time) {
             click = replayClicks.shift();
-            participants = participants + click.clicks;
             this.addTime(click.seconds, click.clicks, click.time);
         }
 
         this.setState({
-            ticks: this.state.ticks + 1,
-            participants: this.state.participants + participants,
-            secondsRemaining: -1 *
-                (displayTime - (click.time + (click.seconds * 1000))) / 1000,
+            secondsRemaining: Math.max(click.seconds - 1, -1 *
+                (displayTime - (click.time + (click.seconds * 1000))) / 1000),
             now: moment(displayTime)
         });
 
@@ -221,6 +217,7 @@ var ButtonSnitch = React.createClass({
             nightMode: false,
             displayImportNotice: false,
             stopped: false,
+            replaying: false,
             now: null
         };
     },
@@ -261,6 +258,7 @@ var ButtonSnitch = React.createClass({
             nightMode: false,
             displayImportNotice: false,
             stopped: false,
+            replaying: false,
             now: null
         };
     },
@@ -651,6 +649,7 @@ var ButtonSnitch = React.createClass({
                     secondsRemaining={this.state.secondsRemaining}
                     connected={this.state.connected}
                     stopped={this.state.stopped}
+                    replaying={this.state.replaying}
                     now={this.now} />;
                 break;
             case "histogram":
