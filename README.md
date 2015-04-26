@@ -27,6 +27,7 @@ Monitor [Reddit](//www.reddit.com/)'s [/r/thebutton](//www.reddit.com/r/thebutto
 - [x] Replay functionality (started as [a pull request from jmlsteele](//github.com/treyp/thebutton/pull/5))
 - [x] Show time zone on time axes
 - [x] Beep support like Squire
+- [X] Cookie to save settings [ implemented as localStorage ]
 - [ ] Dual chart display (request from [/u/argash](//www.reddit.com/user/argash))
 - [ ] Breakdown of percentage of time spent in each color (request from [/u/carpevirginem](//www.reddit.com/user/carpevirginem))
 - [ ] Scroll to zoom, or at least support clamping to start/end times selectable in options bar
@@ -36,4 +37,4 @@ Monitor [Reddit](//www.reddit.com/)'s [/r/thebutton](//www.reddit.com/r/thebutto
 - [ ] Replace pulse dot with a clearer "live" text that fades out after 1 second (with a 1 second fade)
 - [ ] Auto dot size and bar height option: starts large, shrinks down based on window size, minimum of 1
 - [ ] Add pause button
-- [ ] Cookie to save settings
+

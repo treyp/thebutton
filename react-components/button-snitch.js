@@ -1,6 +1,14 @@
 var ButtonSnitch = React.createClass({
     getInitialState: function () {
-        return this.getInitialStateReal();
+        // Alter this to get the local storage settings and merge them into the state.
+        var initialState = this.getInitialStateReal();
+        var savedSettings = this.loadLocalSettings();
+
+        for(var s in savedSettings) {
+            initialState[s] = savedSettings[s];
+        }
+
+        return initialState;
         // return this.getInitialStateFake(5e3);
     },
     parseJson: function (serializedJson) {
@@ -425,6 +433,28 @@ var ButtonSnitch = React.createClass({
             window.setTimeout(this.playBeep, 500 * i);
         }
     },
+    loadLocalSettings: function() {
+        // Load settings out of local storage
+        var snitchSettings = localStorage.getItem('button-snitch-settings');
+        return JSON.parse(snitchSettings);
+    },
+    saveLocalSettings: function() {
+        // Build a list of settings we want to save.
+        var snitchSettings = {
+          alertTime: this.state.alertTime,
+          beep: this.state.beep,
+          beepOnce: this.state.beepOnce,
+          beepOnceTime: this.state.beepOnceTime,
+          beepTwice: this.state.beepTwice,
+          beepTwiceTime: this.state.beepTwiceTime,
+          beepThrice: this.state.beepThrice,
+          beepThriceTime: this.state.beepThriceTime,
+          nightMode: this.state.nightMode
+        };
+
+        // Persist settings to local storage
+        localStorage.setItem('button-snitch-settings', JSON.stringify(snitchSettings));
+    },
     sendBeeps: function(seconds) {
         if (this.state.beepOnce && seconds <= this.state.beepOnceTime && !this.state.beepOnceMuted) {
             this.playNumBeeps(1);
@@ -438,6 +468,10 @@ var ButtonSnitch = React.createClass({
             this.playNumBeeps(3);
             this.state.beepThriceMuted = true;
         }
+    },
+    setupInitialSettingsLeftovers : function() {
+      // call the things that need to be done after the initial state load
+        this.updateNightMode(this.state.nightMode);
     },
     updateChartSelection: function (chart) {
         this.setState({chartSelected: chart});
@@ -697,6 +731,9 @@ var ButtonSnitch = React.createClass({
         this.findWebSocketFromReddit();
 
         this.downloadClickHistory();
+
+        // Finish the load from local storage by calling the extras.
+        this.setupInitialSettingsLeftovers();
     },
     componentWillUnmount: function () {
         clearInterval(this.interval);
@@ -755,7 +792,7 @@ var ButtonSnitch = React.createClass({
                     beepThrice={this.state.beepThrice}
                     beepThriceTime={this.state.beepThriceTime}
                     beepThriceMuted={this.state.beepThriceMuted}
-
+                    saveLocalSettings={this.saveLocalSettings}
                     updateBeep={this.updateBeep}
                     updateBeepOnce={this.updateBeepOnce}
                     updateBeepTwice={this.updateBeepTwice}

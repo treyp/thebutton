@@ -22,6 +22,10 @@ var Settings = React.createClass({
             this.setState({discardAfter: newProps.discardAfter});
         }
     },
+    componentDidUpdate: function(prevOps, prevState){
+        // After we update the settings, persist them to local storage.
+        this.props.saveLocalSettings();
+    },
     updateAlertTime: function () {
         this.props.updateAlertTime(
             React.findDOMNode(this.refs.time).value.trim()
