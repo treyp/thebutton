@@ -26,9 +26,9 @@ Monitor [Reddit](//www.reddit.com/)'s [/r/thebutton](//www.reddit.com/r/thebutto
 - [x] Import historical data on first load
 - [x] Replay functionality (started as [a pull request from jmlsteele](//github.com/treyp/thebutton/pull/5))
 - [x] Show time zone on time axes
+- [x] Beep support like Squire
 - [ ] Dual chart display (request from [/u/argash](//www.reddit.com/user/argash))
 - [ ] Breakdown of percentage of time spent in each color (request from [/u/carpevirginem](//www.reddit.com/user/carpevirginem))
-- [ ] Beep support like Squire
 - [ ] Scroll to zoom, or at least support clamping to start/end times selectable in options bar
 - [ ] Horizontal option for log chart
 - [ ] Export graph to an image

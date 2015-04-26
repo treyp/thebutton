@@ -30,6 +30,15 @@ var Settings = React.createClass({
     updateBeep: function () {
         this.props.updateBeep(React.findDOMNode(this.refs.beep).checked);
     },
+    updateBeepOnce: function() {
+        this.props.updateBeepOnce(React.findDOMNode(this.refs.beepOnce).checked, React.findDOMNode(this.refs.beepOnceTime).value);
+    },
+    updateBeepTwice: function() {
+        this.props.updateBeepTwice(React.findDOMNode(this.refs.beepTwice).checked, React.findDOMNode(this.refs.beepTwiceTime).value);
+    },
+    updateBeepThrice: function() {
+        this.props.updateBeepThrice(React.findDOMNode(this.refs.beepThrice).checked, React.findDOMNode(this.refs.beepThriceTime).value);
+    },
     submitDiscard: function (e) {
         e.preventDefault();
         this.props.updateDiscardAfter(
@@ -118,6 +127,73 @@ var Settings = React.createClass({
                         <label htmlFor="alert-beep">
                             Play a beep for new clicks
                         </label>
+                    </div>
+                    <div className="row">
+                        <input
+                            type="checkbox"
+                            defaultChecked={this.props.beepOnce}
+                            id="alert-beep-once"
+                            ref="beepOnce"
+                            onChange={this.updateBeepOnce} />
+                        <label htmlFor="alert-beep-once">
+                            Play 1 beeps &lt; &nbsp;
+                        </label>
+                        <input
+                            type="number"
+                            min="0"
+                            max="60"
+                            value={this.props.beepOnceTime}
+                            id="alert-beep-once-time"
+                            ref="beepOnceTime"
+                            onChange={this.updateBeepOnce}
+                            />
+                        <label>seconds</label>
+
+                    </div>
+                    <div className="row">
+
+                        <input
+                            type="checkbox"
+                            defaultChecked={this.props.beepTwice}
+                            id="alert-beep-twice"
+                            ref="beepTwice"
+                            onChange={this.updateBeepTwice} />
+                        <label htmlFor="alert-beep-twice">
+                            Play 2 beeps &lt; &nbsp;
+                        </label>
+
+                        <input
+                            type="number"
+                            min="0"
+                            max="60"
+                            value={this.props.beepTwiceTime}
+                            id="alert-beep-Twice-time"
+                            ref="beepTwiceTime"
+                            onChange={this.updateBeepTwice}
+                            />
+                        <label>seconds</label>
+                    </div>
+                    <div className="row">
+                        <input
+                            type="checkbox"
+                            defaultChecked={this.props.beepThrice}
+                            id="alert-beep-thrice"
+                            ref="beepThrice"
+                            onChange={this.updateBeepThrice} />
+                        <label htmlFor="alert-beep-thrice">
+                            Play 3 beeps &lt; &nbsp;
+                        </label>
+                            <input
+                                type="number"
+                                min="0"
+                                max="60"
+                                value={this.props.beepThriceTime}
+                                id="alert-beep-Thrice-time"
+                                ref="beepThriceTime"
+                                onChange={this.updateBeepThrice}
+                                />
+                            <label>seconds</label>
+
                     </div>
                 </div>
                 <div className="setting">

@@ -213,6 +213,15 @@ var ButtonSnitch = React.createClass({
             notifiedForCurrentClick: false,
             lastTimeTrackedForCurrentClick: 60,
             beep: false,
+            beepOnce: false,
+            beepOnceTime: 50,
+            beepOnceMuted: false,
+            beepTwice: false,
+            beepTwiceTime: 40,
+            beepTwiceMuted: false,
+            beepThrice: false,
+            beepThriceTime: 30,
+            beepThriceMuted: false,
             discardAfter: false,
             nightMode: false,
             displayImportNotice: false,
@@ -254,6 +263,15 @@ var ButtonSnitch = React.createClass({
             notifiedForCurrentClick: false,
             lastTimeTrackedForCurrentClick: 60,
             beep: false,
+            beepOnce: false,
+            beepOnceTime: 50,
+            beepOnceMuted: false,
+            beepTwice: false,
+            beepTwiceTime: 40,
+            beepTwiceMuted: false,
+            beepThrice: false,
+            beepThriceTime: 30,
+            beepThriceMuted: false,
             discardAfter: false,
             nightMode: false,
             displayImportNotice: false,
@@ -322,6 +340,18 @@ var ButtonSnitch = React.createClass({
         if (this.state.beep) {
             React.findDOMNode(this.refs.audio).play();
         }
+
+        /* Reset beeps when clicked */
+        if(this.state.beepOnce && this.state.beepOnceMuted) {
+            this.state.beepOnceMuted = false;
+        }
+        if(this.state.beepTwice && this.state.beepTwiceMuted) {
+            this.state.beepTwiceMuted = false;
+        }
+        if(this.state.beepThrice && this.state.beepThriceMuted) {
+            this.state.beepThriceMuted = false;
+        }
+
     },
     flairClass: function (seconds) {
         if (seconds > 51) {
@@ -387,6 +417,28 @@ var ButtonSnitch = React.createClass({
         midRangeBottom = (histogramIndex + 1);
         return (midRangeTop + midRangeBottom) / 2;
     },
+    playBeep: function() {
+        React.findDOMNode(this.refs.audio).play();
+    },
+    playNumBeeps: function(number) {
+        for (var i = 0; i < number; i++) {
+            window.setTimeout(this.playBeep, 500 * i);
+        }
+    },
+    sendBeeps: function(seconds) {
+        if (this.state.beepOnce && seconds <= this.state.beepOnceTime && !this.state.beepOnceMuted) {
+            this.playNumBeeps(1);
+            this.state.beepOnceMuted = true;
+        }
+        if (this.state.beepTwice && seconds <= this.state.beepTwiceTime && !this.state.beepTwiceMuted) {
+            this.playNumBeeps(2);
+            this.state.beepTwiceMuted = true;
+        }
+        if (this.state.beepThrice && seconds <= this.state.beepThriceTime && !this.state.beepThriceMuted) {
+            this.playNumBeeps(3);
+            this.state.beepThriceMuted = true;
+        }
+    },
     updateChartSelection: function (chart) {
         this.setState({chartSelected: chart});
     },
@@ -420,6 +472,27 @@ var ButtonSnitch = React.createClass({
     },
     updateBeep: function (beep) {
         this.setState({beep: beep});
+    },
+    updateBeepOnce: function(beepOnce, beepOnceTime) {
+        this.setState({
+            beepOnce: beepOnce,
+            beepOnceTime: beepOnceTime,
+            beepOnceMuted: false
+        });
+    },
+    updateBeepTwice: function(beepTwice, beepTwiceTime) {
+        this.setState({
+            beepTwice: beepTwice,
+            beepTwiceTime: beepTwiceTime,
+            beepTwiceMuted: false
+        });
+    },
+    updateBeepThrice: function(beepThrice, beepThriceTime) {
+        this.setState({
+            beepThrice: beepThrice,
+            beepThriceTime: beepThriceTime,
+            beepThriceMuted: false
+        });
     },
     updateDiscardAfter: function (clicks) {
         clicks = parseInt(clicks, 10) || false;
@@ -565,6 +638,8 @@ var ButtonSnitch = React.createClass({
 
             self.sendNecessaryNotifications(tick.seconds_left);
 
+            self.sendBeeps(tick.seconds_left);
+
             currentParticipants = parseInt(
                 tick.participants_text.replace(/,/g, ""),
                 10
@@ -669,7 +744,22 @@ var ButtonSnitch = React.createClass({
                     alertTime={this.state.alertTime}
                     updateAlertTime={this.updateAlertTime}
                     beep={this.state.beep}
+                    beepOnce={this.state.beepOnce}
+                    beepOnceTime={this.state.beepOnceTime}
+                    beepOnceMuted={this.state.beepOnceMuted}
+
+                    beepTwice={this.state.beepTwice}
+                    beepTwiceTime={this.state.beepTwiceTime}
+                    beepTwiceMuted={this.state.beepTwiceMuted}
+
+                    beepThrice={this.state.beepThrice}
+                    beepThriceTime={this.state.beepThriceTime}
+                    beepThriceMuted={this.state.beepThriceMuted}
+
                     updateBeep={this.updateBeep}
+                    updateBeepOnce={this.updateBeepOnce}
+                    updateBeepTwice={this.updateBeepTwice}
+                    updateBeepThrice={this.updateBeepThrice}
                     discardAfter={this.state.discardAfter}
                     updateDiscardAfter={this.updateDiscardAfter}
                     nightMode={this.state.nightMode}
