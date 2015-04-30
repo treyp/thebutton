@@ -215,7 +215,6 @@ var ButtonSnitch = React.createClass({
             beep: false,
             discardAfter: false,
             nightMode: false,
-            displayImportNotice: false,
             stopped: false,
             replaying: false,
             now: null
@@ -256,7 +255,6 @@ var ButtonSnitch = React.createClass({
             beep: false,
             discardAfter: false,
             nightMode: false,
-            displayImportNotice: false,
             stopped: false,
             replaying: false,
             now: null
@@ -458,10 +456,7 @@ var ButtonSnitch = React.createClass({
         xhr.addEventListener("readystatechange", function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    // TODO: finish implementation of this. releasing so
-                    // traffic keeps the heroku dyno live.
                     self.importSavedClicks(this.responseText);
-                    self.setState({displayImportNotice: true});
                 }
             }
         }, false);
@@ -607,9 +602,6 @@ var ButtonSnitch = React.createClass({
             return confirmation;
         }
     },
-    clearNotice: function () {
-        this.setState({displayImportNotice: false});
-    },
     componentDidMount: function () {
         this.interval = setInterval(this.tick, 100);
 
@@ -628,7 +620,6 @@ var ButtonSnitch = React.createClass({
     },
     render: function () {
         var selectedChart;
-        var importNotice;
         switch (this.state.chartSelected) {
             case "log":
                selectedChart = <LogChart
@@ -680,14 +671,8 @@ var ButtonSnitch = React.createClass({
                     entriesImported={this.state.entriesImported}
                     clearClicks={this.clearClicks} />;
         }
-        if (this.state.displayImportNotice) {
-            importNotice = <ImportNotice
-                clearClicks={this.clearClicks}
-                clearNotice={this.clearNotice} />;
-        }
         return (
-            <div className={this.state.displayImportNotice ? "with-notice" : ""}>
-                {importNotice}
+            <div>
                 <header id="nav">
                     <div className="right-nav">
                         <span className="row links">
