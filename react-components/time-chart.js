@@ -6,7 +6,7 @@ var TimeChart = React.createClass({
         return {
             dotSize: 5,
             lastSynced: this.props.now().valueOf(),
-            lastTime: 60,
+            lastTime: null,
             displayLabels: false,
             displayGrid: true,
             displayMean: false,
@@ -243,7 +243,8 @@ var TimeChart = React.createClass({
         );
     },
     clicksWithActiveTime: function () {
-        if (!this.props.connected && !this.props.replaying) {
+        if (this.props.secondsRemaining === null ||
+            (!this.props.connected && !this.props.replaying)) {
             return this.props.clicks;
         }
         return this.props.clicks.concat({
@@ -254,7 +255,7 @@ var TimeChart = React.createClass({
         });
     },
     updateActiveDot: function() {
-        if (this.props.connected) {
+        if (this.props.connected && this.state.lastTime !== null) {
             this.updateDots(
                 d3.select(React.findDOMNode(this.refs.chart))
                     .select("g.dot:last-child")

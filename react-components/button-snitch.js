@@ -85,7 +85,7 @@ var ButtonSnitch = React.createClass({
             moment(clicks[0].time - ((60 - clicks[0].seconds) * 1000));
         this.setState({
             started: startMoment,
-            secondsRemaining: 60,
+            secondsRemaining: null,
             participants: null,
             replaying: true,
             entriesImported: clicks.length
@@ -198,9 +198,8 @@ var ButtonSnitch = React.createClass({
             started: moment(clickData.clicks[0].time),
             clicksTracked: clickData.clicksTracked,
             entriesImported: 0,
-            lag: Math.round(Math.random() * 2000),
             participants: 0,
-            secondsRemaining: 60.0,
+            secondsRemaining: null,
             ticks: clickData.clicks.length * 5,
             clicks: clickData.clicks,
             colorCounts: clickData.colorCounts,
@@ -231,9 +230,8 @@ var ButtonSnitch = React.createClass({
             started: null,
             clicksTracked: 0,
             entriesImported: 0,
-            lag: 0,
             participants: 0,
-            secondsRemaining: 60.0,
+            secondsRemaining: null,
             ticks: 0,
             clicks: [],
             colorCounts: {
@@ -261,7 +259,8 @@ var ButtonSnitch = React.createClass({
         };
     },
     tick: function () {
-        if (!this.state.connected || this.state.stopped) {
+        if (!this.state.connected || this.state.stopped ||
+            !this.state.secondsRemaining) {
             return;
         }
         this.setState({secondsRemaining: this.state.secondsRemaining - 0.1});
@@ -578,9 +577,6 @@ var ButtonSnitch = React.createClass({
 
             self.setState({
                 ticks: self.state.ticks + 1,
-                lag: Math.abs(
-                    moment(tick.now_str + " 0000", "YYYY-MM-DD-HH-mm-ss Z") -
-                    moment()),
                 participants: currentParticipants,
                 secondsRemaining: tick.seconds_left
             });
@@ -700,7 +696,7 @@ var ButtonSnitch = React.createClass({
                     <StatsDisplay
                         started={this.state.started}
                         clicksTracked={this.state.clicksTracked}
-                        lag={this.state.lag}
+                        resetsTracked={this.state.clicks.length}
                         participants={this.state.participants}
                         connected={this.state.connected}
                         stopped={this.state.stopped}

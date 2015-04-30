@@ -4,26 +4,23 @@ var StatsDisplay = React.createClass({
         var runningSince = "Loading…"; 
         var runningDuration = "Loading…";
         if (this.props.connected || this.props.stopped) {
-            runningSince = "since " + this.props.started.format("LTS");
+            runningSince = this.props.started.format("LTS");
             runningDuration =
                 moment.duration(this.props.now().diff(this.props.started))
-                .humanize();
+                .humanize() + " ago";
         }
         return (
             <div className="stats">
                 <div>
-                    {"Running: "}
-                    <span title={runningSince}>{runningDuration}</span>
-                    {" "}<span>({
-                        d3.format("0,000")(this.props.clicksTracked) +
-                        " click" + (this.props.clicksTracked === 1 ? "" : "s")
-                    })</span>
+                    {"Clicks tracked here: "}
+                    <span title={d3.format("0,000")(this.props.resetsTracked) +
+                        " resets"}>
+                        {d3.format("0,000")(this.props.clicksTracked)}
+                    </span>
                 </div>
                 <div>
-                    {"Lag: "}
-                    {this.props.connected ?
-                        <span>{d3.format("0,000")(this.props.lag)}ms</span> :
-                        "Disconnected"}
+                    {"Data since: "}
+                    <span title={runningSince}>{runningDuration}</span>
                     <Tick
                         count={this.props.count}
                         connected={this.props.connected} />

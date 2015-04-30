@@ -10,7 +10,7 @@ var HistogramChart = React.createClass({
             displayMean: true,
             displayMedian: true,
             lastSynced: moment().valueOf(),
-            lastTime: 60
+            lastTime: null
         };
     },
     componentDidMount: function () {
@@ -148,12 +148,14 @@ var HistogramChart = React.createClass({
                 .attr("y", this.yScale(this.props.histogram[lastValue - 1]))
                 .attr("height", this.yScale(0) - this.yScale(lastClicks));
 
-        // draw the current timer
-        var timerX = this.xScale(this.props.secondsRemaining);
+        // draw the current timer, hiding it if we haven't received a tick yet
+        var timerX = this.xScale(this.props.secondsRemaining || 0);
         this.timerLine = chart.append("line")
             .attr("class", "timer " +
-                (this.props.connected || this.props.stopped ? "" : "hidden ") +
-                this.props.flairClass(this.props.secondsRemaining))
+                ((this.props.connected &&
+                    this.props.secondsRemaining !== null) ||
+                    this.props.stopped ? "" : "hidden ") +
+                this.props.flairClass(this.props.secondsRemaining || 0))
             .attr("x1", timerX)
             .attr("y1", this.margins.top)
             .attr("x2", timerX)
@@ -250,12 +252,14 @@ var HistogramChart = React.createClass({
         }
     },
     updateTimerLine: function () {
-        var secondsRemaining = this.state.lastTime -
+        var secondsRemaining = (this.state.lastTime || 0) -
             ((moment() - this.state.lastSynced) / 1000);
         var timerX = this.xScale(secondsRemaining + 0.5);
         this.timerLine
             .attr("class", "timer " +
-                (this.props.connected || this.props.stopped ? "" : "hidden ") +
+                ((this.props.connected &&
+                    this.props.secondsRemaining !== null) ||
+                    this.props.stopped ? "" : "hidden ") +
                 this.props.flairClass(secondsRemaining))
             .attr("x1", timerX)
             .attr("x2", timerX);

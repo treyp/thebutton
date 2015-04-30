@@ -5,7 +5,7 @@ var LogChart = React.createClass({
             barHeight: 20,
             gapSize: 1,
             lastSynced: this.props.now().valueOf(),
-            lastTime: 60
+            lastTime: null
         };
     },
     componentDidMount: function () {
@@ -57,6 +57,9 @@ var LogChart = React.createClass({
         }
     },
     clicksWithActiveTime: function () {
+        if (!this.props.connected || this.props.secondsRemaining === null) {
+            return this.props.clicks;
+        }
         return this.props.clicks.concat({
             seconds: this.props.secondsRemaining,
             time: null, // we don't use this here anyway
@@ -65,7 +68,7 @@ var LogChart = React.createClass({
         });
     },
     updateActiveBar: function() {
-        if (this.props.connected) {
+        if (this.props.connected && this.props.secondsRemaining !== null) {
             this.updateBarsWidth(
                 d3.select(React.findDOMNode(this.refs.chart))
                     .select("g:last-child")
