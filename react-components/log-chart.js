@@ -5,7 +5,8 @@ var LogChart = React.createClass({
             barHeight: 20,
             gapSize: 1,
             lastSynced: this.props.now().valueOf(),
-            lastTime: null
+            lastTime: null,
+            displayLabels: true
         };
     },
     componentDidMount: function () {
@@ -159,6 +160,11 @@ var LogChart = React.createClass({
             gapSize: React.findDOMNode(this.refs.gap).checked ? 1 : 0
         });
     },
+    handleLabels: function () {
+        this.setState({
+            displayLabels: React.findDOMNode(this.refs.labels).checked ? 1 : 0
+        });
+    },
     render: function () {
         return (
             <div>
@@ -181,8 +187,19 @@ var LogChart = React.createClass({
                         id="gap-checkbox"
                         ref="gap"
                         onChange={this.handleGap} />
+                    <label htmlFor="labels-checkbox">
+                        Labels
+                    </label>
+                    <input type="checkbox"
+                        defaultChecked={this.state.displayLabels}
+                        id="labels-checkbox"
+                        ref="labels"
+                        onChange={this.handleLabels} />
                 </div>
-                <svg className="log-chart" ref="chart"></svg>
+                <svg
+                    className={"log-chart with" +
+                        (this.state.displayLabels ? "" : "out") + "-labels"}
+                    ref="chart"></svg>
             </div>);
     }
 });

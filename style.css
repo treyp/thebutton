@@ -413,6 +413,10 @@ a {
     fill: #fff;
 }
 
+.log-chart.without-labels text {
+    display: none;
+}
+
 .log-chart text.outside {
     fill: #000;
     text-anchor: start;
