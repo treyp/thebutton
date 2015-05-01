@@ -119,19 +119,25 @@ var HistogramChart = React.createClass({
         this.mean = chart.append("line")
             .attr("y1", this.margins.top)
             .attr("y2", height - this.margins.bottom);
+        this.meanShadow = chart.append("text")
+            .attr("y", this.margins.top)
+            .attr("dy", -5);
         this.meanText = chart.append("text")
             .attr("y", this.margins.top)
             .attr("dy", -5);
-        this.updateAverage(this.mean, this.meanText, this.props.mean,
-            this.state.displayMean, "x̅");
+        this.updateAverage(this.mean, this.meanText, this.meanShadow,
+            this.props.mean, this.state.displayMean, "x̅");
         this.median = chart.append("line")
             .attr("y1", this.margins.top)
             .attr("y2", height - this.margins.bottom);
+        this.medianShadow = chart.append("text")
+            .attr("y", this.margins.top)
+            .attr("dy", -5);
         this.medianText = chart.append("text")
             .attr("y", this.margins.top)
             .attr("dy", -5);
-        this.updateAverage(this.median, this.medianText, this.props.median,
-            this.state.displayMedian, "M");
+        this.updateAverage(this.median, this.medianText, this.medianShadow,
+            this.props.median, this.state.displayMedian, "M");
 
         // draw the active number
         var lastValue = (this.props.clicks.length ?
@@ -215,10 +221,10 @@ var HistogramChart = React.createClass({
             .text(function (d) { return d3.format("0,000")(d); });
 
         // update the averages
-        this.updateAverage(this.mean, this.meanText, this.props.mean,
-            this.state.displayMean, "x̅");
-        this.updateAverage(this.median, this.medianText, this.props.median,
-            this.state.displayMedian, "M");
+        this.updateAverage(this.mean, this.meanText, this.meanShadow,
+            this.props.mean, this.state.displayMean, "x̅");
+        this.updateAverage(this.median, this.medianText, this.medianShadow,
+            this.props.median, this.state.displayMedian, "M");
 
         // update the active number
         var lastValue = (this.props.clicks.length ?
@@ -236,7 +242,7 @@ var HistogramChart = React.createClass({
                 .attr("y", this.yScale(this.props.histogram[lastValue - 1]))
                 .attr("height", this.yScale(0) - this.yScale(lastClicks));
     },
-    updateAverage: function (selection, labelSelection, prop, state, label) {
+    updateAverage: function (selection, labelEl, shadow, prop, state, label) {
         if (prop !== null) {
             var meanX = this.xScale(prop);
             selection
@@ -244,8 +250,13 @@ var HistogramChart = React.createClass({
                     (prop !== null && state ? "" : " hidden"))
                 .attr("x1", meanX)
                 .attr("x2", meanX);
-            labelSelection
+            labelEl
                 .attr("class", "average" +
+                    (prop !== null && state ? "" : " hidden"))
+                .attr("x", meanX)
+                .text(label + " " + Math.round(prop * 1000) / 1000);
+            shadow
+                .attr("class", "average shadow" +
                     (prop !== null && state ? "" : " hidden"))
                 .attr("x", meanX)
                 .text(label + " " + Math.round(prop * 1000) / 1000);

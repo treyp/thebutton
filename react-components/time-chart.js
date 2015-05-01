@@ -93,21 +93,29 @@ var TimeChart = React.createClass({
         this.mean = chart.append("line")
             .attr("x1", this.margins.left)
             .attr("x2", width - this.margins.right);
+        this.meanShadow = chart.append("text")
+            .attr("x", this.margins.left)
+            .attr("dy", ".35em")
+            .attr("dx", -5);
         this.meanLabel = chart.append("text")
             .attr("x", this.margins.left)
             .attr("dy", ".35em")
             .attr("dx", -5);
-        this.updateAverage(this.mean, this.meanLabel, this.props.mean,
-            this.state.displayMean, "x̅");
+        this.updateAverage(this.mean, this.meanLabel, this.meanShadow,
+            this.props.mean, this.state.displayMean, "x̅");
         this.median = chart.append("line")
             .attr("x1", this.margins.left)
             .attr("x2", width - this.margins.right);
+        this.medianShadow = chart.append("text")
+            .attr("x", this.margins.left)
+            .attr("dy", ".35em")
+            .attr("dx", -5);
         this.medianLabel = chart.append("text")
             .attr("x", this.margins.left)
             .attr("dy", ".35em")
             .attr("dx", -5);
-        this.updateAverage(this.median, this.medianLabel, this.props.median,
-            this.state.displayMedian, "M");
+        this.updateAverage(this.median, this.medianLabel, this.medianShadow,
+            this.props.median, this.state.displayMedian, "M");
 
         window.addEventListener("resize", this.windowResized);
 
@@ -141,13 +149,13 @@ var TimeChart = React.createClass({
         // if we have a mean and it has changed, update the mean
         if (this.state.displayMean !== prevState.displayMean ||
             this.props.mean !== prevProps.mean) {
-            this.updateAverage(this.mean, this.meanLabel, this.props.mean,
-                this.state.displayMean, "x̅");
+            this.updateAverage(this.mean, this.meanLabel, this.meanShadow,
+                this.props.mean, this.state.displayMean, "x̅");
         }
         if (this.state.displayMedian !== prevState.displayMedian ||
             this.props.median !== prevProps.median) {
-            this.updateAverage(this.median, this.medianLabel, this.props.median,
-                this.state.displayMedian, "M");
+            this.updateAverage(this.median, this.medianLabel, this.medianShadow,
+                this.props.median, this.state.displayMedian, "M");
         }
 
         // performance optimization: if we have a lot of elements on the page,
@@ -231,12 +239,12 @@ var TimeChart = React.createClass({
 
         this.mean
             .attr("x2", width - this.margins.right);
-        this.updateAverage(this.mean, this.meanLabel, this.props.mean,
-            this.state.displayMean, "x̅");
+        this.updateAverage(this.mean, this.meanLabel, this.meanShadow,
+            this.props.mean, this.state.displayMean, "x̅");
         this.median
             .attr("x2", width - this.margins.right);
-        this.updateAverage(this.median, this.medianLabel, this.props.median,
-            this.state.displayMedian, "M");
+        this.updateAverage(this.median, this.medianLabel, this.medianShadow,
+            this.props.median, this.state.displayMedian, "M");
 
         this.updateDots(
             chart.selectAll("g.dot").data(this.clicksWithActiveTime())
@@ -305,7 +313,7 @@ var TimeChart = React.createClass({
                     (d.clicks > 1 ? (" × " + d.clicks) : "");
             });
     },
-    updateAverage: function (selection, labelSelection, prop, state, label) {
+    updateAverage: function (selection, labelEl, shadow, prop, state, label) {
         if (prop !== null) {
             var meanY = this.yScale(prop);
             selection
@@ -313,8 +321,13 @@ var TimeChart = React.createClass({
                     (prop !== null && state ? "" : " hidden"))
                 .attr("y1", meanY)
                 .attr("y2", meanY);
-            labelSelection
+            labelEl
                 .attr("class", "average" +
+                    (prop !== null && state ? "" : " hidden"))
+                .attr("y", meanY)
+                .text(label + " " + Math.round(prop * 1000) / 1000);
+            shadow
+                .attr("class", "average shadow" +
                     (prop !== null && state ? "" : " hidden"))
                 .attr("y", meanY)
                 .text(label + " " + Math.round(prop * 1000) / 1000);

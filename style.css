@@ -399,12 +399,19 @@ a {
     text-anchor: end;
     font-size: 10px;
     fill: #777;
-    text-shadow: 0 0 1px #fff;
+}
+
+.time-chart text.average.shadow {
+    stroke: #fff;
+    stroke-width: 2;
 }
 
 .night-mode .time-chart text.average {
     fill: #999;
-    text-shadow: 0 0 1px #000;
+}
+
+.night-mode .time-chart text.average.shadow {
+    stroke: #000;
 }
 
 .log-chart text {
@@ -549,11 +556,19 @@ line.flair-press-6 {
     text-anchor: middle;
     font-size: 12px;
     fill: #777;
-    text-shadow: 0 0 1px #fff;
+}
+
+.histogram-chart text.average.shadow {
+    stroke: #fff;
+    stroke-width: 2;
 }
 
 .night-mode .histogram-chart text.average {
     fill: #999;
+}
+
+.night-mode .histogram-chart text.average.shadow {
+    stroke: #000;
 }
 
 .histogram-chart .last rect {
