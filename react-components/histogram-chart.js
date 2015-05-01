@@ -347,15 +347,15 @@ var HistogramChart = React.createClass({
             .attr("y2", height - this.margins.bottom);
         this.meanText
             .attr("y", this.margins.top);
-        this.updateAverage(this.mean, this.meanText, this.props.mean,
-            this.state.displayMean, "x̅");
+        this.updateAverage(this.mean, this.meanText, this.meanShadow,
+            this.props.mean, this.state.displayMean, "x̅");
         this.median
             .attr("y1", this.margins.top)
             .attr("y2", height - this.margins.bottom);
         this.medianText
             .attr("y", this.margins.top);
-        this.updateAverage(this.median, this.medianText, this.props.median,
-            this.state.displayMedian, "M");
+        this.updateAverage(this.median, this.medianText, this.medianShadow,
+            this.props.median, this.state.displayMedian, "M");
 
         // move the active number
         var lastValue = (this.props.clicks.length ?
