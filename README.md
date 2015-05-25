@@ -26,6 +26,7 @@ Monitor [Reddit](//www.reddit.com/)'s [/r/thebutton](//www.reddit.com/r/thebutto
 - [x] Import historical data on first load
 - [x] Replay functionality (started as [a pull request from jmlsteele](//github.com/treyp/thebutton/pull/5))
 - [x] Show time zone on time axes
+- [ ] Bug fix: delayed clicks (bump in participant count between resets) count as their own time instead of either adding to the previous reset (desired behavior) or going to the next reset (not desirable, but at least the total number of seconds would be correct) (bug noticed by [/u/attilad](//www.reddit.com/user/attilad))
 - [ ] Better X axis ticks for time chart (show beginning, end, some middle) (suggestion from [/u/EyeAmmonia](//www.reddit.com/user/EyeAmmonia))
 - [ ] Dual chart display (request from [/u/argash](//www.reddit.com/user/argash))
 - [ ] Breakdown of percentage of time spent in each color (request from [/u/carpevirginem](//www.reddit.com/user/carpevirginem))
