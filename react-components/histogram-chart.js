@@ -20,7 +20,7 @@ var HistogramChart = React.createClass({
         var width = container.offsetWidth;
         var height = container.offsetHeight;
         this.xScale = d3.scale.linear()
-            .domain([0.5, 60.5])
+            .domain([-0.5, 60.5])
             .range([
                 this.margins.left, Math.max(0, width - this.margins.right)
             ]);
@@ -88,9 +88,9 @@ var HistogramChart = React.createClass({
             });
         group.append("rect")
             .attr("class", function (d, i) {
-                return self.props.flairClass(i + 1);
+                return self.props.flairClass(i);
             })
-            .attr("x", function (d, i) { return self.xScale(i + 0.5); })
+            .attr("x", function (d, i) { return self.xScale(i - 0.5); })
             .attr("y", function (d) { return self.yScale(d); })
             .attr("width", barWidth)
             .attr("height",
@@ -101,15 +101,15 @@ var HistogramChart = React.createClass({
                     (self.yScale(0) - self.yScale(d) > 15 ? "" : " hidden"));
             })
             .attr("x", function (d, i) {
-                return self.xScale(i + 0.5) + (barWidth / 2);
+                return self.xScale(i - 0.5) + (barWidth / 2);
             })
             .attr("y", function (d) { return self.yScale(d); })
             .attr("dy", "1.35em")
-            .text(function (d, i) { return i + 1; });
+            .text(function (d, i) { return i; });
         group.append("text")
             .attr("class", "clicks")
             .attr("x", function (d, i) {
-                return self.xScale(i + 0.5) + (barWidth / 2);
+                return self.xScale(i - 0.5) + (barWidth / 2);
             })
             .attr("y", function (d) { return self.yScale(d); })
             .attr("dy", "-.35em")
@@ -151,7 +151,7 @@ var HistogramChart = React.createClass({
             .append("rect")
                 .attr("x", this.xScale(lastValue - 0.5))
                 .attr("width", barWidth)
-                .attr("y", this.yScale(this.props.histogram[lastValue - 1]))
+                .attr("y", this.yScale(this.props.histogram[lastValue]))
                 .attr("height", this.yScale(0) - this.yScale(lastClicks));
 
         // draw the current timer, hiding it if we haven't received a tick yet
@@ -200,7 +200,7 @@ var HistogramChart = React.createClass({
                 return "bar" + (d === 0 ? " hidden" : "");
             });
         group.select("rect")
-            .attr("x", function (d, i) { return self.xScale(i + 0.5); })
+            .attr("x", function (d, i) { return self.xScale(i - 0.5); })
             .attr("y", function (d) { return self.yScale(d); })
             .attr("height",
                 function (d) { return self.yScale(0) - self.yScale(d); });
@@ -210,12 +210,12 @@ var HistogramChart = React.createClass({
                     (self.yScale(0) - self.yScale(d) > 15 ? "" : " hidden"));
             })
             .attr("x", function (d, i) {
-                return self.xScale(i + 0.5) + (barWidth / 2);
+                return self.xScale(i - 0.5) + (barWidth / 2);
             })
             .attr("y", function (d) { return self.yScale(d); });
         group.select("text.clicks")
             .attr("x", function (d, i) {
-                return self.xScale(i + 0.5) + (barWidth / 2);
+                return self.xScale(i - 0.5) + (barWidth / 2);
             })
             .attr("y", function (d) { return self.yScale(d); })
             .text(function (d) { return d3.format("0,000")(d); });
@@ -237,9 +237,7 @@ var HistogramChart = React.createClass({
                         "" : " hidden"))
             .select("rect")
                 .attr("x", this.xScale(lastValue - 0.5))
-                .attr("width",
-                    this.xScale(lastValue + 1) - this.xScale(lastValue))
-                .attr("y", this.yScale(this.props.histogram[lastValue - 1]))
+                .attr("y", this.yScale(this.props.histogram[lastValue]))
                 .attr("height", this.yScale(0) - this.yScale(lastClicks));
     },
     updateAverage: function (selection, labelEl, shadow, prop, state, label) {
@@ -321,7 +319,7 @@ var HistogramChart = React.createClass({
         // move the bars
         var group = chart.selectAll("g.bar");
         group.select("rect")
-            .attr("x", function (d, i) { return self.xScale(i + 0.5); })
+            .attr("x", function (d, i) { return self.xScale(i - 0.5); })
             .attr("y", function (d) { return self.yScale(d); })
             .attr("width", barWidth)
             .attr("height",
@@ -332,12 +330,12 @@ var HistogramChart = React.createClass({
                     (self.yScale(0) - self.yScale(d) > 15 ? "" : " hidden"));
             })
             .attr("x", function (d, i) {
-                return self.xScale(i + 0.5) + (barWidth / 2);
+                return self.xScale(i - 0.5) + (barWidth / 2);
             })
             .attr("y", function (d) { return self.yScale(d); });
         group.select("text.clicks")
             .attr("x", function (d, i) {
-                return self.xScale(i + 0.5) + (barWidth / 2);
+                return self.xScale(i - 0.5) + (barWidth / 2);
             })
             .attr("y", function (d) { return self.yScale(d); });
 
@@ -364,8 +362,8 @@ var HistogramChart = React.createClass({
             this.props.clicks.slice(-1)[0].clicks : 1);
         chart.select("g.last").select("rect")
             .attr("x", this.xScale(lastValue - 0.5))
-            .attr("width", this.xScale(lastValue + 1) - this.xScale(lastValue))
-            .attr("y", this.yScale(this.props.histogram[lastValue - 1]))
+            .attr("width", barWidth)
+            .attr("y", this.yScale(this.props.histogram[lastValue]))
             .attr("height", this.yScale(0) - this.yScale(lastClicks));
 
         // move the timer line

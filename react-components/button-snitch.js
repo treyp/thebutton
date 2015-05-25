@@ -34,8 +34,8 @@ var ButtonSnitch = React.createClass({
             colorCounts[click.color] = colorCounts[click.color] + click.clicks;
             totalClicks = totalClicks + click.clicks;
             sum = sum + (click.clicks * click.seconds);
-            histogram[click.seconds - 1] =
-                histogram[click.seconds - 1] + click.clicks;
+            histogram[click.seconds] =
+                histogram[click.seconds] + click.clicks;
         });
         this.setState({
             clicks: clicks.concat(this.state.clicks),
@@ -154,11 +154,11 @@ var ButtonSnitch = React.createClass({
         var duration;
         var seconds;
         var clickCount;
-        var histogram = new Array(60);
+        var histogram = new Array(61);
         var flairClass;
         var totalClicks = 0;
         var sum = 0;
-        for (var i = 0; i < 60; i = i + 1) {
+        for (var i = 0; i <= 60; i = i + 1) {
             histogram[i] = 0;
         }
         while (remaining > 0) {
@@ -175,7 +175,7 @@ var ButtonSnitch = React.createClass({
                 clicks: clickCount,
             });
             colorCounts[flairClass] = colorCounts[flairClass] + clickCount;
-            histogram[seconds - 1] = histogram[seconds - 1] + clickCount;
+            histogram[seconds] = histogram[seconds] + clickCount;
             totalClicks = totalClicks + clickCount;
             sum = sum + (clickCount * seconds);
             remaining = remaining - clickCount;
@@ -220,8 +220,8 @@ var ButtonSnitch = React.createClass({
         };
     },
     getInitialStateReal: function () {
-        var histogram = new Array(60);
-        for (var i = 0; i < 60; i = i + 1) {
+        var histogram = new Array(61);
+        for (var i = 0; i <= 60; i = i + 1) {
             histogram[i] = 0;
         }
         return {
@@ -280,7 +280,7 @@ var ButtonSnitch = React.createClass({
         var clicksTracked = (this.state.clicksTracked + clicks);
         var started = this.state.started;
         var histogram = this.state.histogram.slice();
-        histogram[seconds - 1] = histogram[seconds - 1] + clicks;
+        histogram[seconds] = histogram[seconds] + clicks;
         var numToDelete = 0;
         if (this.state.discardAfter &&
             this.state.clicks.length >= this.state.discardAfter) {
@@ -291,7 +291,7 @@ var ButtonSnitch = React.createClass({
                 clicksTracked = clicksTracked - click.clicks;
                 colorCounts[click.color] = colorCounts[click.color] -
                     click.clicks;
-                histogram[click.seconds - 1] = histogram[click.seconds - 1] -
+                histogram[click.seconds] = histogram[click.seconds] -
                     click.clicks;
                 sum = sum - (click.seconds * click.clicks);
             });
@@ -376,12 +376,12 @@ var ButtonSnitch = React.createClass({
             histogramIndex = histogramIndex - 1;
             distanceFromEnd = distanceFromEnd + histogram[histogramIndex];
         }
-        midRangeTop = (histogramIndex + 1);
+        midRangeTop = histogramIndex;
         while (distanceFromEnd <= midRangeBottomDistanceFromEnd) {
             histogramIndex = histogramIndex - 1;
             distanceFromEnd = distanceFromEnd + histogram[histogramIndex];
         }
-        midRangeBottom = (histogramIndex + 1);
+        midRangeBottom = histogramIndex;
         return (midRangeTop + midRangeBottom) / 2;
     },
     updateChartSelection: function (chart) {
