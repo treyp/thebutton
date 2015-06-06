@@ -137,6 +137,7 @@ var ButtonSnitch = React.createClass({
             median: initialState.median,
             histogram: initialState.histogram,
             started: moment(),
+            ended: false
         });
     },
     generateFakeClicks: function (quantity) {
@@ -196,6 +197,7 @@ var ButtonSnitch = React.createClass({
             chartSelected: "time",
             connected: true,
             started: moment(clickData.clicks[0].time),
+            ended: false,
             clicksTracked: clickData.clicksTracked,
             entriesImported: 0,
             participants: 0,
@@ -228,6 +230,7 @@ var ButtonSnitch = React.createClass({
             chartSelected: "time",
             connected: false,
             started: null,
+            ended: false,
             clicksTracked: 0,
             entriesImported: 0,
             participants: 0,
@@ -527,7 +530,9 @@ var ButtonSnitch = React.createClass({
             self.setState({connected: false});
             document.title = "The Button Snitch";
             document.getElementById("favicon").href = "favicon/favicon.ico";
-            window.setTimeout(self.findWebSocketFromReddit, 5e3);
+            if (!self.state.ended) {
+                window.setTimeout(self.findWebSocketFromReddit, 5e3);
+            }
         };
         socket.onmessage = function (event) {
             /* jshint camelcase: false */
@@ -553,6 +558,11 @@ var ButtonSnitch = React.createClass({
             }
             var packet = JSON.parse(event.data);
             if (packet.type !== "ticking") {
+                if (packet.type === "expired") {
+                    self.setState({
+                        ended: true
+                    });
+                }
                 return;
             }
             var tick = packet.payload;
@@ -691,10 +701,12 @@ var ButtonSnitch = React.createClass({
                     </div>
                     <TimerDisplay
                         secondsRemaining={this.state.secondsRemaining}
+                        ended={this.state.ended}
                         connected={this.state.connected}
                         stopped={this.state.stopped} />
                     <StatsDisplay
                         started={this.state.started}
+                        ended={this.state.ended}
                         clicksTracked={this.state.clicksTracked}
                         resetsTracked={this.state.clicks.length}
                         participants={this.state.participants}
