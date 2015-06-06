@@ -18,7 +18,10 @@ var ButtonSnitch = React.createClass({
         return data;
     },
     importSavedClicks: function (clickData) {
-        var clicks = this.parseJson(clickData);
+        var clicks = clickData;
+        if (typeof clickData === "string") {
+            clicks = this.parseJson(clickData);
+        }
         if (!clicks) {
             return;
         }
@@ -50,6 +53,23 @@ var ButtonSnitch = React.createClass({
                 moment(clicks[0].time - ((60 - clicks[0].seconds) * 1000)) :
                 this.state.started)
         });
+    },
+    convertCsvToClicks: function (csvAsString) {
+        var self = this;
+        var convertedClicks = [];
+        var row;
+        csvAsString.split("\n").forEach(function (rowAsString) {
+            row = rowAsString.split(",");
+            if (row.length === 3) {
+                convertedClicks.push({
+                    seconds: parseInt(row[2], 10),
+                    time: parseInt(row[0], 10) * 1000,
+                    color: self.flairClass(parseInt(row[2], 10)),
+                    clicks: parseInt(row[1], 10)
+                });
+            }
+        });
+        return convertedClicks;
     },
     now: function () {
         return this.state.now || moment();
@@ -458,11 +478,13 @@ var ButtonSnitch = React.createClass({
         xhr.addEventListener("readystatechange", function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    self.importSavedClicks(this.responseText);
+                    self.importSavedClicks(
+                        self.convertCsvToClicks(this.responseText)
+                    );
                 }
             }
         }, false);
-        xhr.open("get", "//thebuttonsnitch.herokuapp.com/", true);
+        xhr.open("get", "final_clicks.csv", true);
         xhr.send();
     },
     findWebSocketFromReddit: function () {
@@ -560,7 +582,8 @@ var ButtonSnitch = React.createClass({
             if (packet.type !== "ticking") {
                 if (packet.type === "expired") {
                     self.setState({
-                        ended: true
+                        ended: true,
+                        stopped: true
                     });
                 }
                 return;
