@@ -667,7 +667,6 @@ var ButtonSnitch = React.createClass({
                     median={this.state.median}
                     secondsRemaining={this.state.secondsRemaining}
                     connected={this.state.connected}
-                    stopped={this.state.stopped}
                     replaying={this.state.replaying}
                     now={this.now} />;
                 break;
@@ -680,7 +679,8 @@ var ButtonSnitch = React.createClass({
                     histogram={this.state.histogram}
                     secondsRemaining={this.state.secondsRemaining}
                     connected={this.state.connected}
-                    stopped={this.state.stopped} />;
+                    stopped={this.state.stopped}
+                    ended={this.state.ended} />;
                 break;
             default:
                 selectedChart = <Settings

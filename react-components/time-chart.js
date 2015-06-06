@@ -220,8 +220,9 @@ var TimeChart = React.createClass({
         this.xScale = this.calculateXRange(this.xScale.domain([
                 this.props.started.valueOf(),
                 Math.max(
-                    this.state.startingXMax,
-                    this.props.now().valueOf())
+                    (this.props.clicks.length ?
+                        this.props.clicks.slice(-1)[0].time : 0),
+                    this.state.startingXMax)
             ]), width);
         this.xAxisLabel
             .attr("x", width / 2)

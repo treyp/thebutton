@@ -160,7 +160,8 @@ var HistogramChart = React.createClass({
             .attr("class", "timer " +
                 ((this.props.connected &&
                     this.props.secondsRemaining !== null) ||
-                    this.props.stopped ? "" : "hidden ") +
+                    (this.props.stopped && !this.props.ended) ?
+                    "" : "hidden ") +
                 this.props.flairClass(this.props.secondsRemaining || 0))
             .attr("x1", timerX)
             .attr("y1", this.margins.top)
@@ -268,7 +269,8 @@ var HistogramChart = React.createClass({
             .attr("class", "timer " +
                 ((this.props.connected &&
                     this.props.secondsRemaining !== null) ||
-                    this.props.stopped ? "" : "hidden ") +
+                    (this.props.stopped && !this.props.ended) ?
+                    "" : "hidden ") +
                 this.props.flairClass(secondsRemaining))
             .attr("x1", timerX)
             .attr("x2", timerX);
