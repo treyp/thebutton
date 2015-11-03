@@ -631,6 +631,9 @@ var ButtonSnitch = React.createClass({
             return confirmation;
         }
     },
+    theEnd: function () {
+        this.setState({connected: false, ended: true, stopped: true});
+    },
     componentDidMount: function () {
         this.interval = setInterval(this.tick, 100);
 
@@ -640,7 +643,9 @@ var ButtonSnitch = React.createClass({
             this.setState({deniedNotificationPermission: true});
         }
 
-        this.findWebSocketFromReddit();
+        // Now that The Button has ended, let's not bother connecting
+        // this.findWebSocketFromReddit();
+        this.theEnd();
 
         this.downloadClickHistory();
     },

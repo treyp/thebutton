@@ -4,7 +4,8 @@ var StatsDisplay = React.createClass({
         var runningSince = "Loading…";
         var runningDuration = "Loading…";
         var participants = "Unknown";
-        if (this.props.connected || this.props.stopped) {
+        if (this.props.started &&
+            (this.props.connected || this.props.stopped)) {
             runningSince = this.props.started.format("LTS");
             runningDuration =
                 moment.duration(this.props.now().diff(this.props.started))
